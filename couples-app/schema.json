@@ -1,0 +1,80 @@
+{
+  "users": {
+    "read": "doc._openid === auth.openid",
+    "write": "doc._openid === auth.openid"
+  },
+  "couples": {
+    "read": "doc.user1Id === auth.openid || doc.user2Id === auth.openid",
+    "write": "doc.user1Id === auth.openid || doc.user2Id === auth.openid"
+  },
+  "messages": {
+    "read": "let couple = db.collection('couples').doc(doc.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "write": "let couple = db.collection('couples').doc(doc.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "index": [
+      {
+        "fields": ["coupleId", "createdAt"],
+        "unique": false
+      }
+    ]
+  },
+  "bills": {
+    "read": "let couple = db.collection('couples').doc(doc.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "write": "let couple = db.collection('couples').doc(doc.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "index": [
+      {
+        "fields": ["coupleId", "date"],
+        "unique": false
+      }
+    ]
+  },
+  "photos": {
+    "read": "let couple = db.collection('couples').doc(doc.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "write": "let couple = db.collection('couples').doc(doc.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "index": [
+      {
+        "fields": ["coupleId", "createdAt"],
+        "unique": false
+      }
+    ]
+  },
+  "photoComments": {
+    "read": "let photo = db.collection('photos').doc(doc.photoId).get(); let couple = db.collection('couples').doc(photo.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "write": "let photo = db.collection('photos').doc(doc.photoId).get(); let couple = db.collection('couples').doc(photo.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "index": [
+      {
+        "fields": ["photoId", "createdAt"],
+        "unique": false
+      }
+    ]
+  },
+  "diaries": {
+    "read": "let couple = db.collection('couples').doc(doc.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "write": "let couple = db.collection('couples').doc(doc.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "index": [
+      {
+        "fields": ["coupleId", "date"],
+        "unique": false
+      }
+    ]
+  },
+  "diaryComments": {
+    "read": "let diary = db.collection('diaries').doc(doc.diaryId).get(); let couple = db.collection('couples').doc(diary.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "write": "let diary = db.collection('diaries').doc(doc.diaryId).get(); let couple = db.collection('couples').doc(diary.coupleId).get(); return couple.user1Id === auth.openid || couple.user2Id === auth.openid;",
+    "index": [
+      {
+        "fields": ["diaryId", "createdAt"],
+        "unique": false
+      }
+    ]
+  },
+  "notifications": {
+    "read": "doc.userId === auth.openid",
+    "write": "doc.userId === auth.openid",
+    "index": [
+      {
+        "fields": ["userId", "isRead"],
+        "unique": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,90 @@
+﻿{
+    "pages":  [
+                  {
+                      "path":  "pages/login/login",
+                      "style":  {
+                                    "navigationBarTitleText":  "鐧诲綍"
+                                }
+                  },
+                  {
+                      "path":  "pages/index/index",
+                      "style":  {
+                                    "navigationBarTitleText":  "棣栭〉"
+                                }
+                  },
+                  {
+                      "path":  "pages/bind/bind",
+                      "style":  {
+                                    "navigationBarTitleText":  "鎯呬荆缁戝畾"
+                                }
+                  },
+                  {
+                      "path":  "pages/chat/chat",
+                      "style":  {
+                                    "navigationBarTitleText":  "鑱婂ぉ"
+                                }
+                  },
+                  {
+                      "path":  "pages/bill/bill",
+                      "style":  {
+                                    "navigationBarTitleText":  "璁拌处"
+                                }
+                  },
+                  {
+                      "path":  "pages/album/album",
+                      "style":  {
+                                    "navigationBarTitleText":  "鐩稿唽"
+                                }
+                  },
+                  {
+                      "path":  "pages/diary/diary",
+                      "style":  {
+                                    "navigationBarTitleText":  "鏃ヨ"
+                                }
+                  },
+                  {
+                      "path":  "pages/settings/settings",
+                      "style":  {
+                                    "navigationBarTitleText":  "璁剧疆"
+                                }
+                  }
+              ],
+    "globalStyle":  {
+                        "navigationBarTextStyle":  "black",
+                        "navigationBarTitleText":  "鎯呬荆APP",
+                        "navigationBarBackgroundColor":  "#ffffff",
+                        "backgroundColor":  "#f5f5f5"
+                    },
+    "tabBar":  {
+                   "color":  "#999999",
+                   "selectedColor":  "#ff6b6b",
+                   "backgroundColor":  "#ffffff",
+                   "borderStyle":  "black",
+                   "list":  [
+                                {
+                                    "pagePath":  "pages/index/index",
+                                    "text":  "棣栭〉",
+                                    "iconPath":  "static/tabbar/home.png",
+                                    "selectedIconPath":  "static/tabbar/home-active.png"
+                                },
+                                {
+                                    "pagePath":  "pages/chat/chat",
+                                    "text":  "鑱婂ぉ",
+                                    "iconPath":  "static/tabbar/chat.png",
+                                    "selectedIconPath":  "static/tabbar/chat-active.png"
+                                },
+                                {
+                                    "pagePath":  "pages/bill/bill",
+                                    "text":  "璁拌处",
+                                    "iconPath":  "static/tabbar/bill.png",
+                                    "selectedIconPath":  "static/tabbar/bill-active.png"
+                                },
+                                {
+                                    "pagePath":  "pages/settings/settings",
+                                    "text":  "璁剧疆",
+                                    "iconPath":  "static/tabbar/settings.png",
+                                    "selectedIconPath":  "static/tabbar/settings-active.png"
+                                }
+                            ]
+               }
+}

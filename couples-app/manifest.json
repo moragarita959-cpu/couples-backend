@@ -1,0 +1,85 @@
+{
+  "name": "好意",
+  "appid": "uni-app-id",
+  "description": "情侣专用私密空间",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "transformPx": true,
+  "uniStatistics": {
+    "enable": false
+  },
+  "uniCloud": {
+    "service": {
+      "tcb": {
+        "env": "hao-yi-2g77ffe4ffd5f3b7"
+      }
+    }
+  },
+  "app-plus": {
+    "usingComponents": true,
+    "nvueStyleCompiler": "uni-app",
+    "compilerVersion": 3,
+    "splashscreen": {
+      "alwaysShowBeforeRender": true,
+      "autoclose": true,
+      "waiting": true,
+      "image": "static/splash.png"
+    }
+  },
+  "quickapp": {
+    "usingComponents": true
+  },
+  "mp-weixin": {
+    "appid": "wx-app-id",
+    "setting": {
+      "urlCheck": false,
+      "es6": true,
+      "postcss": true,
+      "minified": true
+    },
+    "usingComponents": true
+  },
+  "mp-alipay": {
+    "appid": "alipay-app-id",
+    "usingComponents": true
+  },
+  "mp-baidu": {
+    "appid": "baidu-app-id",
+    "usingComponents": true
+  },
+  "mp-toutiao": {
+    "appid": "toutiao-app-id",
+    "usingComponents": true
+  },
+  "mp-qq": {
+    "appid": "qq-app-id",
+    "usingComponents": true
+  },
+  "mp-360": {
+    "appid": "360-app-id",
+    "usingComponents": true
+  },
+  "web": {
+    "usingComponents": true,
+    "es6": true,
+    "postcss": true,
+    "uni-app": true,
+    "title": "好意",
+    "template": "template.html",
+    "router": {
+      "mode": "hash"
+    }
+  },
+  "h5": {
+    "usingComponents": true,
+    "es6": true,
+    "postcss": true,
+    "uni-app": true,
+    "title": "好意",
+    "template": "template.html",
+    "router": {
+      "mode": "hash"
+    },
+    "useUniCloud": true
+  }
+}
