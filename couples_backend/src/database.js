@@ -39,6 +39,23 @@ ensureColumn(
   'ALTER TABLE chat_messages ADD COLUMN media_duration_ms INTEGER NOT NULL DEFAULT 0',
 );
 
+db.exec(`
+CREATE TABLE IF NOT EXISTS chat_push_tokens (
+  id TEXT PRIMARY KEY,
+  couple_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  token TEXT NOT NULL,
+  platform TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  UNIQUE(couple_id, user_id, token)
+);
+`);
+db.exec(`
+CREATE INDEX IF NOT EXISTS idx_chat_push_tokens_couple_user
+  ON chat_push_tokens(couple_id, user_id);
+`);
+
 db.transaction = (work) => (...args) => {
   db.exec('BEGIN');
   try {

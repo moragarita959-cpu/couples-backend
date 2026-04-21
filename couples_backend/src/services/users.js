@@ -44,6 +44,37 @@ function bootstrapUser(db, { userId, nickname }) {
     };
   }
 
+  // Recovery path: If device local identity was lost (reinstall/clear data),
+  // try to recover by nickname when it maps to exactly one existing user.
+  // This avoids creating a brand-new account and "losing" prior couple/chat data.
+  const sameNicknameRows = db
+    .prepare(
+      `
+        SELECT id, nickname, pair_code, couple_id, created_at, updated_at
+        FROM users
+        WHERE lower(nickname) = lower(?)
+      `,
+    )
+    .all(trimmedNickname);
+  if (sameNicknameRows.length === 1) {
+    const recovered = sameNicknameRows[0];
+    db.prepare(
+      `
+        UPDATE users
+        SET updated_at = ?
+        WHERE id = ?
+      `,
+    ).run(now, recovered.id);
+    return {
+      id: recovered.id,
+      nickname: recovered.nickname,
+      pairCode: recovered.pair_code,
+      coupleId: recovered.couple_id,
+      createdAt: recovered.created_at,
+      updatedAt: now,
+    };
+  }
+
   const pairCode = generatePairCode(db);
   db.prepare(
     `
