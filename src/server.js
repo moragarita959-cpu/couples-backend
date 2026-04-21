@@ -2,6 +2,7 @@ const express = require('express');
 
 const config = require('./config');
 const db = require('./database');
+const { pool, initPostgresSchema } = require('./database_pg');
 const { isAppError } = require('./errors');
 const { bootstrapUser } = require('./services/users');
 const { bindCoupleByPairCode } = require('./services/couples');
@@ -10,6 +11,21 @@ const {
   sendChatMessage,
   uploadChatMedia,
 } = require('./services/chat');
+const {
+  listChatMessagesPg,
+  sendChatMessagePg,
+  uploadChatMediaPg,
+} = require('./services/chat_pg');
+const {
+  registerChatPushToken,
+  notifyPartnerOnChatMessage,
+} = require('./services/chat_push');
+const {
+  registerChatPushTokenPg,
+  notifyPartnerOnChatMessagePg,
+} = require('./services/chat_push_pg');
+const { bootstrapUserPg } = require('./services/users_pg');
+const { bindCoupleByPairCodePg } = require('./services/couples_pg');
 const {
   listBillRecords,
   upsertBillRecord,
@@ -29,6 +45,7 @@ const { listPokeEvents, sendPoke } = require('./services/poke');
 const {
   listPlaylistSongs,
   upsertPlaylistSong,
+  deletePlaylistSong,
   listPlaylistReviews,
   upsertPlaylistReview,
 } = require('./services/playlist');
@@ -63,71 +80,80 @@ app.get('/health', (_req, res) => {
 });
 
 app.post('/bootstrap-user', (req, res, next) => {
-  try {
-    const data = bootstrapUser(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await bootstrapUserPg(pool, req.body || {})
+      : bootstrapUser(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/bind-couple-by-pair-code', (req, res, next) => {
-  try {
-    const data = bindCoupleByPairCode(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await bindCoupleByPairCodePg(pool, req.body || {})
+      : bindCoupleByPairCode(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/chat/list', (req, res, next) => {
-  try {
-    const data = listChatMessages(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await listChatMessagesPg(pool, req.body || {})
+      : listChatMessages(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/chat/send', (req, res, next) => {
-  try {
-    const data = sendChatMessage(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await sendChatMessagePg(pool, req.body || {})
+      : sendChatMessage(db, req.body || {});
+    const notify = config.usePostgres
+      ? notifyPartnerOnChatMessagePg(pool, data)
+      : notifyPartnerOnChatMessage(db, data);
+    notify.catch(() => {
+      // 推送失败不阻断聊天发送。
+    });
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/chat/upload-image', (req, res, next) => {
-  try {
-    const data = uploadChatMedia(
-      db,
-      {
-        ...(req.body || {}),
-        mediaKind: 'image',
-      },
-      resolvePublicBaseUrl(req),
-    );
+  (async () => {
+    const payload = {
+      ...(req.body || {}),
+      mediaKind: 'image',
+    };
+    const data = config.usePostgres
+      ? await uploadChatMediaPg(pool, payload, resolvePublicBaseUrl(req))
+      : uploadChatMedia(db, payload, resolvePublicBaseUrl(req));
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/chat/upload-voice', (req, res, next) => {
-  try {
-    const data = uploadChatMedia(
-      db,
-      {
-        ...(req.body || {}),
-        mediaKind: 'voice',
-      },
-      resolvePublicBaseUrl(req),
-    );
+  (async () => {
+    const payload = {
+      ...(req.body || {}),
+      mediaKind: 'voice',
+    };
+    const data = config.usePostgres
+      ? await uploadChatMediaPg(pool, payload, resolvePublicBaseUrl(req))
+      : uploadChatMedia(db, payload, resolvePublicBaseUrl(req));
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
+});
+
+app.post('/chat/push/register-token', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await registerChatPushTokenPg(pool, req.body || {})
+      : registerChatPushToken(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
 });
 
 app.post('/bill/list', (req, res, next) => {
@@ -247,6 +273,15 @@ app.post('/playlist/songs/upsert', (req, res, next) => {
   }
 });
 
+app.post('/playlist/songs/delete', (req, res, next) => {
+  try {
+    const data = deletePlaylistSong(db, req.body || {});
+    res.json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post('/playlist/reviews/list', (req, res, next) => {
   try {
     const data = listPlaylistReviews(db, req.body || {});
@@ -312,7 +347,21 @@ app.use((error, _req, res, _next) => {
   });
 });
 
-app.listen(config.port, () => {
-  console.log(`Couples backend listening on http://0.0.0.0:${config.port}`);
-  console.log(`Database path: ${config.dbPath}`);
+async function start() {
+  if (config.usePostgres) {
+    await initPostgresSchema();
+  }
+  app.listen(config.port, () => {
+    console.log(`Couples backend listening on http://0.0.0.0:${config.port}`);
+    if (config.usePostgres) {
+      console.log('Database mode: postgres');
+    } else {
+      console.log(`Database path: ${config.dbPath}`);
+    }
+  });
+}
+
+start().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
 });
