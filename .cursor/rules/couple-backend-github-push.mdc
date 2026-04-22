@@ -1,0 +1,11 @@
+---
+description: 整仓 d:\couple 向 GitHub couples-backend 推送、Railway 部署后端时，必须用 git subtree，勿从整仓根直接 push backend main
+globs: 
+alwaysApply: true
+---
+
+# 后端 GitHub / Railway 提醒
+
+- 本地是**整仓**，后端在子目录 `couples_backend/`；远程 `couples-backend` 仓库的 **main 在根目录**就是后端。二者不是同一套目录布局。
+- 用户说到 **推后端、部署 Railway、更新 GitHub 后端、backend 远程** 时，**先提醒**其打开并遵循仓库内文档 `couples_backend/MONOREPO_GIT_PUSH.md`，使用 **`git subtree push`** 或 **split + push**；**不要**建议对 `d:\couple` 执行裸的 `git push <backend> main`（除非已确认是 subtree 或专用克隆）。
+- 若需贴命令，从该文档复制方式 A / 方式 B，并说明 `backend` 是 `git remote` 名称、指向 `moragarita959-cpu/couples-backend`。
