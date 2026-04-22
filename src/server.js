@@ -5,7 +5,7 @@ const db = require('./database');
 const { pool, initPostgresSchema } = require('./database_pg');
 const { isAppError } = require('./errors');
 const { bootstrapUser } = require('./services/users');
-const { bindCoupleByPairCode } = require('./services/couples');
+const { bindCoupleByPairCode, getPartnerUserId } = require('./services/couples');
 const {
   listChatMessages,
   sendChatMessage,
@@ -25,23 +25,39 @@ const {
   notifyPartnerOnChatMessagePg,
 } = require('./services/chat_push_pg');
 const { bootstrapUserPg } = require('./services/users_pg');
-const { bindCoupleByPairCodePg } = require('./services/couples_pg');
+const { bindCoupleByPairCodePg, getPartnerUserIdPg } = require('./services/couples_pg');
 const {
   listBillRecords,
   upsertBillRecord,
   deleteBillRecord,
 } = require('./services/bills');
 const {
+  listBillRecordsPg,
+  upsertBillRecordPg,
+  deleteBillRecordPg,
+} = require('./services/bills_pg');
+const {
   listTodoItems,
   upsertTodoItem,
   deleteTodoItem,
 } = require('./services/todos');
 const {
+  listTodoItemsPg,
+  upsertTodoItemPg,
+  deleteTodoItemPg,
+} = require('./services/todos_pg');
+const {
   listCountdownEvents,
   upsertCountdownEvent,
   deleteCountdownEvent,
 } = require('./services/countdowns');
+const {
+  listCountdownEventsPg,
+  upsertCountdownEventPg,
+  deleteCountdownEventPg,
+} = require('./services/countdowns_pg');
 const { listPokeEvents, sendPoke } = require('./services/poke');
+const { listPokeEventsPg, sendPokePg } = require('./services/poke_pg');
 const {
   listPlaylistSongs,
   upsertPlaylistSong,
@@ -50,10 +66,28 @@ const {
   upsertPlaylistReview,
 } = require('./services/playlist');
 const {
+  listPlaylistSongsPg,
+  upsertPlaylistSongPg,
+  deletePlaylistSongPg,
+  listPlaylistReviewsPg,
+  upsertPlaylistReviewPg,
+} = require('./services/playlist_pg');
+const {
   listScheduleCourses,
   upsertScheduleCourse,
   deleteScheduleCourse,
 } = require('./services/schedule');
+const {
+  listScheduleCoursesPg,
+  upsertScheduleCoursePg,
+  deleteScheduleCoursePg,
+} = require('./services/schedule_pg');
+const { listFeedEventsPg, addFeedEventPg } = require('./services/feed_pg');
+const {
+  updateDistanceLocationPg,
+  setDistanceVisibilityPg,
+  getDistanceInfoPg,
+} = require('./services/distance_pg');
 
 const app = express();
 
@@ -93,6 +127,15 @@ app.post('/bind-couple-by-pair-code', (req, res, next) => {
     const data = config.usePostgres
       ? await bindCoupleByPairCodePg(pool, req.body || {})
       : bindCoupleByPairCode(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/couple/partner-id', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await getPartnerUserIdPg(pool, req.body || {})
+      : getPartnerUserId(db, req.body || {});
     res.json({ data });
   })().catch(next);
 });
@@ -157,174 +200,219 @@ app.post('/chat/push/register-token', (req, res, next) => {
 });
 
 app.post('/bill/list', (req, res, next) => {
-  try {
-    const data = listBillRecords(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await listBillRecordsPg(pool, req.body || {})
+      : listBillRecords(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/bill/upsert', (req, res, next) => {
-  try {
-    const data = upsertBillRecord(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await upsertBillRecordPg(pool, req.body || {})
+      : upsertBillRecord(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/bill/delete', (req, res, next) => {
-  try {
-    const data = deleteBillRecord(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await deleteBillRecordPg(pool, req.body || {})
+      : deleteBillRecord(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/todo/list', (req, res, next) => {
-  try {
-    const data = listTodoItems(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await listTodoItemsPg(pool, req.body || {})
+      : listTodoItems(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/todo/upsert', (req, res, next) => {
-  try {
-    const data = upsertTodoItem(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await upsertTodoItemPg(pool, req.body || {})
+      : upsertTodoItem(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/todo/delete', (req, res, next) => {
-  try {
-    const data = deleteTodoItem(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await deleteTodoItemPg(pool, req.body || {})
+      : deleteTodoItem(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/countdown/list', (req, res, next) => {
-  try {
-    const data = listCountdownEvents(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await listCountdownEventsPg(pool, req.body || {})
+      : listCountdownEvents(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/countdown/upsert', (req, res, next) => {
-  try {
-    const data = upsertCountdownEvent(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await upsertCountdownEventPg(pool, req.body || {})
+      : upsertCountdownEvent(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/countdown/delete', (req, res, next) => {
-  try {
-    const data = deleteCountdownEvent(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await deleteCountdownEventPg(pool, req.body || {})
+      : deleteCountdownEvent(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/poke/list', (req, res, next) => {
-  try {
-    const data = listPokeEvents(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await listPokeEventsPg(pool, req.body || {})
+      : listPokeEvents(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/poke/send', (req, res, next) => {
-  try {
-    const data = sendPoke(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await sendPokePg(pool, req.body || {})
+      : sendPoke(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/playlist/songs/list', (req, res, next) => {
-  try {
-    const data = listPlaylistSongs(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await listPlaylistSongsPg(pool, req.body || {})
+      : listPlaylistSongs(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/playlist/songs/upsert', (req, res, next) => {
-  try {
-    const data = upsertPlaylistSong(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await upsertPlaylistSongPg(pool, req.body || {})
+      : upsertPlaylistSong(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/playlist/songs/delete', (req, res, next) => {
-  try {
-    const data = deletePlaylistSong(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await deletePlaylistSongPg(pool, req.body || {})
+      : deletePlaylistSong(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/playlist/reviews/list', (req, res, next) => {
-  try {
-    const data = listPlaylistReviews(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await listPlaylistReviewsPg(pool, req.body || {})
+      : listPlaylistReviews(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/playlist/reviews/upsert', (req, res, next) => {
-  try {
-    const data = upsertPlaylistReview(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await upsertPlaylistReviewPg(pool, req.body || {})
+      : upsertPlaylistReview(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/schedule/list', (req, res, next) => {
-  try {
-    const data = listScheduleCourses(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await listScheduleCoursesPg(pool, req.body || {})
+      : listScheduleCourses(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/schedule/upsert', (req, res, next) => {
-  try {
-    const data = upsertScheduleCourse(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await upsertScheduleCoursePg(pool, req.body || {})
+      : upsertScheduleCourse(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
 });
 
 app.post('/schedule/delete', (req, res, next) => {
-  try {
-    const data = deleteScheduleCourse(db, req.body || {});
+  (async () => {
+    const data = config.usePostgres
+      ? await deleteScheduleCoursePg(pool, req.body || {})
+      : deleteScheduleCourse(db, req.body || {});
     res.json({ data });
-  } catch (error) {
-    next(error);
-  }
+  })().catch(next);
+});
+
+app.post('/feed/list', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await listFeedEventsPg(pool, req.body || {})
+      : [];
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/feed/add', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await addFeedEventPg(pool, req.body || {})
+      : null;
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/distance/update-location', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await updateDistanceLocationPg(pool, req.body || {})
+      : { ok: false };
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/distance/get-info', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await getDistanceInfoPg(pool, req.body || {})
+      : { distanceKm: null };
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/distance/set-visibility', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await setDistanceVisibilityPg(pool, req.body || {})
+      : { ok: false };
+    res.json({ data });
+  })().catch(next);
 });
 
 app.use((error, _req, res, _next) => {

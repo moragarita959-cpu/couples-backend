@@ -1,22 +1,22 @@
 const { AppError } = require('../errors');
 
-function ensureCoupleExists(db, coupleId) {
-  const couple = db
-    .prepare('SELECT id, user1_id, user2_id FROM couples WHERE id = ? AND status = ?')
-    .get(coupleId, 'active');
-
-  if (!couple) {
+async function ensureCoupleExistsPg(client, coupleId) {
+  const result = await client.query(
+    'SELECT id, user1_id, user2_id FROM couples WHERE id = $1 AND status = $2',
+    [coupleId, 'active'],
+  );
+  if (result.rowCount === 0) {
     throw new AppError('couple_not_found', 'Couple not found', 404);
   }
-  return couple;
+  return result.rows[0];
 }
 
-function ensureActorInCouple(db, coupleId, actorUserId) {
+async function ensureActorInCouplePg(client, coupleId, actorUserId) {
   const trimmedActor = String(actorUserId || '').trim();
   if (!trimmedActor) {
     throw new AppError('invalid_request', 'actorUserId is required');
   }
-  const couple = ensureCoupleExists(db, coupleId);
+  const couple = await ensureCoupleExistsPg(client, coupleId);
   if (couple.user1_id !== trimmedActor && couple.user2_id !== trimmedActor) {
     throw new AppError('forbidden', 'actorUserId is not a member of this couple', 403);
   }
@@ -24,11 +24,11 @@ function ensureActorInCouple(db, coupleId, actorUserId) {
 }
 
 function normalizeCoupleId(coupleId) {
-  const trimmedCoupleId = String(coupleId || '').trim();
-  if (!trimmedCoupleId) {
+  const trimmed = String(coupleId || '').trim();
+  if (!trimmed) {
     throw new AppError('invalid_request', 'coupleId is required');
   }
-  return trimmedCoupleId;
+  return trimmed;
 }
 
 function normalizeSince(since) {
@@ -92,64 +92,67 @@ function mapBillRow(row) {
     ownerUserId: row.owner_user_id != null ? String(row.owner_user_id) : '',
     type: row.type,
     category: row.category,
-    amount: row.amount,
-    note: row.note,
+    amount: Number(row.amount),
+    note: row.note || '',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    isDeleted: row.is_deleted === 1,
+    isDeleted: row.is_deleted === true,
   };
 }
 
-function listBillRecords(db, { coupleId, since }) {
+async function listBillRecordsPg(pool, { coupleId, since }) {
   const normalizedCoupleId = normalizeCoupleId(coupleId);
   const normalizedSince = normalizeSince(since);
-
-  ensureCoupleExists(db, normalizedCoupleId);
+  const client = await pool.connect();
+  try {
+    await ensureCoupleExistsPg(client, normalizedCoupleId);
+  } finally {
+    client.release();
+  }
 
   const rows = normalizedSince
-    ? db
-        .prepare(
-          `
-            SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
-            FROM bill_records
-            WHERE couple_id = ? AND updated_at > ?
-            ORDER BY updated_at ASC, id ASC
-          `,
-        )
-        .all(normalizedCoupleId, normalizedSince)
-    : db
-        .prepare(
-          `
-            SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
-            FROM bill_records
-            WHERE couple_id = ?
-            ORDER BY updated_at ASC, id ASC
-          `,
-        )
-        .all(normalizedCoupleId);
-
-  return rows.map(mapBillRow);
-}
-
-function upsertBillRecord(db, payload) {
-  const bill = normalizeBillPayload(payload || {});
-  const actorUserId = ensureActorInCouple(db, bill.coupleId, (payload || {}).actorUserId);
-
-  const transaction = db.transaction(() => {
-    ensureCoupleExists(db, bill.coupleId);
-
-    const existing = db
-      .prepare(
+    ? await pool.query(
         `
           SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
           FROM bill_records
-          WHERE id = ? AND couple_id = ?
+          WHERE couple_id = $1 AND updated_at > $2
+          ORDER BY updated_at ASC, id ASC
         `,
+        [normalizedCoupleId, normalizedSince],
       )
-      .get(bill.id, bill.coupleId);
+    : await pool.query(
+        `
+          SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
+          FROM bill_records
+          WHERE couple_id = $1
+          ORDER BY updated_at ASC, id ASC
+        `,
+        [normalizedCoupleId],
+      );
+
+  return rows.rows.map(mapBillRow);
+}
+
+async function upsertBillRecordPg(pool, payload) {
+  const bill = normalizeBillPayload(payload || {});
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const actorUserId = await ensureActorInCouplePg(client, bill.coupleId, (payload || {}).actorUserId);
+
+    const existingRes = await client.query(
+      `
+        SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
+        FROM bill_records
+        WHERE id = $1 AND couple_id = $2
+      `,
+      [bill.id, bill.coupleId],
+    );
+    const existing = existingRes.rows[0];
 
     if (existing) {
       if (Date.parse(existing.updated_at) > Date.parse(bill.updatedAt)) {
+        await client.query('COMMIT');
         return mapBillRow(existing);
       }
 
@@ -161,71 +164,73 @@ function upsertBillRecord(db, payload) {
         throw new AppError('forbidden', 'Cannot modify another user bill', 403);
       }
 
-      db.prepare(
+      await client.query(
         `
           UPDATE bill_records
-          SET type = ?, category = ?, amount = ?, note = ?, created_at = ?, updated_at = ?, is_deleted = ?, owner_user_id = ?
-          WHERE id = ? AND couple_id = ?
+          SET type = $1, category = $2, amount = $3, note = $4, created_at = $5, updated_at = $6, is_deleted = $7, owner_user_id = $8
+          WHERE id = $9 AND couple_id = $10
         `,
-      ).run(
-        bill.type,
-        bill.category,
-        bill.amount,
-        bill.note,
-        bill.createdAt,
-        bill.updatedAt,
-        bill.isDeleted ? 1 : 0,
-        existingOwner,
-        bill.id,
-        bill.coupleId,
+        [
+          bill.type,
+          bill.category,
+          bill.amount,
+          bill.note,
+          bill.createdAt,
+          bill.updatedAt,
+          bill.isDeleted,
+          existingOwner,
+          bill.id,
+          bill.coupleId,
+        ],
       );
     } else {
       if (!bill.ownerUserId || bill.ownerUserId !== actorUserId) {
         throw new AppError('invalid_request', 'ownerUserId must match actorUserId for new bills');
       }
-      db.prepare(
+      await client.query(
         `
           INSERT INTO bill_records (
             id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         `,
-      ).run(
-        bill.id,
-        bill.coupleId,
-        bill.ownerUserId,
-        bill.type,
-        bill.category,
-        bill.amount,
-        bill.note,
-        bill.createdAt,
-        bill.updatedAt,
-        bill.isDeleted ? 1 : 0,
+        [
+          bill.id,
+          bill.coupleId,
+          bill.ownerUserId,
+          bill.type,
+          bill.category,
+          bill.amount,
+          bill.note,
+          bill.createdAt,
+          bill.updatedAt,
+          bill.isDeleted,
+        ],
       );
     }
 
-    const latest = db
-      .prepare(
-        `
-          SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
-          FROM bill_records
-          WHERE id = ? AND couple_id = ?
-        `,
-      )
-      .get(bill.id, bill.coupleId);
-
-    return mapBillRow(latest);
-  });
-
-  return transaction();
+    const latestRes = await client.query(
+      `
+        SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
+        FROM bill_records
+        WHERE id = $1 AND couple_id = $2
+      `,
+      [bill.id, bill.coupleId],
+    );
+    await client.query('COMMIT');
+    return mapBillRow(latestRes.rows[0]);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
-function deleteBillRecord(db, payload) {
+async function deleteBillRecordPg(pool, payload) {
   const normalizedCoupleId = normalizeCoupleId((payload || {}).coupleId);
-  const actorUserId = ensureActorInCouple(db, normalizedCoupleId, (payload || {}).actorUserId);
   const normalizedId = String((payload || {}).id || '').trim();
   const normalizedUpdatedAt = String((payload || {}).updatedAt || '').trim();
-
   if (!normalizedId) {
     throw new AppError('invalid_request', 'id is required');
   }
@@ -233,20 +238,22 @@ function deleteBillRecord(db, payload) {
     throw new AppError('invalid_request', 'updatedAt must be a valid ISO timestamp');
   }
 
-  const transaction = db.transaction(() => {
-    ensureCoupleExists(db, normalizedCoupleId);
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const actorUserId = await ensureActorInCouplePg(client, normalizedCoupleId, (payload || {}).actorUserId);
 
-    const existing = db
-      .prepare(
-        `
-          SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
-          FROM bill_records
-          WHERE id = ? AND couple_id = ?
-        `,
-      )
-      .get(normalizedId, normalizedCoupleId);
-
+    const existingRes = await client.query(
+      `
+        SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
+        FROM bill_records
+        WHERE id = $1 AND couple_id = $2
+      `,
+      [normalizedId, normalizedCoupleId],
+    );
+    const existing = existingRes.rows[0];
     if (!existing) {
+      await client.query('COMMIT');
       return {
         id: normalizedId,
         coupleId: normalizedCoupleId,
@@ -263,37 +270,40 @@ function deleteBillRecord(db, payload) {
     if (existingOwner !== actorUserId) {
       throw new AppError('forbidden', 'Cannot delete another user bill', 403);
     }
-
     if (Date.parse(existing.updated_at) > Date.parse(normalizedUpdatedAt)) {
+      await client.query('COMMIT');
       return mapBillRow(existing);
     }
 
-    db.prepare(
+    await client.query(
       `
         UPDATE bill_records
-        SET is_deleted = 1, updated_at = ?
-        WHERE id = ? AND couple_id = ?
+        SET is_deleted = true, updated_at = $1
+        WHERE id = $2 AND couple_id = $3
       `,
-    ).run(normalizedUpdatedAt, normalizedId, normalizedCoupleId);
+      [normalizedUpdatedAt, normalizedId, normalizedCoupleId],
+    );
 
-    const latest = db
-      .prepare(
-        `
-          SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
-          FROM bill_records
-          WHERE id = ? AND couple_id = ?
-        `,
-      )
-      .get(normalizedId, normalizedCoupleId);
-
-    return mapBillRow(latest);
-  });
-
-  return transaction();
+    const latestRes = await client.query(
+      `
+        SELECT id, couple_id, owner_user_id, type, category, amount, note, created_at, updated_at, is_deleted
+        FROM bill_records
+        WHERE id = $1 AND couple_id = $2
+      `,
+      [normalizedId, normalizedCoupleId],
+    );
+    await client.query('COMMIT');
+    return mapBillRow(latestRes.rows[0]);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 module.exports = {
-  listBillRecords,
-  upsertBillRecord,
-  deleteBillRecord,
+  listBillRecordsPg,
+  upsertBillRecordPg,
+  deleteBillRecordPg,
 };

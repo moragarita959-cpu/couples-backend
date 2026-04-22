@@ -124,7 +124,8 @@ async function uploadChatMediaPg(pool, body, publicBaseUrl) {
   fs.writeFileSync(path.join(absoluteDir, generatedName), fileBuffer);
 
   const relativeUrlPath = `/media/chat/${relativeDir.replace(/\\/g, '/')}/${generatedName}`;
-  return { url: buildPublicMediaUrl(publicBaseUrl, relativeUrlPath) };
+  const mediaUrl = buildPublicMediaUrl(publicBaseUrl, relativeUrlPath);
+  return { url: mediaUrl, mediaUrl };
 }
 
 async function sendChatMessagePg(pool, body) {

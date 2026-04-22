@@ -86,7 +86,30 @@ function bindCoupleByPairCode(db, { currentUserId, targetPairCode }) {
   return transaction();
 }
 
+function getPartnerUserId(db, { coupleId, currentUserId }) {
+  const normalizedCoupleId = String(coupleId || '').trim();
+  const trimmedMe = String(currentUserId || '').trim();
+  if (!normalizedCoupleId || !trimmedMe) {
+    throw new AppError('invalid_request', 'coupleId and currentUserId are required');
+  }
+
+  const couple = db
+    .prepare('SELECT user1_id, user2_id FROM couples WHERE id = ? AND status = ?')
+    .get(normalizedCoupleId, 'active');
+
+  if (!couple) {
+    throw new AppError('couple_not_found', 'Couple not found', 404);
+  }
+  if (couple.user1_id !== trimmedMe && couple.user2_id !== trimmedMe) {
+    throw new AppError('forbidden', 'currentUserId is not a member of this couple', 403);
+  }
+
+  const partnerUserId = couple.user1_id === trimmedMe ? couple.user2_id : couple.user1_id;
+  return { partnerUserId };
+}
+
 module.exports = {
   bindCoupleByPairCode,
   normalizeUserPair,
+  getPartnerUserId,
 };
