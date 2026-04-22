@@ -156,8 +156,10 @@ function uploadChatMedia(
   fs.writeFileSync(absoluteFilePath, fileBuffer);
 
   const relativeUrlPath = `/media/chat/${relativeDir.replace(/\\/g, '/')}/${generatedName}`;
+  const mediaUrl = buildPublicMediaUrl(publicBaseUrl, relativeUrlPath);
   return {
-    url: buildPublicMediaUrl(publicBaseUrl, relativeUrlPath),
+    url: mediaUrl,
+    mediaUrl,
   };
 }
 

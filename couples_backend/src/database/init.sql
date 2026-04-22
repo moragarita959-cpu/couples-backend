@@ -40,9 +40,24 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 CREATE INDEX IF NOT EXISTS idx_chat_messages_couple_created
   ON chat_messages(couple_id, created_at, id);
 
+CREATE TABLE IF NOT EXISTS chat_push_tokens (
+  id TEXT PRIMARY KEY,
+  couple_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  token TEXT NOT NULL,
+  platform TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  UNIQUE(couple_id, user_id, token)
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_push_tokens_couple_user
+  ON chat_push_tokens(couple_id, user_id);
+
 CREATE TABLE IF NOT EXISTS bill_records (
   id TEXT PRIMARY KEY,
   couple_id TEXT NOT NULL,
+  owner_user_id TEXT NOT NULL DEFAULT '',
   type TEXT NOT NULL,
   category TEXT NOT NULL,
   amount REAL NOT NULL,
@@ -101,12 +116,19 @@ CREATE TABLE IF NOT EXISTS playlist_songs (
   couple_id TEXT NOT NULL,
   name TEXT NOT NULL,
   artist TEXT NOT NULL,
+  genre TEXT NOT NULL DEFAULT '',
+  recommender_user_id TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL,
-  preference TEXT NOT NULL DEFAULT 'none'
+  updated_at TEXT NOT NULL DEFAULT '',
+  preference TEXT NOT NULL DEFAULT 'none',
+  is_deleted INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_playlist_songs_couple_created
   ON playlist_songs(couple_id, created_at, id);
+
+CREATE INDEX IF NOT EXISTS idx_playlist_songs_couple_name_artist
+  ON playlist_songs(couple_id, name, artist, is_deleted);
 
 CREATE TABLE IF NOT EXISTS playlist_reviews (
   id TEXT PRIMARY KEY,

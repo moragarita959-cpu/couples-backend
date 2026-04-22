@@ -39,15 +39,17 @@ function parseStyleTags(raw) {
   return [];
 }
 
-function listPlaylistSongs(db, { coupleId }) {
+function listPlaylistSongs(db, { coupleId, currentUserId }) {
   const trimmedCoupleId = normalizeRequired(coupleId, 'coupleId');
   ensureCouple(db, trimmedCoupleId);
+  const trimmedCurrentUserId = String(currentUserId || '').trim();
   const rows = db
     .prepare(
       `
-        SELECT id, couple_id, name, artist, created_at, preference
+        SELECT id, couple_id, name, artist, genre, recommender_user_id,
+               created_at, updated_at, preference, is_deleted
         FROM playlist_songs
-        WHERE couple_id = ?
+        WHERE couple_id = ? AND is_deleted = 0
         ORDER BY created_at DESC, id DESC
       `,
     )
@@ -57,53 +59,137 @@ function listPlaylistSongs(db, { coupleId }) {
     id: row.id,
     name: row.name,
     artist: row.artist,
+    genre: row.genre || '',
     createdAt: row.created_at,
+    updatedAt: row.updated_at || row.created_at,
     preference: row.preference,
+    recommender:
+      trimmedCurrentUserId && row.recommender_user_id === trimmedCurrentUserId
+        ? 'me'
+        : 'partner',
+    isDeleted: row.is_deleted === 1,
   }));
 }
 
 function upsertPlaylistSong(db, payload) {
   const coupleId = normalizeRequired(payload.coupleId, 'coupleId');
+  const currentUserId = normalizeRequired(payload.currentUserId, 'currentUserId');
   const id = normalizeRequired(payload.id, 'id');
   const name = normalizeRequired(payload.name, 'name');
   const artist = normalizeRequired(payload.artist, 'artist');
+  const genre = String(payload.genre || '').trim();
   const createdAt = normalizeRequired(payload.createdAt, 'createdAt');
+  const updatedAt = String(payload.updatedAt || createdAt).trim() || createdAt;
   const preference = String(payload.preference || 'none').trim() || 'none';
+  const isDeleted = payload.isDeleted === true ? 1 : 0;
 
   if (Number.isNaN(Date.parse(createdAt))) {
     throw new AppError('invalid_request', 'createdAt must be a valid ISO timestamp');
   }
+  if (Number.isNaN(Date.parse(updatedAt))) {
+    throw new AppError('invalid_request', 'updatedAt must be a valid ISO timestamp');
+  }
 
   const transaction = db.transaction(() => {
-    ensureCouple(db, coupleId);
+    const couple = ensureCouple(db, coupleId);
+    ensureMember(couple, currentUserId);
     const existing = db
       .prepare('SELECT id FROM playlist_songs WHERE id = ? AND couple_id = ?')
       .get(id, coupleId);
+
+    if (!existing && isDeleted === 0) {
+      const duplicate = db
+        .prepare(
+          `
+            SELECT id
+            FROM playlist_songs
+            WHERE couple_id = ?
+              AND is_deleted = 0
+              AND LOWER(TRIM(name)) = LOWER(TRIM(?))
+              AND LOWER(TRIM(artist)) = LOWER(TRIM(?))
+          `,
+        )
+        .get(coupleId, name, artist);
+      if (duplicate) {
+        throw new AppError('duplicate_playlist_song', 'Song already exists', 409);
+      }
+    }
 
     if (existing) {
       db.prepare(
         `
           UPDATE playlist_songs
-          SET name = ?, artist = ?, created_at = ?, preference = ?
+          SET name = ?, artist = ?, genre = ?, created_at = ?, updated_at = ?,
+              preference = ?, is_deleted = ?
           WHERE id = ? AND couple_id = ?
         `,
-      ).run(name, artist, createdAt, preference, id, coupleId);
+      ).run(name, artist, genre, createdAt, updatedAt, preference, isDeleted, id, coupleId);
     } else {
       db.prepare(
         `
-          INSERT INTO playlist_songs (id, couple_id, name, artist, created_at, preference)
-          VALUES (?, ?, ?, ?, ?, ?)
+          INSERT INTO playlist_songs (
+            id, couple_id, name, artist, genre, recommender_user_id,
+            created_at, updated_at, preference, is_deleted
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
-      ).run(id, coupleId, name, artist, createdAt, preference);
+      ).run(
+        id,
+        coupleId,
+        name,
+        artist,
+        genre,
+        currentUserId,
+        createdAt,
+        updatedAt,
+        preference,
+        isDeleted,
+      );
     }
 
     return {
       id,
       name,
       artist,
+      genre,
       createdAt,
+      updatedAt,
       preference,
+      recommender: 'me',
+      isDeleted: isDeleted === 1,
     };
+  });
+
+  return transaction();
+}
+
+function deletePlaylistSong(db, payload) {
+  const coupleId = normalizeRequired(payload.coupleId, 'coupleId');
+  const currentUserId = normalizeRequired(payload.currentUserId, 'currentUserId');
+  const songId = normalizeRequired(payload.songId, 'songId');
+  const updatedAt = normalizeRequired(payload.updatedAt, 'updatedAt');
+
+  if (Number.isNaN(Date.parse(updatedAt))) {
+    throw new AppError('invalid_request', 'updatedAt must be a valid ISO timestamp');
+  }
+
+  const transaction = db.transaction(() => {
+    const couple = ensureCouple(db, coupleId);
+    ensureMember(couple, currentUserId);
+    const existing = db
+      .prepare('SELECT id FROM playlist_songs WHERE id = ? AND couple_id = ?')
+      .get(songId, coupleId);
+    if (!existing) {
+      throw new AppError('song_not_found', 'Song not found', 404);
+    }
+    db.prepare(
+      `
+        UPDATE playlist_songs
+        SET is_deleted = 1, updated_at = ?
+        WHERE id = ? AND couple_id = ?
+      `,
+    ).run(updatedAt, songId, coupleId);
+    return { id: songId, updatedAt, isDeleted: true };
   });
 
   return transaction();
@@ -145,7 +231,7 @@ function upsertPlaylistReview(db, payload) {
   const coupleId = normalizeRequired(payload.coupleId, 'coupleId');
   const currentUserId = normalizeRequired(payload.currentUserId, 'currentUserId');
   const songId = normalizeRequired(payload.songId, 'songId');
-  const content = normalizeRequired(payload.content, 'content');
+  const content = String(payload.content || '').trim();
   const createdAt = normalizeRequired(payload.createdAt, 'createdAt');
   const styleTags = Array.isArray(payload.styleTags) ? payload.styleTags : [];
   const atmosphereScore = Number(payload.atmosphereScore || 0);
@@ -232,6 +318,7 @@ function upsertPlaylistReview(db, payload) {
 module.exports = {
   listPlaylistSongs,
   upsertPlaylistSong,
+  deletePlaylistSong,
   listPlaylistReviews,
   upsertPlaylistReview,
 };

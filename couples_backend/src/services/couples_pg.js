@@ -80,6 +80,29 @@ async function bindCoupleByPairCodePg(pool, { currentUserId, targetPairCode }) {
   }
 }
 
+async function getPartnerUserIdPg(pool, { coupleId, currentUserId }) {
+  const normalizedCoupleId = String(coupleId || '').trim();
+  const trimmedMe = String(currentUserId || '').trim();
+  if (!normalizedCoupleId || !trimmedMe) {
+    throw new AppError('invalid_request', 'coupleId and currentUserId are required');
+  }
+
+  const result = await pool.query(
+    'SELECT user1_id, user2_id FROM couples WHERE id = $1 AND status = $2',
+    [normalizedCoupleId, 'active'],
+  );
+  if (result.rowCount === 0) {
+    throw new AppError('couple_not_found', 'Couple not found', 404);
+  }
+  const row = result.rows[0];
+  if (row.user1_id !== trimmedMe && row.user2_id !== trimmedMe) {
+    throw new AppError('forbidden', 'currentUserId is not a member of this couple', 403);
+  }
+  const partnerUserId = row.user1_id === trimmedMe ? row.user2_id : row.user1_id;
+  return { partnerUserId };
+}
+
 module.exports = {
   bindCoupleByPairCodePg,
+  getPartnerUserIdPg,
 };

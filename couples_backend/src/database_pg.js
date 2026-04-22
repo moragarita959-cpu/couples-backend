@@ -71,6 +71,188 @@ async function initPostgresSchema() {
     CREATE INDEX IF NOT EXISTS idx_chat_push_tokens_couple_user
       ON chat_push_tokens(couple_id, user_id);
   `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS bill_records (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      owner_user_id TEXT NOT NULL DEFAULT '',
+      type TEXT NOT NULL,
+      category TEXT NOT NULL,
+      amount DOUBLE PRECISION NOT NULL,
+      note TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL,
+      is_deleted BOOLEAN NOT NULL DEFAULT FALSE
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_bill_records_couple_updated
+      ON bill_records(couple_id, updated_at, id);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS playlist_songs (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      artist TEXT NOT NULL,
+      genre TEXT NOT NULL DEFAULT '',
+      recommender_user_id TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL,
+      preference TEXT NOT NULL DEFAULT 'none',
+      is_deleted BOOLEAN NOT NULL DEFAULT FALSE
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_playlist_songs_couple_created
+      ON playlist_songs(couple_id, created_at, id);
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_playlist_songs_couple_name_artist
+      ON playlist_songs(couple_id, name, artist, is_deleted);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS playlist_reviews (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      song_id TEXT NOT NULL,
+      author_user_id TEXT NOT NULL,
+      content TEXT NOT NULL,
+      style_tags TEXT NOT NULL DEFAULT '[]',
+      atmosphere_score INTEGER NOT NULL DEFAULT 0,
+      resonance_score INTEGER NOT NULL DEFAULT 0,
+      share_score INTEGER NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL,
+      UNIQUE(couple_id, song_id, author_user_id)
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_playlist_reviews_couple_song_created
+      ON playlist_reviews(couple_id, song_id, created_at, id);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS todo_items (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      due_at TIMESTAMPTZ NULL,
+      owner_type TEXT NOT NULL,
+      owner_user_id TEXT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL,
+      is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+      done_user_ids TEXT NOT NULL DEFAULT '[]'
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_todo_items_couple_updated
+      ON todo_items(couple_id, updated_at, id);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS countdown_events (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      date TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL,
+      is_deleted BOOLEAN NOT NULL DEFAULT FALSE
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_countdown_events_couple_updated
+      ON countdown_events(couple_id, updated_at, id);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS poke_events (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      sender_user_id TEXT NOT NULL,
+      message TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_poke_events_couple_created
+      ON poke_events(couple_id, created_at, id);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS schedule_courses (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      weekday INTEGER NOT NULL,
+      start_minute INTEGER NOT NULL,
+      end_minute INTEGER NOT NULL,
+      start_week INTEGER NOT NULL,
+      end_week INTEGER NOT NULL,
+      repeat_weekly BOOLEAN NOT NULL DEFAULT TRUE,
+      start_period INTEGER NOT NULL,
+      end_period INTEGER NOT NULL,
+      location TEXT NOT NULL,
+      teacher TEXT NOT NULL,
+      note TEXT NOT NULL DEFAULT '',
+      owner_user_id TEXT NOT NULL,
+      color_hex TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_schedule_courses_couple_updated
+      ON schedule_courses(couple_id, updated_at, id);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feed_events (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      event_type TEXT NOT NULL,
+      actor_user_id TEXT NOT NULL,
+      target_type TEXT NOT NULL,
+      target_id TEXT NOT NULL,
+      summary_text TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      is_read BOOLEAN NOT NULL DEFAULT FALSE
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_feed_events_couple_created
+      ON feed_events(couple_id, created_at, id);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS distance_locations (
+      couple_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      latitude DOUBLE PRECISION NOT NULL,
+      longitude DOUBLE PRECISION NOT NULL,
+      is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+      location_label TEXT NOT NULL DEFAULT '',
+      updated_at TIMESTAMPTZ NOT NULL,
+      PRIMARY KEY (couple_id, user_id)
+    );
+  `);
+  await pool.query(`
+    ALTER TABLE distance_locations
+    ADD COLUMN IF NOT EXISTS is_visible BOOLEAN NOT NULL DEFAULT TRUE;
+  `);
+  await pool.query(`
+    ALTER TABLE distance_locations
+    ADD COLUMN IF NOT EXISTS location_label TEXT NOT NULL DEFAULT '';
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_distance_locations_couple_updated
+      ON distance_locations(couple_id, updated_at);
+  `);
 }
 
 module.exports = {
