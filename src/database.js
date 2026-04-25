@@ -11,6 +11,7 @@ const schemaSql = fs.readFileSync(
 
 fs.mkdirSync(path.dirname(config.dbPath), { recursive: true });
 fs.mkdirSync(config.chatMediaDir, { recursive: true });
+fs.mkdirSync(config.albumMediaDir, { recursive: true });
 
 const db = new DatabaseSync(config.dbPath);
 db.exec(schemaSql);

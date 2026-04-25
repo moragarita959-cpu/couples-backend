@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const config = require('./config');
 
 fs.mkdirSync(config.chatMediaDir, { recursive: true });
+fs.mkdirSync(config.albumMediaDir, { recursive: true });
 
 const pool = new Pool({
   connectionString: config.databaseUrl,
@@ -185,6 +186,66 @@ async function initPostgresSchema() {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS albums (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NULL,
+      cover_photo_url TEXT NULL,
+      created_by_user_id TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_albums_couple_id
+      ON albums(couple_id);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS album_photos (
+      id TEXT PRIMARY KEY,
+      album_id TEXT NOT NULL,
+      couple_id TEXT NOT NULL,
+      uploader_user_id TEXT NOT NULL,
+      image_url TEXT NOT NULL,
+      local_path TEXT NULL,
+      caption TEXT NULL,
+      taken_at TIMESTAMPTZ NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_album_photos_album_id
+      ON album_photos(album_id);
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_album_photos_couple_id
+      ON album_photos(couple_id);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS photo_comments (
+      id TEXT PRIMARY KEY,
+      photo_id TEXT NOT NULL,
+      couple_id TEXT NOT NULL,
+      author_user_id TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_photo_comments_photo_id
+      ON photo_comments(photo_id);
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_photo_comments_couple_id
+      ON photo_comments(couple_id);
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS schedule_courses (
       id TEXT PRIMARY KEY,
       couple_id TEXT NOT NULL,
@@ -252,6 +313,48 @@ async function initPostgresSchema() {
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_distance_locations_couple_updated
       ON distance_locations(couple_id, updated_at);
+  `);
+
+  await migrateAlbumPostgresSchema(pool);
+}
+
+/**
+ * 为已有环境补齐外键与 ON DELETE CASCADE；新环境 CREATE TABLE 后也会执行，幂等。
+ */
+async function migrateAlbumPostgresSchema(pool) {
+  await pool.query(`
+    DO $migration$
+    BEGIN
+      -- 清孤儿，避免加约束失败
+      DELETE FROM photo_comments pc
+      WHERE NOT EXISTS (SELECT 1 FROM album_photos ap WHERE ap.id = pc.photo_id);
+
+      DELETE FROM album_photos p
+      WHERE NOT EXISTS (SELECT 1 FROM albums a WHERE a.id = p.album_id);
+
+      IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE table_schema = 'public'
+          AND table_name = 'album_photos'
+          AND constraint_name = 'fk_album_photos_album'
+      ) THEN
+        ALTER TABLE album_photos
+          ADD CONSTRAINT fk_album_photos_album
+          FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE CASCADE;
+      END IF;
+
+      IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE table_schema = 'public'
+          AND table_name = 'photo_comments'
+          AND constraint_name = 'fk_photo_comments_photo'
+      ) THEN
+        ALTER TABLE photo_comments
+          ADD CONSTRAINT fk_photo_comments_photo
+          FOREIGN KEY (photo_id) REFERENCES album_photos(id) ON DELETE CASCADE;
+      END IF;
+    END
+    $migration$;
   `);
 }
 

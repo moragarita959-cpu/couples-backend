@@ -147,6 +147,55 @@ CREATE TABLE IF NOT EXISTS playlist_reviews (
 CREATE INDEX IF NOT EXISTS idx_playlist_reviews_couple_song_created
   ON playlist_reviews(couple_id, song_id, created_at, id);
 
+CREATE TABLE IF NOT EXISTS albums (
+  id TEXT PRIMARY KEY,
+  couple_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  cover_photo_url TEXT,
+  created_by_user_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_albums_couple_id
+  ON albums(couple_id);
+
+CREATE TABLE IF NOT EXISTS album_photos (
+  id TEXT PRIMARY KEY,
+  album_id TEXT NOT NULL,
+  couple_id TEXT NOT NULL,
+  uploader_user_id TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  local_path TEXT,
+  caption TEXT,
+  taken_at TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_album_photos_album_id
+  ON album_photos(album_id);
+
+CREATE INDEX IF NOT EXISTS idx_album_photos_couple_id
+  ON album_photos(couple_id);
+
+CREATE TABLE IF NOT EXISTS photo_comments (
+  id TEXT PRIMARY KEY,
+  photo_id TEXT NOT NULL,
+  couple_id TEXT NOT NULL,
+  author_user_id TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_photo_comments_photo_id
+  ON photo_comments(photo_id);
+
+CREATE INDEX IF NOT EXISTS idx_photo_comments_couple_id
+  ON photo_comments(couple_id);
+
 CREATE TABLE IF NOT EXISTS schedule_courses (
   id TEXT PRIMARY KEY,
   couple_id TEXT NOT NULL,
