@@ -1,9 +1,11 @@
 const express = require('express');
+const multer = require('multer');
 
 const config = require('./config');
 const db = require('./database');
 const { pool, initPostgresSchema } = require('./database_pg');
-const { isAppError } = require('./errors');
+const { AppError, isAppError } = require('./errors');
+const { generateStoredFileName, isAllowedImageMime } = require('./services/album_media_storage');
 const { bootstrapUser } = require('./services/users');
 const { bindCoupleByPairCode, getPartnerUserId } = require('./services/couples');
 const {
@@ -82,6 +84,32 @@ const {
   upsertScheduleCoursePg,
   deleteScheduleCoursePg,
 } = require('./services/schedule_pg');
+const {
+  listAlbums,
+  createAlbum,
+  updateAlbum,
+  deleteAlbum,
+  listAlbumPhotos,
+  uploadAlbumPhoto,
+  updateAlbumPhoto,
+  deleteAlbumPhoto,
+  listPhotoComments,
+  createPhotoComment,
+  deletePhotoComment,
+} = require('./services/albums');
+const {
+  listAlbumsPg,
+  createAlbumPg,
+  updateAlbumPg,
+  deleteAlbumPg,
+  listAlbumPhotosPg,
+  uploadAlbumPhotoPg,
+  updateAlbumPhotoPg,
+  deleteAlbumPhotoPg,
+  listPhotoCommentsPg,
+  createPhotoCommentPg,
+  deletePhotoCommentPg,
+} = require('./services/albums_pg');
 const { listFeedEventsPg, addFeedEventPg } = require('./services/feed_pg');
 const {
   updateDistanceLocationPg,
@@ -91,9 +119,36 @@ const {
 
 const app = express();
 
+const ALBUM_UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
+const albumUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      cb(null, config.albumMediaDir);
+    },
+    filename: (_req, file, cb) => {
+      cb(null, generateStoredFileName(file.originalname));
+    },
+  }),
+  limits: { fileSize: ALBUM_UPLOAD_MAX_BYTES },
+  fileFilter: (_req, file, cb) => {
+    if (isAllowedImageMime(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new AppError(
+          'invalid_request',
+          'Only jpg, jpeg, png or webp images are allowed',
+          400,
+        ),
+      );
+    }
+  },
+});
+
 app.set('trust proxy', true);
 app.use(express.json({ limit: '20mb' }));
 app.use('/media/chat', express.static(config.chatMediaDir));
+app.use('/media/album', express.static(config.albumMediaDir));
 
 function resolvePublicBaseUrl(req) {
   if (config.publicBaseUrl) {
@@ -343,6 +398,109 @@ app.post('/playlist/reviews/upsert', (req, res, next) => {
   })().catch(next);
 });
 
+app.post('/album/list', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await listAlbumsPg(pool, req.body || {})
+      : listAlbums(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/album/create', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await createAlbumPg(pool, req.body || {})
+      : createAlbum(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/album/update', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await updateAlbumPg(pool, req.body || {})
+      : updateAlbum(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/album/delete', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await deleteAlbumPg(pool, req.body || {})
+      : deleteAlbum(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/album/photo/list', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await listAlbumPhotosPg(pool, req.body || {})
+      : listAlbumPhotos(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/album/photo/upload', albumUpload.single('file'), (req, res, next) => {
+  (async () => {
+    const payload = {
+      ...(req.body || {}),
+      file: req.file,
+    };
+    const data = config.usePostgres
+      ? await uploadAlbumPhotoPg(pool, payload, resolvePublicBaseUrl(req))
+      : uploadAlbumPhoto(db, payload, resolvePublicBaseUrl(req));
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/album/photo/update', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await updateAlbumPhotoPg(pool, req.body || {})
+      : updateAlbumPhoto(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/album/photo/delete', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await deleteAlbumPhotoPg(pool, req.body || {})
+      : deleteAlbumPhoto(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/album/photo/comment/list', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await listPhotoCommentsPg(pool, req.body || {})
+      : listPhotoComments(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/album/photo/comment/create', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await createPhotoCommentPg(pool, req.body || {})
+      : createPhotoComment(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/album/photo/comment/delete', (req, res, next) => {
+  (async () => {
+    const data = config.usePostgres
+      ? await deletePhotoCommentPg(pool, req.body || {})
+      : deletePhotoComment(db, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
 app.post('/schedule/list', (req, res, next) => {
   (async () => {
     const data = config.usePostgres
@@ -424,6 +582,18 @@ app.use((error, _req, res, _next) => {
       },
     });
     return;
+  }
+
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      res.status(400).json({
+        error: {
+          code: 'invalid_request',
+          message: 'File too large (max 10MB)',
+        },
+      });
+      return;
+    }
   }
 
   console.error(error);

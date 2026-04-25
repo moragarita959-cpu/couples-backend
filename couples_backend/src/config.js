@@ -14,6 +14,10 @@ const config = {
     rootDir,
     process.env.CHAT_MEDIA_DIR || './data/chat-media',
   ),
+  albumMediaDir: path.resolve(
+    rootDir,
+    process.env.ALBUM_MEDIA_DIR || './data/album-media',
+  ),
   fcmServerKey: String(process.env.FCM_SERVER_KEY || '').trim(),
 };
 
