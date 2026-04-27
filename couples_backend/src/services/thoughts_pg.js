@@ -1,5 +1,8 @@
 const { AppError } = require('../errors');
 
+const SUPPORTED_IDEA_TYPES = new Set(['mood', 'idea', 'wish']);
+const SUPPORTED_EXCERPT_CATEGORIES = new Set(['book', 'movie', 'lyric', 'custom']);
+
 function normalizeRequired(value, field) {
   const trimmed = String(value || '').trim();
   if (!trimmed) {
@@ -22,6 +25,58 @@ function normalizeOptionalIso(value, field) {
     throw new AppError('invalid_request', `${field} must be a valid ISO timestamp`);
   }
   return trimmed;
+}
+
+function normalizeMoodTags(value) {
+  if (value == null) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item || '').trim())
+      .filter((item) => item.length > 0);
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return [];
+    }
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed
+            .map((item) => String(item || '').trim())
+            .filter((item) => item.length > 0);
+        }
+      } catch (_) {
+        // fall through and treat as a single tag
+      }
+    }
+    return [trimmed];
+  }
+  return [];
+}
+
+function moodTagsToColumn(tags) {
+  return tags.length === 0 ? null : JSON.stringify(tags);
+}
+
+function moodTagsFromColumn(value) {
+  if (!value) {
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((item) => String(item || '').trim())
+        .filter((item) => item.length > 0);
+    }
+    return [String(parsed)];
+  } catch (_) {
+    return [String(value)];
+  }
 }
 
 async function ensureCouple(client, coupleId) {
@@ -49,9 +104,10 @@ function mapIdeaRow(row) {
     type: row.type,
     title: row.title || null,
     content: row.content,
-    moodTag: row.mood_tag || null,
+    moodTags: moodTagsFromColumn(row.mood_tags),
     colorStyle: row.color_style || null,
     layoutStyle: row.layout_style || null,
+    stickerStyle: row.sticker_style || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     commentCount: Number(row.comment_count || 0),
@@ -117,6 +173,9 @@ async function assertThoughtTarget(client, targetType, targetId, coupleId) {
 function normalizeIdeaPayload(payload, coupleId, currentUserId) {
   const id = normalizeRequired(payload.id, 'id');
   const type = normalizeRequired(payload.type, 'type');
+  if (!SUPPORTED_IDEA_TYPES.has(type)) {
+    throw new AppError('invalid_request', `type must be one of mood, idea, wish`);
+  }
   const content = normalizeRequired(payload.content, 'content');
   const createdAt = normalizeRequired(payload.createdAt, 'createdAt');
   const updatedAt = normalizeRequired(payload.updatedAt, 'updatedAt');
@@ -126,6 +185,7 @@ function normalizeIdeaPayload(payload, coupleId, currentUserId) {
   if (Number.isNaN(Date.parse(updatedAt))) {
     throw new AppError('invalid_request', 'updatedAt must be a valid ISO timestamp');
   }
+  const moodTags = normalizeMoodTags(payload.moodTags ?? payload.moodTag);
   return {
     id,
     coupleId,
@@ -133,9 +193,10 @@ function normalizeIdeaPayload(payload, coupleId, currentUserId) {
     type,
     title: normalizeOptional(payload.title),
     content,
-    moodTag: normalizeOptional(payload.moodTag),
+    moodTags,
     colorStyle: normalizeOptional(payload.colorStyle),
     layoutStyle: normalizeOptional(payload.layoutStyle),
+    stickerStyle: normalizeOptional(payload.stickerStyle),
     createdAt,
     updatedAt,
   };
@@ -144,6 +205,12 @@ function normalizeIdeaPayload(payload, coupleId, currentUserId) {
 function normalizeExcerptPayload(payload, coupleId, currentUserId) {
   const id = normalizeRequired(payload.id, 'id');
   const category = normalizeRequired(payload.category, 'category');
+  if (!SUPPORTED_EXCERPT_CATEGORIES.has(category)) {
+    throw new AppError(
+      'invalid_request',
+      'category must be one of book, movie, lyric, custom',
+    );
+  }
   const quoteText = normalizeRequired(payload.quoteText, 'quoteText');
   const createdAt = normalizeRequired(payload.createdAt, 'createdAt');
   const updatedAt = normalizeRequired(payload.updatedAt, 'updatedAt');
@@ -207,7 +274,8 @@ async function listIdeaNotesPg(pool, { coupleId, currentUserId, since }) {
       ? await client.query(
           `
           SELECT i.id, i.couple_id, i.author_user_id, i.type, i.title, i.content,
-                 i.mood_tag, i.color_style, i.layout_style, i.created_at, i.updated_at,
+                 i.mood_tags, i.color_style, i.layout_style, i.sticker_style,
+                 i.created_at, i.updated_at,
                  COUNT(c.id) AS comment_count
           FROM idea_notes i
           LEFT JOIN thought_comments c
@@ -221,7 +289,8 @@ async function listIdeaNotesPg(pool, { coupleId, currentUserId, since }) {
       : await client.query(
           `
           SELECT i.id, i.couple_id, i.author_user_id, i.type, i.title, i.content,
-                 i.mood_tag, i.color_style, i.layout_style, i.created_at, i.updated_at,
+                 i.mood_tags, i.color_style, i.layout_style, i.sticker_style,
+                 i.created_at, i.updated_at,
                  COUNT(c.id) AS comment_count
           FROM idea_notes i
           LEFT JOIN thought_comments c
@@ -264,7 +333,8 @@ async function upsertIdeaNotePg(pool, payload) {
         const latest = await client.query(
           `
           SELECT i.id, i.couple_id, i.author_user_id, i.type, i.title, i.content,
-                 i.mood_tag, i.color_style, i.layout_style, i.created_at, i.updated_at,
+                 i.mood_tags, i.color_style, i.layout_style, i.sticker_style,
+                 i.created_at, i.updated_at,
                  COUNT(c.id) AS comment_count
           FROM idea_notes i
           LEFT JOIN thought_comments c
@@ -282,18 +352,19 @@ async function upsertIdeaNotePg(pool, payload) {
     await client.query(
       `
       INSERT INTO idea_notes (
-        id, couple_id, author_user_id, type, title, content, mood_tag,
-        color_style, layout_style, created_at, updated_at
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+        id, couple_id, author_user_id, type, title, content, mood_tags,
+        color_style, layout_style, sticker_style, created_at, updated_at
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
       ON CONFLICT (id) DO UPDATE SET
         couple_id = EXCLUDED.couple_id,
         author_user_id = EXCLUDED.author_user_id,
         type = EXCLUDED.type,
         title = EXCLUDED.title,
         content = EXCLUDED.content,
-        mood_tag = EXCLUDED.mood_tag,
+        mood_tags = EXCLUDED.mood_tags,
         color_style = EXCLUDED.color_style,
         layout_style = EXCLUDED.layout_style,
+        sticker_style = EXCLUDED.sticker_style,
         created_at = EXCLUDED.created_at,
         updated_at = EXCLUDED.updated_at
       `,
@@ -304,9 +375,10 @@ async function upsertIdeaNotePg(pool, payload) {
         idea.type,
         idea.title,
         idea.content,
-        idea.moodTag,
+        moodTagsToColumn(idea.moodTags),
         idea.colorStyle,
         idea.layoutStyle,
+        idea.stickerStyle,
         idea.createdAt,
         idea.updatedAt,
       ],
@@ -315,7 +387,8 @@ async function upsertIdeaNotePg(pool, payload) {
     const latest = await client.query(
       `
       SELECT i.id, i.couple_id, i.author_user_id, i.type, i.title, i.content,
-             i.mood_tag, i.color_style, i.layout_style, i.created_at, i.updated_at,
+             i.mood_tags, i.color_style, i.layout_style, i.sticker_style,
+             i.created_at, i.updated_at,
              COUNT(c.id) AS comment_count
       FROM idea_notes i
       LEFT JOIN thought_comments c

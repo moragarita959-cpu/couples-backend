@@ -16,11 +16,14 @@ class IdeaNotesTable extends Table {
 
   TextColumn get content => text()();
 
-  TextColumn get moodTag => text().nullable()();
+  // JSON-encoded list of mood tags (e.g. ["温柔","想念"]). Null/empty when no tags.
+  TextColumn get moodTagsJson => text().nullable()();
 
   TextColumn get colorStyle => text().nullable()();
 
   TextColumn get layoutStyle => text().nullable()();
+
+  TextColumn get stickerStyle => text().nullable()();
 
   DateTimeColumn get createdAt => dateTime()();
 

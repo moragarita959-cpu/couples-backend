@@ -5,7 +5,7 @@ enum ThoughtsSection { ideas, excerpts }
 
 enum IdeaFilter { all, mood, idea, wish }
 
-enum ExcerptFilter { all, book, movie, lyric, article, custom }
+enum ExcerptFilter { all, book, movie, lyric, custom }
 
 class ThoughtsHomeState {
   const ThoughtsHomeState({
@@ -60,9 +60,18 @@ class ThoughtsHomeState {
       return result.toList();
     }
     return result.where((item) {
-      return (item.title ?? '').toLowerCase().contains(query) ||
-          item.content.toLowerCase().contains(query) ||
-          (item.moodTag ?? '').toLowerCase().contains(query);
+      if ((item.title ?? '').toLowerCase().contains(query)) {
+        return true;
+      }
+      if (item.content.toLowerCase().contains(query)) {
+        return true;
+      }
+      for (final tag in item.moodTags) {
+        if (tag.toLowerCase().contains(query)) {
+          return true;
+        }
+      }
+      return false;
     }).toList();
   }
 
@@ -77,9 +86,6 @@ class ThoughtsHomeState {
         break;
       case ExcerptFilter.lyric:
         result = result.where((item) => item.category == ExcerptNote.categoryLyric);
-        break;
-      case ExcerptFilter.article:
-        result = result.where((item) => item.category == ExcerptNote.categoryArticle);
         break;
       case ExcerptFilter.custom:
         result = result.where((item) => item.category == ExcerptNote.categoryCustom);

@@ -14,10 +14,14 @@ import '../features/feed/presentation/pages/feed_page.dart';
 import '../features/album/presentation/pages/photo_detail_page.dart';
 import '../features/playlist/presentation/pages/playlist_page.dart';
 import '../features/schedule/presentation/pages/schedule_page.dart';
+import '../features/thoughts/presentation/models/excerpt_draft.dart';
+import '../features/thoughts/presentation/models/idea_draft.dart';
 import '../features/thoughts/presentation/pages/excerpt_detail_page.dart';
 import '../features/thoughts/presentation/pages/excerpt_edit_page.dart';
+import '../features/thoughts/presentation/pages/excerpt_preview_page.dart';
 import '../features/thoughts/presentation/pages/idea_detail_page.dart';
 import '../features/thoughts/presentation/pages/idea_edit_page.dart';
+import '../features/thoughts/presentation/pages/idea_preview_page.dart';
 import '../features/thoughts/presentation/pages/thoughts_home_page.dart';
 import '../features/todo/presentation/pages/todo_page.dart';
 import '../pages/app_shell_page.dart';
@@ -65,6 +69,38 @@ GoRouter buildAppRouter() {
         builder: (context, state) => const ThoughtsHomePage(),
       ),
       GoRoute(
+        path: '/thoughts/idea/edit',
+        builder: (context, state) => IdeaEditPage(
+          ideaId: state.uri.queryParameters['ideaId'],
+        ),
+      ),
+      GoRoute(
+        path: '/thoughts/idea/preview',
+        builder: (context, state) {
+          final draft = state.extra;
+          if (draft is! IdeaDraft) {
+            return const ThoughtsHomePage();
+          }
+          return IdeaPreviewPage(draft: draft);
+        },
+      ),
+      GoRoute(
+        path: '/thoughts/excerpt/edit',
+        builder: (context, state) => ExcerptEditPage(
+          excerptId: state.uri.queryParameters['excerptId'],
+        ),
+      ),
+      GoRoute(
+        path: '/thoughts/excerpt/preview',
+        builder: (context, state) {
+          final draft = state.extra;
+          if (draft is! ExcerptDraft) {
+            return const ThoughtsHomePage();
+          }
+          return ExcerptPreviewPage(draft: draft);
+        },
+      ),
+      GoRoute(
         path: '/thoughts/idea/:ideaId',
         builder: (context, state) => IdeaDetailPage(
           ideaId: state.pathParameters['ideaId'] ?? '',
@@ -74,18 +110,6 @@ GoRouter buildAppRouter() {
         path: '/thoughts/excerpt/:excerptId',
         builder: (context, state) => ExcerptDetailPage(
           excerptId: state.pathParameters['excerptId'] ?? '',
-        ),
-      ),
-      GoRoute(
-        path: '/thoughts/idea/edit',
-        builder: (context, state) => IdeaEditPage(
-          ideaId: state.uri.queryParameters['ideaId'],
-        ),
-      ),
-      GoRoute(
-        path: '/thoughts/excerpt/edit',
-        builder: (context, state) => ExcerptEditPage(
-          excerptId: state.uri.queryParameters['excerptId'],
         ),
       ),
       GoRoute(

@@ -19,14 +19,12 @@ class ExcerptNote {
   static const String categoryBook = 'book';
   static const String categoryMovie = 'movie';
   static const String categoryLyric = 'lyric';
-  static const String categoryArticle = 'article';
   static const String categoryCustom = 'custom';
 
   static const List<String> supportedCategories = <String>[
     categoryBook,
     categoryMovie,
     categoryLyric,
-    categoryArticle,
     categoryCustom,
   ];
 
@@ -39,12 +37,11 @@ class ExcerptNote {
   ];
 
   static const List<String> supportedColorStyles = <String>[
+    'lavender',
     'rose',
     'cream',
-    'mist',
     'sage',
-    'amber',
-    'lavender',
+    'mist',
   ];
 
   final String id;

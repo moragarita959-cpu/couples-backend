@@ -272,6 +272,12 @@ async function initPostgresSchema() {
       ON schedule_courses(couple_id, updated_at, id);
   `);
 
+  // Thoughts redesign reset: drop legacy tables so we can recreate with the new
+  // multi-tag + sticker schema. Other modules' tables remain untouched.
+  await pool.query('DROP TABLE IF EXISTS thought_comments');
+  await pool.query('DROP TABLE IF EXISTS idea_notes');
+  await pool.query('DROP TABLE IF EXISTS excerpt_notes');
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS idea_notes (
       id TEXT PRIMARY KEY,
@@ -280,9 +286,10 @@ async function initPostgresSchema() {
       type TEXT NOT NULL,
       title TEXT NULL,
       content TEXT NOT NULL,
-      mood_tag TEXT NULL,
+      mood_tags TEXT NULL,
       color_style TEXT NULL,
       layout_style TEXT NULL,
+      sticker_style TEXT NULL,
       created_at TIMESTAMPTZ NOT NULL,
       updated_at TIMESTAMPTZ NOT NULL
     );

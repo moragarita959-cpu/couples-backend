@@ -8984,12 +8984,12 @@ class $IdeaNotesTableTable extends IdeaNotesTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _moodTagMeta = const VerificationMeta(
-    'moodTag',
+  static const VerificationMeta _moodTagsJsonMeta = const VerificationMeta(
+    'moodTagsJson',
   );
   @override
-  late final GeneratedColumn<String> moodTag = GeneratedColumn<String>(
-    'mood_tag',
+  late final GeneratedColumn<String> moodTagsJson = GeneratedColumn<String>(
+    'mood_tags_json',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -9012,6 +9012,17 @@ class $IdeaNotesTableTable extends IdeaNotesTable
   @override
   late final GeneratedColumn<String> layoutStyle = GeneratedColumn<String>(
     'layout_style',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stickerStyleMeta = const VerificationMeta(
+    'stickerStyle',
+  );
+  @override
+  late final GeneratedColumn<String> stickerStyle = GeneratedColumn<String>(
+    'sticker_style',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -9047,9 +9058,10 @@ class $IdeaNotesTableTable extends IdeaNotesTable
     type,
     title,
     content,
-    moodTag,
+    moodTagsJson,
     colorStyle,
     layoutStyle,
+    stickerStyle,
     createdAt,
     updatedAt,
   ];
@@ -9111,10 +9123,13 @@ class $IdeaNotesTableTable extends IdeaNotesTable
     } else if (isInserting) {
       context.missing(_contentMeta);
     }
-    if (data.containsKey('mood_tag')) {
+    if (data.containsKey('mood_tags_json')) {
       context.handle(
-        _moodTagMeta,
-        moodTag.isAcceptableOrUnknown(data['mood_tag']!, _moodTagMeta),
+        _moodTagsJsonMeta,
+        moodTagsJson.isAcceptableOrUnknown(
+          data['mood_tags_json']!,
+          _moodTagsJsonMeta,
+        ),
       );
     }
     if (data.containsKey('color_style')) {
@@ -9129,6 +9144,15 @@ class $IdeaNotesTableTable extends IdeaNotesTable
         layoutStyle.isAcceptableOrUnknown(
           data['layout_style']!,
           _layoutStyleMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sticker_style')) {
+      context.handle(
+        _stickerStyleMeta,
+        stickerStyle.isAcceptableOrUnknown(
+          data['sticker_style']!,
+          _stickerStyleMeta,
         ),
       );
     }
@@ -9181,9 +9205,9 @@ class $IdeaNotesTableTable extends IdeaNotesTable
         DriftSqlType.string,
         data['${effectivePrefix}content'],
       )!,
-      moodTag: attachedDatabase.typeMapping.read(
+      moodTagsJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}mood_tag'],
+        data['${effectivePrefix}mood_tags_json'],
       ),
       colorStyle: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -9192,6 +9216,10 @@ class $IdeaNotesTableTable extends IdeaNotesTable
       layoutStyle: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}layout_style'],
+      ),
+      stickerStyle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sticker_style'],
       ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -9218,9 +9246,10 @@ class IdeaNotesTableData extends DataClass
   final String type;
   final String? title;
   final String content;
-  final String? moodTag;
+  final String? moodTagsJson;
   final String? colorStyle;
   final String? layoutStyle;
+  final String? stickerStyle;
   final DateTime createdAt;
   final DateTime updatedAt;
   const IdeaNotesTableData({
@@ -9230,9 +9259,10 @@ class IdeaNotesTableData extends DataClass
     required this.type,
     this.title,
     required this.content,
-    this.moodTag,
+    this.moodTagsJson,
     this.colorStyle,
     this.layoutStyle,
+    this.stickerStyle,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -9247,14 +9277,17 @@ class IdeaNotesTableData extends DataClass
       map['title'] = Variable<String>(title);
     }
     map['content'] = Variable<String>(content);
-    if (!nullToAbsent || moodTag != null) {
-      map['mood_tag'] = Variable<String>(moodTag);
+    if (!nullToAbsent || moodTagsJson != null) {
+      map['mood_tags_json'] = Variable<String>(moodTagsJson);
     }
     if (!nullToAbsent || colorStyle != null) {
       map['color_style'] = Variable<String>(colorStyle);
     }
     if (!nullToAbsent || layoutStyle != null) {
       map['layout_style'] = Variable<String>(layoutStyle);
+    }
+    if (!nullToAbsent || stickerStyle != null) {
+      map['sticker_style'] = Variable<String>(stickerStyle);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -9271,15 +9304,18 @@ class IdeaNotesTableData extends DataClass
           ? const Value.absent()
           : Value(title),
       content: Value(content),
-      moodTag: moodTag == null && nullToAbsent
+      moodTagsJson: moodTagsJson == null && nullToAbsent
           ? const Value.absent()
-          : Value(moodTag),
+          : Value(moodTagsJson),
       colorStyle: colorStyle == null && nullToAbsent
           ? const Value.absent()
           : Value(colorStyle),
       layoutStyle: layoutStyle == null && nullToAbsent
           ? const Value.absent()
           : Value(layoutStyle),
+      stickerStyle: stickerStyle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stickerStyle),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -9297,9 +9333,10 @@ class IdeaNotesTableData extends DataClass
       type: serializer.fromJson<String>(json['type']),
       title: serializer.fromJson<String?>(json['title']),
       content: serializer.fromJson<String>(json['content']),
-      moodTag: serializer.fromJson<String?>(json['moodTag']),
+      moodTagsJson: serializer.fromJson<String?>(json['moodTagsJson']),
       colorStyle: serializer.fromJson<String?>(json['colorStyle']),
       layoutStyle: serializer.fromJson<String?>(json['layoutStyle']),
+      stickerStyle: serializer.fromJson<String?>(json['stickerStyle']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -9314,9 +9351,10 @@ class IdeaNotesTableData extends DataClass
       'type': serializer.toJson<String>(type),
       'title': serializer.toJson<String?>(title),
       'content': serializer.toJson<String>(content),
-      'moodTag': serializer.toJson<String?>(moodTag),
+      'moodTagsJson': serializer.toJson<String?>(moodTagsJson),
       'colorStyle': serializer.toJson<String?>(colorStyle),
       'layoutStyle': serializer.toJson<String?>(layoutStyle),
+      'stickerStyle': serializer.toJson<String?>(stickerStyle),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -9329,9 +9367,10 @@ class IdeaNotesTableData extends DataClass
     String? type,
     Value<String?> title = const Value.absent(),
     String? content,
-    Value<String?> moodTag = const Value.absent(),
+    Value<String?> moodTagsJson = const Value.absent(),
     Value<String?> colorStyle = const Value.absent(),
     Value<String?> layoutStyle = const Value.absent(),
+    Value<String?> stickerStyle = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => IdeaNotesTableData(
@@ -9341,9 +9380,10 @@ class IdeaNotesTableData extends DataClass
     type: type ?? this.type,
     title: title.present ? title.value : this.title,
     content: content ?? this.content,
-    moodTag: moodTag.present ? moodTag.value : this.moodTag,
+    moodTagsJson: moodTagsJson.present ? moodTagsJson.value : this.moodTagsJson,
     colorStyle: colorStyle.present ? colorStyle.value : this.colorStyle,
     layoutStyle: layoutStyle.present ? layoutStyle.value : this.layoutStyle,
+    stickerStyle: stickerStyle.present ? stickerStyle.value : this.stickerStyle,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -9357,13 +9397,18 @@ class IdeaNotesTableData extends DataClass
       type: data.type.present ? data.type.value : this.type,
       title: data.title.present ? data.title.value : this.title,
       content: data.content.present ? data.content.value : this.content,
-      moodTag: data.moodTag.present ? data.moodTag.value : this.moodTag,
+      moodTagsJson: data.moodTagsJson.present
+          ? data.moodTagsJson.value
+          : this.moodTagsJson,
       colorStyle: data.colorStyle.present
           ? data.colorStyle.value
           : this.colorStyle,
       layoutStyle: data.layoutStyle.present
           ? data.layoutStyle.value
           : this.layoutStyle,
+      stickerStyle: data.stickerStyle.present
+          ? data.stickerStyle.value
+          : this.stickerStyle,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -9378,9 +9423,10 @@ class IdeaNotesTableData extends DataClass
           ..write('type: $type, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
-          ..write('moodTag: $moodTag, ')
+          ..write('moodTagsJson: $moodTagsJson, ')
           ..write('colorStyle: $colorStyle, ')
           ..write('layoutStyle: $layoutStyle, ')
+          ..write('stickerStyle: $stickerStyle, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -9395,9 +9441,10 @@ class IdeaNotesTableData extends DataClass
     type,
     title,
     content,
-    moodTag,
+    moodTagsJson,
     colorStyle,
     layoutStyle,
+    stickerStyle,
     createdAt,
     updatedAt,
   );
@@ -9411,9 +9458,10 @@ class IdeaNotesTableData extends DataClass
           other.type == this.type &&
           other.title == this.title &&
           other.content == this.content &&
-          other.moodTag == this.moodTag &&
+          other.moodTagsJson == this.moodTagsJson &&
           other.colorStyle == this.colorStyle &&
           other.layoutStyle == this.layoutStyle &&
+          other.stickerStyle == this.stickerStyle &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -9425,9 +9473,10 @@ class IdeaNotesTableCompanion extends UpdateCompanion<IdeaNotesTableData> {
   final Value<String> type;
   final Value<String?> title;
   final Value<String> content;
-  final Value<String?> moodTag;
+  final Value<String?> moodTagsJson;
   final Value<String?> colorStyle;
   final Value<String?> layoutStyle;
+  final Value<String?> stickerStyle;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -9438,9 +9487,10 @@ class IdeaNotesTableCompanion extends UpdateCompanion<IdeaNotesTableData> {
     this.type = const Value.absent(),
     this.title = const Value.absent(),
     this.content = const Value.absent(),
-    this.moodTag = const Value.absent(),
+    this.moodTagsJson = const Value.absent(),
     this.colorStyle = const Value.absent(),
     this.layoutStyle = const Value.absent(),
+    this.stickerStyle = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -9452,9 +9502,10 @@ class IdeaNotesTableCompanion extends UpdateCompanion<IdeaNotesTableData> {
     required String type,
     this.title = const Value.absent(),
     required String content,
-    this.moodTag = const Value.absent(),
+    this.moodTagsJson = const Value.absent(),
     this.colorStyle = const Value.absent(),
     this.layoutStyle = const Value.absent(),
+    this.stickerStyle = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
@@ -9472,9 +9523,10 @@ class IdeaNotesTableCompanion extends UpdateCompanion<IdeaNotesTableData> {
     Expression<String>? type,
     Expression<String>? title,
     Expression<String>? content,
-    Expression<String>? moodTag,
+    Expression<String>? moodTagsJson,
     Expression<String>? colorStyle,
     Expression<String>? layoutStyle,
+    Expression<String>? stickerStyle,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -9486,9 +9538,10 @@ class IdeaNotesTableCompanion extends UpdateCompanion<IdeaNotesTableData> {
       if (type != null) 'type': type,
       if (title != null) 'title': title,
       if (content != null) 'content': content,
-      if (moodTag != null) 'mood_tag': moodTag,
+      if (moodTagsJson != null) 'mood_tags_json': moodTagsJson,
       if (colorStyle != null) 'color_style': colorStyle,
       if (layoutStyle != null) 'layout_style': layoutStyle,
+      if (stickerStyle != null) 'sticker_style': stickerStyle,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -9502,9 +9555,10 @@ class IdeaNotesTableCompanion extends UpdateCompanion<IdeaNotesTableData> {
     Value<String>? type,
     Value<String?>? title,
     Value<String>? content,
-    Value<String?>? moodTag,
+    Value<String?>? moodTagsJson,
     Value<String?>? colorStyle,
     Value<String?>? layoutStyle,
+    Value<String?>? stickerStyle,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -9516,9 +9570,10 @@ class IdeaNotesTableCompanion extends UpdateCompanion<IdeaNotesTableData> {
       type: type ?? this.type,
       title: title ?? this.title,
       content: content ?? this.content,
-      moodTag: moodTag ?? this.moodTag,
+      moodTagsJson: moodTagsJson ?? this.moodTagsJson,
       colorStyle: colorStyle ?? this.colorStyle,
       layoutStyle: layoutStyle ?? this.layoutStyle,
+      stickerStyle: stickerStyle ?? this.stickerStyle,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -9546,14 +9601,17 @@ class IdeaNotesTableCompanion extends UpdateCompanion<IdeaNotesTableData> {
     if (content.present) {
       map['content'] = Variable<String>(content.value);
     }
-    if (moodTag.present) {
-      map['mood_tag'] = Variable<String>(moodTag.value);
+    if (moodTagsJson.present) {
+      map['mood_tags_json'] = Variable<String>(moodTagsJson.value);
     }
     if (colorStyle.present) {
       map['color_style'] = Variable<String>(colorStyle.value);
     }
     if (layoutStyle.present) {
       map['layout_style'] = Variable<String>(layoutStyle.value);
+    }
+    if (stickerStyle.present) {
+      map['sticker_style'] = Variable<String>(stickerStyle.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -9576,9 +9634,10 @@ class IdeaNotesTableCompanion extends UpdateCompanion<IdeaNotesTableData> {
           ..write('type: $type, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
-          ..write('moodTag: $moodTag, ')
+          ..write('moodTagsJson: $moodTagsJson, ')
           ..write('colorStyle: $colorStyle, ')
           ..write('layoutStyle: $layoutStyle, ')
+          ..write('stickerStyle: $stickerStyle, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -15622,9 +15681,10 @@ typedef $$IdeaNotesTableTableCreateCompanionBuilder =
       required String type,
       Value<String?> title,
       required String content,
-      Value<String?> moodTag,
+      Value<String?> moodTagsJson,
       Value<String?> colorStyle,
       Value<String?> layoutStyle,
+      Value<String?> stickerStyle,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<int> rowid,
@@ -15637,9 +15697,10 @@ typedef $$IdeaNotesTableTableUpdateCompanionBuilder =
       Value<String> type,
       Value<String?> title,
       Value<String> content,
-      Value<String?> moodTag,
+      Value<String?> moodTagsJson,
       Value<String?> colorStyle,
       Value<String?> layoutStyle,
+      Value<String?> stickerStyle,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -15684,8 +15745,8 @@ class $$IdeaNotesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get moodTag => $composableBuilder(
-    column: $table.moodTag,
+  ColumnFilters<String> get moodTagsJson => $composableBuilder(
+    column: $table.moodTagsJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15696,6 +15757,11 @@ class $$IdeaNotesTableTableFilterComposer
 
   ColumnFilters<String> get layoutStyle => $composableBuilder(
     column: $table.layoutStyle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stickerStyle => $composableBuilder(
+    column: $table.stickerStyle,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15749,8 +15815,8 @@ class $$IdeaNotesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get moodTag => $composableBuilder(
-    column: $table.moodTag,
+  ColumnOrderings<String> get moodTagsJson => $composableBuilder(
+    column: $table.moodTagsJson,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -15761,6 +15827,11 @@ class $$IdeaNotesTableTableOrderingComposer
 
   ColumnOrderings<String> get layoutStyle => $composableBuilder(
     column: $table.layoutStyle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stickerStyle => $composableBuilder(
+    column: $table.stickerStyle,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -15804,8 +15875,10 @@ class $$IdeaNotesTableTableAnnotationComposer
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
 
-  GeneratedColumn<String> get moodTag =>
-      $composableBuilder(column: $table.moodTag, builder: (column) => column);
+  GeneratedColumn<String> get moodTagsJson => $composableBuilder(
+    column: $table.moodTagsJson,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get colorStyle => $composableBuilder(
     column: $table.colorStyle,
@@ -15814,6 +15887,11 @@ class $$IdeaNotesTableTableAnnotationComposer
 
   GeneratedColumn<String> get layoutStyle => $composableBuilder(
     column: $table.layoutStyle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get stickerStyle => $composableBuilder(
+    column: $table.stickerStyle,
     builder: (column) => column,
   );
 
@@ -15867,9 +15945,10 @@ class $$IdeaNotesTableTableTableManager
                 Value<String> type = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 Value<String> content = const Value.absent(),
-                Value<String?> moodTag = const Value.absent(),
+                Value<String?> moodTagsJson = const Value.absent(),
                 Value<String?> colorStyle = const Value.absent(),
                 Value<String?> layoutStyle = const Value.absent(),
+                Value<String?> stickerStyle = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -15880,9 +15959,10 @@ class $$IdeaNotesTableTableTableManager
                 type: type,
                 title: title,
                 content: content,
-                moodTag: moodTag,
+                moodTagsJson: moodTagsJson,
                 colorStyle: colorStyle,
                 layoutStyle: layoutStyle,
+                stickerStyle: stickerStyle,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -15895,9 +15975,10 @@ class $$IdeaNotesTableTableTableManager
                 required String type,
                 Value<String?> title = const Value.absent(),
                 required String content,
-                Value<String?> moodTag = const Value.absent(),
+                Value<String?> moodTagsJson = const Value.absent(),
                 Value<String?> colorStyle = const Value.absent(),
                 Value<String?> layoutStyle = const Value.absent(),
+                Value<String?> stickerStyle = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
@@ -15908,9 +15989,10 @@ class $$IdeaNotesTableTableTableManager
                 type: type,
                 title: title,
                 content: content,
-                moodTag: moodTag,
+                moodTagsJson: moodTagsJson,
                 colorStyle: colorStyle,
                 layoutStyle: layoutStyle,
+                stickerStyle: stickerStyle,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

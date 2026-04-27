@@ -8,9 +8,10 @@ class IdeaNote {
     required this.createdAt,
     required this.updatedAt,
     this.title,
-    this.moodTag,
+    this.moodTags = const <String>[],
     this.colorStyle,
     this.layoutStyle,
+    this.stickerStyle,
     this.commentCount = 0,
   });
 
@@ -26,28 +27,41 @@ class IdeaNote {
 
   static const List<String> supportedMoodTags = <String>[
     '温柔',
-    '开心',
     '想念',
-    '低落',
+    '开心',
     '期待',
+    '低落',
     '平静',
     '勇敢',
   ];
 
+  // Note paper background colors. Six soft tones to mirror the design mocks.
   static const List<String> supportedColorStyles = <String>[
     'pink',
     'cream',
+    'sage',
+    'mist',
     'lavender',
-    'blue',
-    'green',
+    'peach',
   ];
 
+  // Paper layout templates picked at create time.
   static const List<String> supportedLayoutStyles = <String>[
-    'plain',
-    'paper',
-    'grid',
-    'photo',
-    'floral',
+    'tape',
+    'pin',
+    'paperclip',
+    'spiral',
+  ];
+
+  // Decorative stickers picked at preview time. The values map to icon
+  // glyphs rendered on the card. Null means no sticker.
+  static const List<String> supportedStickerStyles = <String>[
+    'heart',
+    'leaf',
+    'sparkle',
+    'music',
+    'tape',
+    'flower',
   ];
 
   final String id;
@@ -56,9 +70,10 @@ class IdeaNote {
   final String type;
   final String? title;
   final String content;
-  final String? moodTag;
+  final List<String> moodTags;
   final String? colorStyle;
   final String? layoutStyle;
+  final String? stickerStyle;
   final DateTime createdAt;
   final DateTime updatedAt;
   final int commentCount;

@@ -52,7 +52,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -264,6 +264,16 @@ class AppDatabase extends _$AppDatabase {
         await migrator.createTable(photoCommentsTable);
       }
       if (from < 18) {
+        await migrator.createTable(ideaNotesTable);
+        await migrator.createTable(excerptNotesTable);
+        await migrator.createTable(thoughtCommentsTable);
+      }
+      if (from < 19) {
+        // Thoughts redesign reset: drop legacy tables and recreate with the
+        // new multi-tag + sticker schema. Other modules' tables stay intact.
+        await customStatement('DROP TABLE IF EXISTS thought_comments');
+        await customStatement('DROP TABLE IF EXISTS idea_notes');
+        await customStatement('DROP TABLE IF EXISTS excerpt_notes');
         await migrator.createTable(ideaNotesTable);
         await migrator.createTable(excerptNotesTable);
         await migrator.createTable(thoughtCommentsTable);

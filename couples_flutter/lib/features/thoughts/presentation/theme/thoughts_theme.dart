@@ -144,10 +144,14 @@ abstract final class ThoughtsTheme {
         return cream;
       case 'lavender':
         return lavender;
+      case 'mist':
       case 'blue':
         return mist;
+      case 'sage':
       case 'green':
         return sage;
+      case 'peach':
+        return peach;
       case 'pink':
       default:
         return blush;
@@ -164,11 +168,11 @@ abstract final class ThoughtsTheme {
         return sage;
       case 'amber':
         return sand;
-      case 'lavender':
-        return lavender;
       case 'rose':
-      default:
         return peach;
+      case 'lavender':
+      default:
+        return lavender;
     }
   }
 
@@ -228,11 +232,59 @@ abstract final class ThoughtsTheme {
         return '电影';
       case ExcerptNote.categoryLyric:
         return '歌词';
-      case ExcerptNote.categoryArticle:
-        return '文章';
       case ExcerptNote.categoryCustom:
       default:
         return '随记';
+    }
+  }
+
+  static String stickerLabel(String style) {
+    switch (style) {
+      case 'leaf':
+        return '枝叶';
+      case 'sparkle':
+        return '星光';
+      case 'music':
+        return '音符';
+      case 'tape':
+        return '胶带';
+      case 'flower':
+        return '花卉';
+      case 'heart':
+      default:
+        return '爱心';
+    }
+  }
+
+  static IconData stickerIcon(String? style) {
+    switch (style) {
+      case 'leaf':
+        return Icons.eco_rounded;
+      case 'sparkle':
+        return Icons.auto_awesome_rounded;
+      case 'music':
+        return Icons.music_note_rounded;
+      case 'tape':
+        return Icons.bookmark_rounded;
+      case 'flower':
+        return Icons.local_florist_rounded;
+      case 'heart':
+      default:
+        return Icons.favorite_rounded;
+    }
+  }
+
+  static String layoutLabel(String style) {
+    switch (style) {
+      case 'pin':
+        return '图钉';
+      case 'paperclip':
+        return '回形针';
+      case 'spiral':
+        return '螺旋';
+      case 'tape':
+      default:
+        return '胶带';
     }
   }
 

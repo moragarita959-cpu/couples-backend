@@ -157,8 +157,6 @@ class ThoughtsHomePage extends ConsumerWidget {
                                       return '歌词';
                                     case ExcerptFilter.custom:
                                       return '随记';
-                                    case ExcerptFilter.article:
-                                      return '文章';
                                     case ExcerptFilter.all:
                                       return '全部';
                                   }

@@ -154,9 +154,10 @@ class ThoughtsHomeController extends StateNotifier<ThoughtsHomeState> {
     required String type,
     required String title,
     required String content,
-    String? moodTag,
+    List<String> moodTags = const <String>[],
     String? colorStyle,
     String? layoutStyle,
+    String? stickerStyle,
   }) async {
     final coupleId = _resolveCoupleId();
     final currentUserId = _resolveCurrentUserId();
@@ -181,6 +182,10 @@ class ThoughtsHomeController extends StateNotifier<ThoughtsHomeState> {
               (item) => item?.id == ideaId,
               orElse: () => null,
             );
+    final cleanMoodTags = moodTags
+        .map((tag) => tag.trim())
+        .where((tag) => tag.isNotEmpty)
+        .toList(growable: false);
     final draft = IdeaNote(
       id: existing?.id ?? 'idea-${now.microsecondsSinceEpoch}',
       coupleId: coupleId,
@@ -188,9 +193,10 @@ class ThoughtsHomeController extends StateNotifier<ThoughtsHomeState> {
       type: type,
       title: title.trim().isEmpty ? null : title.trim(),
       content: trimmedContent,
-      moodTag: _cleanNullable(moodTag),
+      moodTags: cleanMoodTags,
       colorStyle: colorStyle ?? IdeaNote.supportedColorStyles.first,
       layoutStyle: layoutStyle ?? IdeaNote.supportedLayoutStyles.first,
+      stickerStyle: stickerStyle,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
       commentCount: existing?.commentCount ?? 0,

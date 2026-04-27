@@ -112,6 +112,13 @@ class IdeaDetailPage extends ConsumerWidget {
                             children: <Widget>[
                               Row(
                                 children: <Widget>[
+                                  Icon(
+                                    Icons.favorite_rounded,
+                                    size: 18,
+                                    color: ThoughtsTheme.rose
+                                        .withValues(alpha: 0.78),
+                                  ),
+                                  const SizedBox(width: 6),
                                   Text(
                                     '评论区',
                                     style: ThoughtsTheme.title(size: 22),
