@@ -1,0 +1,993 @@
+From fb2cfac3d888b7a6df3f4f345957559c5ffa6688 Mon Sep 17 00:00:00 2001
+From: guess001 <MoragaRita959@gmail.com>
+Date: Tue, 21 Apr 2026 16:25:56 +0800
+Subject: [PATCH] feat: add postgres core path for auth/couple/chat
+
+---
+ couples_backend/package.json                 |   3 +-
+ couples_backend/src/config.js                |   4 +
+ couples_backend/src/database.js              |  17 ++
+ couples_backend/src/database_pg.js           |  79 ++++++
+ couples_backend/src/server.js                | 143 +++++++----
+ couples_backend/src/services/chat_pg.js      | 254 +++++++++++++++++++
+ couples_backend/src/services/chat_push_pg.js | 111 ++++++++
+ couples_backend/src/services/couples_pg.js   |  85 +++++++
+ couples_backend/src/services/users.js        |  31 +++
+ couples_backend/src/services/users_pg.js     |  96 +++++++
+ 10 files changed, 775 insertions(+), 48 deletions(-)
+ create mode 100644 couples_backend/src/database_pg.js
+ create mode 100644 couples_backend/src/services/chat_pg.js
+ create mode 100644 couples_backend/src/services/chat_push_pg.js
+ create mode 100644 couples_backend/src/services/couples_pg.js
+ create mode 100644 couples_backend/src/services/users_pg.js
+
+diff --git a/couples_backend/package.json b/couples_backend/package.json
+index e45e332..9ae6e94 100644
+--- a/couples_backend/package.json
++++ b/couples_backend/package.json
+@@ -11,6 +11,7 @@
+   },
+   "dependencies": {
+     "dotenv": "^16.4.7",
+-    "express": "^4.21.2"
++    "express": "^4.21.2",
++    "pg": "^8.13.1"
+   }
+ }
+diff --git a/couples_backend/src/config.js b/couples_backend/src/config.js
+index ac0f91d..a07533a 100644
+--- a/couples_backend/src/config.js
++++ b/couples_backend/src/config.js
+@@ -7,12 +7,16 @@ const rootDir = path.resolve(__dirname, '..');
+ const config = {
+   port: Number(process.env.PORT || 3000),
+   dbPath: path.resolve(rootDir, process.env.DB_PATH || './data/couples.db'),
++  databaseUrl: String(process.env.DATABASE_URL || '').trim(),
+   messageMaxLength: Number(process.env.MESSAGE_MAX_LENGTH || 1000),
+   publicBaseUrl: String(process.env.PUBLIC_BASE_URL || '').trim(),
+   chatMediaDir: path.resolve(
+     rootDir,
+     process.env.CHAT_MEDIA_DIR || './data/chat-media',
+   ),
++  fcmServerKey: String(process.env.FCM_SERVER_KEY || '').trim(),
+ };
+ 
++config.usePostgres = config.databaseUrl.length > 0;
++
+ module.exports = config;
+diff --git a/couples_backend/src/database.js b/couples_backend/src/database.js
+index cd0eb0a..15df8b7 100644
+--- a/couples_backend/src/database.js
++++ b/couples_backend/src/database.js
+@@ -39,6 +39,23 @@ ensureColumn(
+   'ALTER TABLE chat_messages ADD COLUMN media_duration_ms INTEGER NOT NULL DEFAULT 0',
+ );
+ 
++db.exec(`
++CREATE TABLE IF NOT EXISTS chat_push_tokens (
++  id TEXT PRIMARY KEY,
++  couple_id TEXT NOT NULL,
++  user_id TEXT NOT NULL,
++  token TEXT NOT NULL,
++  platform TEXT NOT NULL,
++  created_at TEXT NOT NULL,
++  updated_at TEXT NOT NULL,
++  UNIQUE(couple_id, user_id, token)
++);
++`);
++db.exec(`
++CREATE INDEX IF NOT EXISTS idx_chat_push_tokens_couple_user
++  ON chat_push_tokens(couple_id, user_id);
++`);
++
+ db.transaction = (work) => (...args) => {
+   db.exec('BEGIN');
+   try {
+diff --git a/couples_backend/src/database_pg.js b/couples_backend/src/database_pg.js
+new file mode 100644
+index 0000000..64bdb7b
+--- /dev/null
++++ b/couples_backend/src/database_pg.js
+@@ -0,0 +1,79 @@
++const fs = require('fs');
++const { Pool } = require('pg');
++
++const config = require('./config');
++
++fs.mkdirSync(config.chatMediaDir, { recursive: true });
++
++const pool = new Pool({
++  connectionString: config.databaseUrl,
++  ssl: { rejectUnauthorized: false },
++});
++
++async function initPostgresSchema() {
++  await pool.query(`
++    CREATE TABLE IF NOT EXISTS users (
++      id TEXT PRIMARY KEY,
++      nickname TEXT NOT NULL,
++      pair_code TEXT NOT NULL UNIQUE,
++      couple_id TEXT NULL,
++      created_at TIMESTAMPTZ NOT NULL,
++      updated_at TIMESTAMPTZ NOT NULL
++    );
++  `);
++  await pool.query('CREATE INDEX IF NOT EXISTS idx_users_couple_id ON users(couple_id);');
++
++  await pool.query(`
++    CREATE TABLE IF NOT EXISTS couples (
++      id TEXT PRIMARY KEY,
++      user1_id TEXT NOT NULL,
++      user2_id TEXT NOT NULL,
++      status TEXT NOT NULL,
++      created_at TIMESTAMPTZ NOT NULL,
++      UNIQUE(user1_id, user2_id)
++    );
++  `);
++  await pool.query('CREATE INDEX IF NOT EXISTS idx_couples_user1_id ON couples(user1_id);');
++  await pool.query('CREATE INDEX IF NOT EXISTS idx_couples_user2_id ON couples(user2_id);');
++
++  await pool.query(`
++    CREATE TABLE IF NOT EXISTS chat_messages (
++      id TEXT PRIMARY KEY,
++      couple_id TEXT NOT NULL,
++      sender_user_id TEXT NOT NULL,
++      content TEXT NOT NULL,
++      client_message_id TEXT NOT NULL,
++      message_type TEXT NOT NULL DEFAULT 'text',
++      media_url TEXT NULL,
++      media_duration_ms INTEGER NOT NULL DEFAULT 0,
++      created_at TIMESTAMPTZ NOT NULL,
++      UNIQUE(couple_id, client_message_id)
++    );
++  `);
++  await pool.query(`
++    CREATE INDEX IF NOT EXISTS idx_chat_messages_couple_created
++      ON chat_messages(couple_id, created_at, id);
++  `);
++
++  await pool.query(`
++    CREATE TABLE IF NOT EXISTS chat_push_tokens (
++      id TEXT PRIMARY KEY,
++      couple_id TEXT NOT NULL,
++      user_id TEXT NOT NULL,
++      token TEXT NOT NULL,
++      platform TEXT NOT NULL,
++      created_at TIMESTAMPTZ NOT NULL,
++      updated_at TIMESTAMPTZ NOT NULL,
++      UNIQUE(couple_id, user_id, token)
++    );
++  `);
++  await pool.query(`
++    CREATE INDEX IF NOT EXISTS idx_chat_push_tokens_couple_user
++      ON chat_push_tokens(couple_id, user_id);
++  `);
++}
++
++module.exports = {
++  pool,
++  initPostgresSchema,
++};
+diff --git a/couples_backend/src/server.js b/couples_backend/src/server.js
+index 6ab1b38..6d13b0d 100644
+--- a/couples_backend/src/server.js
++++ b/couples_backend/src/server.js
+@@ -2,6 +2,7 @@ const express = require('express');
+ 
+ const config = require('./config');
+ const db = require('./database');
++const { pool, initPostgresSchema } = require('./database_pg');
+ const { isAppError } = require('./errors');
+ const { bootstrapUser } = require('./services/users');
+ const { bindCoupleByPairCode } = require('./services/couples');
+@@ -10,6 +11,21 @@ const {
+   sendChatMessage,
+   uploadChatMedia,
+ } = require('./services/chat');
++const {
++  listChatMessagesPg,
++  sendChatMessagePg,
++  uploadChatMediaPg,
++} = require('./services/chat_pg');
++const {
++  registerChatPushToken,
++  notifyPartnerOnChatMessage,
++} = require('./services/chat_push');
++const {
++  registerChatPushTokenPg,
++  notifyPartnerOnChatMessagePg,
++} = require('./services/chat_push_pg');
++const { bootstrapUserPg } = require('./services/users_pg');
++const { bindCoupleByPairCodePg } = require('./services/couples_pg');
+ const {
+   listBillRecords,
+   upsertBillRecord,
+@@ -29,6 +45,7 @@ const { listPokeEvents, sendPoke } = require('./services/poke');
+ const {
+   listPlaylistSongs,
+   upsertPlaylistSong,
++  deletePlaylistSong,
+   listPlaylistReviews,
+   upsertPlaylistReview,
+ } = require('./services/playlist');
+@@ -63,71 +80,80 @@ app.get('/health', (_req, res) => {
+ });
+ 
+ app.post('/bootstrap-user', (req, res, next) => {
+-  try {
+-    const data = bootstrapUser(db, req.body || {});
++  (async () => {
++    const data = config.usePostgres
++      ? await bootstrapUserPg(pool, req.body || {})
++      : bootstrapUser(db, req.body || {});
+     res.json({ data });
+-  } catch (error) {
+-    next(error);
+-  }
++  })().catch(next);
+ });
+ 
+ app.post('/bind-couple-by-pair-code', (req, res, next) => {
+-  try {
+-    const data = bindCoupleByPairCode(db, req.body || {});
++  (async () => {
++    const data = config.usePostgres
++      ? await bindCoupleByPairCodePg(pool, req.body || {})
++      : bindCoupleByPairCode(db, req.body || {});
+     res.json({ data });
+-  } catch (error) {
+-    next(error);
+-  }
++  })().catch(next);
+ });
+ 
+ app.post('/chat/list', (req, res, next) => {
+-  try {
+-    const data = listChatMessages(db, req.body || {});
++  (async () => {
++    const data = config.usePostgres
++      ? await listChatMessagesPg(pool, req.body || {})
++      : listChatMessages(db, req.body || {});
+     res.json({ data });
+-  } catch (error) {
+-    next(error);
+-  }
++  })().catch(next);
+ });
+ 
+ app.post('/chat/send', (req, res, next) => {
+-  try {
+-    const data = sendChatMessage(db, req.body || {});
++  (async () => {
++    const data = config.usePostgres
++      ? await sendChatMessagePg(pool, req.body || {})
++      : sendChatMessage(db, req.body || {});
++    const notify = config.usePostgres
++      ? notifyPartnerOnChatMessagePg(pool, data)
++      : notifyPartnerOnChatMessage(db, data);
++    notify.catch(() => {
++      // 推送失败不阻断聊天发送。
++    });
+     res.json({ data });
+-  } catch (error) {
+-    next(error);
+-  }
++  })().catch(next);
+ });
+ 
+ app.post('/chat/upload-image', (req, res, next) => {
+-  try {
+-    const data = uploadChatMedia(
+-      db,
+-      {
+-        ...(req.body || {}),
+-        mediaKind: 'image',
+-      },
+-      resolvePublicBaseUrl(req),
+-    );
++  (async () => {
++    const payload = {
++      ...(req.body || {}),
++      mediaKind: 'image',
++    };
++    const data = config.usePostgres
++      ? await uploadChatMediaPg(pool, payload, resolvePublicBaseUrl(req))
++      : uploadChatMedia(db, payload, resolvePublicBaseUrl(req));
+     res.json({ data });
+-  } catch (error) {
+-    next(error);
+-  }
++  })().catch(next);
+ });
+ 
+ app.post('/chat/upload-voice', (req, res, next) => {
+-  try {
+-    const data = uploadChatMedia(
+-      db,
+-      {
+-        ...(req.body || {}),
+-        mediaKind: 'voice',
+-      },
+-      resolvePublicBaseUrl(req),
+-    );
++  (async () => {
++    const payload = {
++      ...(req.body || {}),
++      mediaKind: 'voice',
++    };
++    const data = config.usePostgres
++      ? await uploadChatMediaPg(pool, payload, resolvePublicBaseUrl(req))
++      : uploadChatMedia(db, payload, resolvePublicBaseUrl(req));
+     res.json({ data });
+-  } catch (error) {
+-    next(error);
+-  }
++  })().catch(next);
++});
++
++app.post('/chat/push/register-token', (req, res, next) => {
++  (async () => {
++    const data = config.usePostgres
++      ? await registerChatPushTokenPg(pool, req.body || {})
++      : registerChatPushToken(db, req.body || {});
++    res.json({ data });
++  })().catch(next);
+ });
+ 
+ app.post('/bill/list', (req, res, next) => {
+@@ -247,6 +273,15 @@ app.post('/playlist/songs/upsert', (req, res, next) => {
+   }
+ });
+ 
++app.post('/playlist/songs/delete', (req, res, next) => {
++  try {
++    const data = deletePlaylistSong(db, req.body || {});
++    res.json({ data });
++  } catch (error) {
++    next(error);
++  }
++});
++
+ app.post('/playlist/reviews/list', (req, res, next) => {
+   try {
+     const data = listPlaylistReviews(db, req.body || {});
+@@ -312,7 +347,21 @@ app.use((error, _req, res, _next) => {
+   });
+ });
+ 
+-app.listen(config.port, () => {
+-  console.log(`Couples backend listening on http://0.0.0.0:${config.port}`);
+-  console.log(`Database path: ${config.dbPath}`);
++async function start() {
++  if (config.usePostgres) {
++    await initPostgresSchema();
++  }
++  app.listen(config.port, () => {
++    console.log(`Couples backend listening on http://0.0.0.0:${config.port}`);
++    if (config.usePostgres) {
++      console.log('Database mode: postgres');
++    } else {
++      console.log(`Database path: ${config.dbPath}`);
++    }
++  });
++}
++
++start().catch((error) => {
++  console.error('Failed to start server:', error);
++  process.exit(1);
+ });
+diff --git a/couples_backend/src/services/chat_pg.js b/couples_backend/src/services/chat_pg.js
+new file mode 100644
+index 0000000..6e36557
+--- /dev/null
++++ b/couples_backend/src/services/chat_pg.js
+@@ -0,0 +1,254 @@
++const fs = require('fs');
++const path = require('path');
++
++const config = require('../config');
++const { AppError } = require('../errors');
++const { normalizeUserPair } = require('./couples');
++
++function validateTextContent(content, { allowEmpty = false } = {}) {
++  const trimmedContent = String(content || '').trim();
++  if (!allowEmpty && !trimmedContent) {
++    throw new AppError('invalid_request', 'content must not be empty');
++  }
++  if (trimmedContent.length > config.messageMaxLength) {
++    throw new AppError('content_too_long', `content exceeds max length ${config.messageMaxLength}`);
++  }
++  return trimmedContent;
++}
++
++async function ensureSenderInCouplePg(client, { coupleId, senderUserId }) {
++  const coupleResult = await client.query(
++    'SELECT id, user1_id, user2_id FROM couples WHERE id = $1 AND status = $2',
++    [coupleId, 'active'],
++  );
++  if (coupleResult.rowCount === 0) {
++    throw new AppError('couple_not_found', 'Couple not found', 404);
++  }
++  const couple = coupleResult.rows[0];
++  const [user1Id, user2Id] = normalizeUserPair(couple.user1_id, couple.user2_id);
++  if (user1Id !== couple.user1_id || user2Id !== couple.user2_id) {
++    throw new AppError('couple_data_invalid', 'Couple data invalid', 500);
++  }
++  if (senderUserId !== couple.user1_id && senderUserId !== couple.user2_id) {
++    throw new AppError('sender_not_in_couple', 'Sender does not belong to couple', 403);
++  }
++}
++
++function sanitizeSegment(value) {
++  return String(value || '').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
++}
++
++function normalizeMessageType(messageType) {
++  const raw = String(messageType || 'text').trim().toLowerCase();
++  if (raw === 'text' || raw === 'image' || raw === 'voice') {
++    return raw;
++  }
++  throw new AppError('invalid_request', 'messageType must be one of text, image or voice');
++}
++
++function normalizeMediaDurationMs(mediaDurationMs) {
++  if (mediaDurationMs == null || mediaDurationMs === '') {
++    return 0;
++  }
++  const parsed = Number(mediaDurationMs);
++  if (!Number.isFinite(parsed) || parsed < 0) {
++    throw new AppError('invalid_request', 'mediaDurationMs must be a valid integer');
++  }
++  return Math.floor(parsed);
++}
++
++function normalizeFileExtension(fileName, fallbackExtension) {
++  const extension = path.extname(String(fileName || '').trim()).toLowerCase();
++  if (extension && extension.length <= 8) {
++    return extension;
++  }
++  return fallbackExtension;
++}
++
++function buildPublicMediaUrl(publicBaseUrl, relativePath) {
++  const base = String(publicBaseUrl || '').replace(/\/+$/, '');
++  const relative = relativePath.replace(/\\/g, '/');
++  return `${base}${relative.startsWith('/') ? relative : `/${relative}`}`;
++}
++
++function mapChatRow(row) {
++  return {
++    id: row.id,
++    coupleId: row.couple_id,
++    senderUserId: row.sender_user_id,
++    content: row.content,
++    clientMessageId: row.client_message_id,
++    messageType: row.message_type || 'text',
++    mediaUrl: row.media_url,
++    mediaDurationMs: row.media_duration_ms || 0,
++    createdAt: row.created_at,
++  };
++}
++
++async function uploadChatMediaPg(pool, body, publicBaseUrl) {
++  const { coupleId, senderUserId, fileName, fileBytesBase64, mediaKind } = body;
++  const trimmedCoupleId = String(coupleId || '').trim();
++  const trimmedSenderUserId = String(senderUserId || '').trim();
++  const trimmedFileName = String(fileName || '').trim();
++  const trimmedBase64 = String(fileBytesBase64 || '').trim();
++  const normalizedMediaKind = mediaKind === 'voice' ? 'voice' : 'image';
++
++  if (!trimmedCoupleId || !trimmedSenderUserId || !trimmedBase64) {
++    throw new AppError('invalid_request', 'coupleId, senderUserId and fileBytesBase64 are required');
++  }
++
++  const client = await pool.connect();
++  try {
++    await ensureSenderInCouplePg(client, { coupleId: trimmedCoupleId, senderUserId: trimmedSenderUserId });
++  } finally {
++    client.release();
++  }
++
++  let fileBuffer;
++  try {
++    fileBuffer = Buffer.from(trimmedBase64, 'base64');
++  } catch (_) {
++    throw new AppError('invalid_request', 'fileBytesBase64 is invalid');
++  }
++  if (!fileBuffer || fileBuffer.length === 0) {
++    throw new AppError('invalid_request', 'uploaded file must not be empty');
++  }
++
++  const safeCoupleDir = sanitizeSegment(trimmedCoupleId);
++  const safeSenderDir = sanitizeSegment(trimmedSenderUserId);
++  const extension = normalizeFileExtension(trimmedFileName, normalizedMediaKind === 'image' ? '.jpg' : '.m4a');
++  const generatedName = `${normalizedMediaKind}-${Date.now()}-${Math.floor(Math.random() * 9000) + 1000}${extension}`;
++  const relativeDir = path.join(safeCoupleDir, normalizedMediaKind, safeSenderDir);
++  const absoluteDir = path.join(config.chatMediaDir, relativeDir);
++  fs.mkdirSync(absoluteDir, { recursive: true });
++  fs.writeFileSync(path.join(absoluteDir, generatedName), fileBuffer);
++
++  const relativeUrlPath = `/media/chat/${relativeDir.replace(/\\/g, '/')}/${generatedName}`;
++  return { url: buildPublicMediaUrl(publicBaseUrl, relativeUrlPath) };
++}
++
++async function sendChatMessagePg(pool, body) {
++  const { coupleId, senderUserId, content, clientMessageId, messageType, mediaUrl, mediaDurationMs } = body;
++  const trimmedCoupleId = String(coupleId || '').trim();
++  const trimmedSenderUserId = String(senderUserId || '').trim();
++  const trimmedClientMessageId = String(clientMessageId || '').trim();
++  const normalizedMessageType = normalizeMessageType(messageType);
++  const trimmedMediaUrl = String(mediaUrl || '').trim();
++  const normalizedMediaDurationMs = normalizeMediaDurationMs(mediaDurationMs);
++  const trimmedContent = validateTextContent(content, { allowEmpty: normalizedMessageType !== 'text' });
++
++  if (!trimmedCoupleId || !trimmedSenderUserId || !trimmedClientMessageId) {
++    throw new AppError('invalid_request', 'coupleId, senderUserId and clientMessageId are required');
++  }
++  if (normalizedMessageType !== 'text' && !trimmedMediaUrl) {
++    throw new AppError('invalid_request', 'mediaUrl is required for image or voice messages');
++  }
++  if (normalizedMessageType === 'voice' && normalizedMediaDurationMs <= 0) {
++    throw new AppError('invalid_request', 'mediaDurationMs must be greater than 0 for voice messages');
++  }
++
++  const client = await pool.connect();
++  try {
++    await client.query('BEGIN');
++    await ensureSenderInCouplePg(client, { coupleId: trimmedCoupleId, senderUserId: trimmedSenderUserId });
++
++    const existing = await client.query(
++      `
++      SELECT id, couple_id, sender_user_id, content, client_message_id, message_type, media_url, media_duration_ms, created_at
++      FROM chat_messages
++      WHERE couple_id = $1 AND client_message_id = $2
++      `,
++      [trimmedCoupleId, trimmedClientMessageId],
++    );
++    if (existing.rowCount > 0) {
++      await client.query('COMMIT');
++      return mapChatRow(existing.rows[0]);
++    }
++
++    const now = new Date().toISOString();
++    const id = `msg-${Date.now()}-${Math.floor(Math.random() * 9000) + 1000}`;
++    await client.query(
++      `
++      INSERT INTO chat_messages (
++        id, couple_id, sender_user_id, content, client_message_id,
++        message_type, media_url, media_duration_ms, created_at
++      )
++      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
++      `,
++      [
++        id,
++        trimmedCoupleId,
++        trimmedSenderUserId,
++        trimmedContent,
++        trimmedClientMessageId,
++        normalizedMessageType,
++        trimmedMediaUrl || null,
++        normalizedMediaDurationMs,
++        now,
++      ],
++    );
++    await client.query('COMMIT');
++    return {
++      id,
++      coupleId: trimmedCoupleId,
++      senderUserId: trimmedSenderUserId,
++      content: trimmedContent,
++      clientMessageId: trimmedClientMessageId,
++      messageType: normalizedMessageType,
++      mediaUrl: trimmedMediaUrl || null,
++      mediaDurationMs: normalizedMediaDurationMs,
++      createdAt: now,
++    };
++  } catch (error) {
++    await client.query('ROLLBACK');
++    throw error;
++  } finally {
++    client.release();
++  }
++}
++
++async function listChatMessagesPg(pool, { coupleId, since }) {
++  const trimmedCoupleId = String(coupleId || '').trim();
++  if (!trimmedCoupleId) {
++    throw new AppError('invalid_request', 'coupleId is required');
++  }
++  const sinceValue = typeof since === 'string' && since.trim() ? since.trim() : null;
++  if (sinceValue && Number.isNaN(Date.parse(sinceValue))) {
++    throw new AppError('invalid_request', 'since must be a valid ISO timestamp');
++  }
++
++  const coupleResult = await pool.query('SELECT id FROM couples WHERE id = $1 AND status = $2', [
++    trimmedCoupleId,
++    'active',
++  ]);
++  if (coupleResult.rowCount === 0) {
++    throw new AppError('couple_not_found', 'Couple not found', 404);
++  }
++
++  const rows = sinceValue
++    ? await pool.query(
++        `
++        SELECT id, couple_id, sender_user_id, content, client_message_id, message_type, media_url, media_duration_ms, created_at
++        FROM chat_messages
++        WHERE couple_id = $1 AND created_at > $2
++        ORDER BY created_at ASC, id ASC
++        `,
++        [trimmedCoupleId, sinceValue],
++      )
++    : await pool.query(
++        `
++        SELECT id, couple_id, sender_user_id, content, client_message_id, message_type, media_url, media_duration_ms, created_at
++        FROM chat_messages
++        WHERE couple_id = $1
++        ORDER BY created_at ASC, id ASC
++        `,
++        [trimmedCoupleId],
++      );
++  return rows.rows.map(mapChatRow);
++}
++
++module.exports = {
++  uploadChatMediaPg,
++  sendChatMessagePg,
++  listChatMessagesPg,
++};
+diff --git a/couples_backend/src/services/chat_push_pg.js b/couples_backend/src/services/chat_push_pg.js
+new file mode 100644
+index 0000000..4ead3a1
+--- /dev/null
++++ b/couples_backend/src/services/chat_push_pg.js
+@@ -0,0 +1,111 @@
++const https = require('https');
++const { randomUUID } = require('crypto');
++
++const config = require('../config');
++const { AppError } = require('../errors');
++
++async function registerChatPushTokenPg(pool, { coupleId, userId, token, platform }) {
++  const trimmedCoupleId = String(coupleId || '').trim();
++  const trimmedUserId = String(userId || '').trim();
++  const trimmedToken = String(token || '').trim();
++  const normalizedPlatform = String(platform || '').trim().toLowerCase() || 'android';
++  if (!trimmedCoupleId || !trimmedUserId || !trimmedToken) {
++    throw new AppError('invalid_request', 'coupleId, userId and token are required');
++  }
++  const now = new Date().toISOString();
++  const existing = await pool.query(
++    'SELECT id FROM chat_push_tokens WHERE couple_id = $1 AND user_id = $2 AND token = $3',
++    [trimmedCoupleId, trimmedUserId, trimmedToken],
++  );
++  if (existing.rowCount > 0) {
++    await pool.query('UPDATE chat_push_tokens SET platform = $1, updated_at = $2 WHERE id = $3', [
++      normalizedPlatform,
++      now,
++      existing.rows[0].id,
++    ]);
++    return { ok: true };
++  }
++  await pool.query(
++    `
++    INSERT INTO chat_push_tokens (id, couple_id, user_id, token, platform, created_at, updated_at)
++    VALUES ($1, $2, $3, $4, $5, $6, $7)
++    `,
++    [randomUUID(), trimmedCoupleId, trimmedUserId, trimmedToken, normalizedPlatform, now, now],
++  );
++  return { ok: true };
++}
++
++async function notifyPartnerOnChatMessagePg(pool, message) {
++  if (!config.fcmServerKey) {
++    return;
++  }
++  const rows = await pool.query(
++    'SELECT token FROM chat_push_tokens WHERE couple_id = $1 AND user_id <> $2',
++    [message.coupleId, message.senderUserId],
++  );
++  const tokens = rows.rows.map((r) => r.token).filter(Boolean);
++  if (tokens.length === 0) {
++    return;
++  }
++  const title = 'TA 发来新消息';
++  const body =
++    message.messageType === 'text'
++      ? message.content || '收到一条消息'
++      : message.messageType === 'image'
++      ? '[图片]'
++      : '[语音]';
++  for (const token of tokens) {
++    try {
++      await sendFcmLegacy(token, {
++        title,
++        body,
++        channel_id: 'chat_messages_channel',
++        sound: 'chat_partner_pop',
++      });
++    } catch (_) {
++      // ignore single-token failure
++    }
++  }
++}
++
++function sendFcmLegacy(toToken, notification) {
++  return new Promise((resolve, reject) => {
++    const payload = JSON.stringify({
++      to: toToken,
++      priority: 'high',
++      notification,
++      data: { type: 'chat_message' },
++    });
++    const req = https.request(
++      {
++        method: 'POST',
++        hostname: 'fcm.googleapis.com',
++        path: '/fcm/send',
++        headers: {
++          'Content-Type': 'application/json',
++          Authorization: `key=${config.fcmServerKey}`,
++          'Content-Length': Buffer.byteLength(payload),
++        },
++      },
++      (res) => {
++        const chunks = [];
++        res.on('data', (d) => chunks.push(d));
++        res.on('end', () => {
++          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
++            resolve();
++            return;
++          }
++          reject(new Error(`fcm_http_${res.statusCode || 500}`));
++        });
++      },
++    );
++    req.on('error', reject);
++    req.write(payload);
++    req.end();
++  });
++}
++
++module.exports = {
++  registerChatPushTokenPg,
++  notifyPartnerOnChatMessagePg,
++};
+diff --git a/couples_backend/src/services/couples_pg.js b/couples_backend/src/services/couples_pg.js
+new file mode 100644
+index 0000000..469a506
+--- /dev/null
++++ b/couples_backend/src/services/couples_pg.js
+@@ -0,0 +1,85 @@
++const { AppError } = require('../errors');
++const { normalizeUserPair } = require('./couples');
++
++async function bindCoupleByPairCodePg(pool, { currentUserId, targetPairCode }) {
++  const trimmedCurrentUserId = String(currentUserId || '').trim();
++  const normalizedPairCode = String(targetPairCode || '').trim().toUpperCase();
++  if (!trimmedCurrentUserId || !normalizedPairCode) {
++    throw new AppError('invalid_request', 'currentUserId and targetPairCode are required');
++  }
++
++  const client = await pool.connect();
++  try {
++    await client.query('BEGIN');
++    const currentResult = await client.query(
++      'SELECT id, nickname, pair_code, couple_id FROM users WHERE id = $1',
++      [trimmedCurrentUserId],
++    );
++    if (currentResult.rowCount === 0) {
++      throw new AppError('user_not_found', 'Current user not found', 404);
++    }
++    const currentUser = currentResult.rows[0];
++    if (currentUser.couple_id) {
++      throw new AppError('current_user_already_bound', 'Current user already bound');
++    }
++
++    const targetResult = await client.query(
++      'SELECT id, nickname, pair_code, couple_id FROM users WHERE UPPER(pair_code) = $1',
++      [normalizedPairCode],
++    );
++    if (targetResult.rowCount === 0) {
++      throw new AppError('invalid_pair_code', 'Pair code is invalid');
++    }
++    const targetUser = targetResult.rows[0];
++    if (targetUser.id === trimmedCurrentUserId) {
++      throw new AppError('cannot_bind_self', 'Cannot bind self');
++    }
++    if (targetUser.couple_id) {
++      throw new AppError('target_user_already_bound', 'Target user already bound');
++    }
++
++    const [user1Id, user2Id] = normalizeUserPair(currentUser.id, targetUser.id);
++    const existingCouple = await client.query(
++      'SELECT id, created_at FROM couples WHERE user1_id = $1 AND user2_id = $2',
++      [user1Id, user2Id],
++    );
++    if (existingCouple.rowCount > 0) {
++      throw new AppError('current_user_already_bound', 'Current user already bound');
++    }
++
++    const now = new Date().toISOString();
++    const coupleId = `couple-${Date.now()}-${Math.floor(Math.random() * 9000) + 1000}`;
++    await client.query(
++      `
++      INSERT INTO couples (id, user1_id, user2_id, status, created_at)
++      VALUES ($1, $2, $3, 'active', $4)
++      `,
++      [coupleId, user1Id, user2Id, now],
++    );
++    await client.query(
++      `
++      UPDATE users
++      SET couple_id = $1, updated_at = $2
++      WHERE id IN ($3, $4)
++      `,
++      [coupleId, now, currentUser.id, targetUser.id],
++    );
++    await client.query('COMMIT');
++    return {
++      coupleId,
++      createdAt: now,
++      updatedAt: now,
++      currentUser: { id: currentUser.id, nickname: currentUser.nickname },
++      partner: { id: targetUser.id, nickname: targetUser.nickname },
++    };
++  } catch (error) {
++    await client.query('ROLLBACK');
++    throw error;
++  } finally {
++    client.release();
++  }
++}
++
++module.exports = {
++  bindCoupleByPairCodePg,
++};
+diff --git a/couples_backend/src/services/users.js b/couples_backend/src/services/users.js
+index 3b70259..5b255d6 100644
+--- a/couples_backend/src/services/users.js
++++ b/couples_backend/src/services/users.js
+@@ -44,6 +44,37 @@ function bootstrapUser(db, { userId, nickname }) {
+     };
+   }
+ 
++  // Recovery path: If device local identity was lost (reinstall/clear data),
++  // try to recover by nickname when it maps to exactly one existing user.
++  // This avoids creating a brand-new account and "losing" prior couple/chat data.
++  const sameNicknameRows = db
++    .prepare(
++      `
++        SELECT id, nickname, pair_code, couple_id, created_at, updated_at
++        FROM users
++        WHERE lower(nickname) = lower(?)
++      `,
++    )
++    .all(trimmedNickname);
++  if (sameNicknameRows.length === 1) {
++    const recovered = sameNicknameRows[0];
++    db.prepare(
++      `
++        UPDATE users
++        SET updated_at = ?
++        WHERE id = ?
++      `,
++    ).run(now, recovered.id);
++    return {
++      id: recovered.id,
++      nickname: recovered.nickname,
++      pairCode: recovered.pair_code,
++      coupleId: recovered.couple_id,
++      createdAt: recovered.created_at,
++      updatedAt: now,
++    };
++  }
++
+   const pairCode = generatePairCode(db);
+   db.prepare(
+     `
+diff --git a/couples_backend/src/services/users_pg.js b/couples_backend/src/services/users_pg.js
+new file mode 100644
+index 0000000..15fa2b6
+--- /dev/null
++++ b/couples_backend/src/services/users_pg.js
+@@ -0,0 +1,96 @@
++const { AppError } = require('../errors');
++
++async function generatePairCodePg(client) {
++  for (let i = 0; i < 20; i += 1) {
++    const code = String(Math.floor(Math.random() * 900000) + 100000);
++    const hit = await client.query('SELECT 1 FROM users WHERE pair_code = $1 LIMIT 1', [code]);
++    if (hit.rowCount === 0) {
++      return code;
++    }
++  }
++  throw new AppError('pair_code_generation_failed', 'Failed to generate pair code', 500);
++}
++
++async function bootstrapUserPg(pool, { userId, nickname }) {
++  const trimmedNickname = String(nickname || '').trim();
++  const trimmedUserId = String(userId || '').trim();
++  if (!trimmedUserId || !trimmedNickname) {
++    throw new AppError('invalid_request', 'userId and nickname are required');
++  }
++
++  const now = new Date().toISOString();
++  const client = await pool.connect();
++  try {
++    await client.query('BEGIN');
++    const existing = await client.query(
++      'SELECT id, nickname, pair_code, couple_id, created_at, updated_at FROM users WHERE id = $1',
++      [trimmedUserId],
++    );
++    if (existing.rowCount > 0) {
++      await client.query('UPDATE users SET nickname = $1, updated_at = $2 WHERE id = $3', [
++        trimmedNickname,
++        now,
++        trimmedUserId,
++      ]);
++      await client.query('COMMIT');
++      const row = existing.rows[0];
++      return {
++        id: row.id,
++        nickname: trimmedNickname,
++        pairCode: row.pair_code,
++        coupleId: row.couple_id,
++        createdAt: row.created_at,
++        updatedAt: now,
++      };
++    }
++
++    const sameNicknameRows = await client.query(
++      `
++      SELECT id, nickname, pair_code, couple_id, created_at, updated_at
++      FROM users
++      WHERE lower(nickname) = lower($1)
++      `,
++      [trimmedNickname],
++    );
++    if (sameNicknameRows.rowCount === 1) {
++      const recovered = sameNicknameRows.rows[0];
++      await client.query('UPDATE users SET updated_at = $1 WHERE id = $2', [now, recovered.id]);
++      await client.query('COMMIT');
++      return {
++        id: recovered.id,
++        nickname: recovered.nickname,
++        pairCode: recovered.pair_code,
++        coupleId: recovered.couple_id,
++        createdAt: recovered.created_at,
++        updatedAt: now,
++      };
++    }
++
++    const pairCode = await generatePairCodePg(client);
++    await client.query(
++      `
++      INSERT INTO users (id, nickname, pair_code, couple_id, created_at, updated_at)
++      VALUES ($1, $2, $3, NULL, $4, $5)
++      `,
++      [trimmedUserId, trimmedNickname, pairCode, now, now],
++    );
++    await client.query('COMMIT');
++    return {
++      id: trimmedUserId,
++      nickname: trimmedNickname,
++      pairCode,
++      coupleId: null,
++      createdAt: now,
++      updatedAt: now,
++    };
++  } catch (error) {
++    await client.query('ROLLBACK');
++    throw error;
++  } finally {
++    client.release();
++  }
++}
++
++module.exports = {
++  bootstrapUserPg,
++};
+-- 
+2.53.0.windows.2
+

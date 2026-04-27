@@ -8,10 +8,19 @@ class CreateBillRecord {
 
   Future<BillRecord> call(
     BillType type,
-    BillCategory category,
+    String categoryKey,
     double amount,
-    String note,
-  ) {
-    return _repository.createRecord(type, category, amount, note);
+    String note, {
+    required String ownerUserId,
+    required String coupleId,
+  }) {
+    return _repository.createRecord(
+      type,
+      categoryKey,
+      amount,
+      note,
+      ownerUserId: ownerUserId,
+      coupleId: coupleId,
+    );
   }
 }

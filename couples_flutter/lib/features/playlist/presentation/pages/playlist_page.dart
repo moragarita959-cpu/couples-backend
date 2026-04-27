@@ -1,11 +1,15 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/providers.dart';
 import '../../../../core/ui/couple_ui.dart';
 import '../../domain/entities/song.dart';
-import '../../domain/entities/song_review.dart';
+import '../../domain/genre/genre_catalog.dart';
+import '../state/playlist_state.dart';
+import '../widgets/genre_mixed_text.dart';
 import '../widgets/playlist_card.dart';
+import 'song_detail_page.dart';
+import 'tag_search_page.dart';
 
 class PlaylistPage extends ConsumerStatefulWidget {
   const PlaylistPage({super.key});
@@ -18,13 +22,10 @@ class _PlaylistPageState extends ConsumerState<PlaylistPage>
     with WidgetsBindingObserver {
   final TextEditingController _songNameController = TextEditingController();
   final TextEditingController _artistController = TextEditingController();
-  final Map<String, TextEditingController> _reviewControllers =
-      <String, TextEditingController>{};
-  final Map<String, TextEditingController> _tagControllers =
-      <String, TextEditingController>{};
-  final Map<String, List<double>> _scoreDrafts = <String, List<double>>{};
-  final Map<String, List<String>> _tagDrafts = <String, List<String>>{};
-  bool _composerExpanded = false;
+  String _selectedPrimaryGenreId = GenreCatalog.categories.first.id;
+  String? _selectedSecondaryGenreId;
+  String? _filterPrimaryGenreId;
+  String? _filterSecondaryGenreId;
 
   Future<void> _refreshPlaylist() async {
     await ref.read(playlistControllerProvider.notifier).load();
@@ -46,12 +47,6 @@ class _PlaylistPageState extends ConsumerState<PlaylistPage>
     WidgetsBinding.instance.removeObserver(this);
     _songNameController.dispose();
     _artistController.dispose();
-    for (final controller in _reviewControllers.values) {
-      controller.dispose();
-    }
-    for (final controller in _tagControllers.values) {
-      controller.dispose();
-    }
     super.dispose();
   }
 
@@ -62,354 +57,811 @@ class _PlaylistPageState extends ConsumerState<PlaylistPage>
     }
   }
 
-  TextEditingController _reviewControllerFor(String songId) {
-    return _reviewControllers.putIfAbsent(songId, TextEditingController.new);
+  String _sortLabel(PlaylistSortMode mode) {
+    switch (mode) {
+      case PlaylistSortMode.time:
+        return '按时间';
+      case PlaylistSortMode.score:
+        return '按评分';
+      case PlaylistSortMode.alphabet:
+        return '按字母';
+    }
   }
 
-  TextEditingController _tagControllerFor(String songId) {
-    return _tagControllers.putIfAbsent(songId, TextEditingController.new);
+  String _periodLabel(PlaylistRankingPeriod period) {
+    switch (period) {
+      case PlaylistRankingPeriod.week:
+        return '周榜';
+      case PlaylistRankingPeriod.month:
+        return '月榜';
+      case PlaylistRankingPeriod.year:
+        return '年榜';
+    }
   }
 
-  List<double> _scoreDraftFor(String songId) {
-    return _scoreDrafts.putIfAbsent(songId, () => <double>[3, 3, 3]);
+  String _scopeLabel(PlaylistRankingScope scope) {
+    switch (scope) {
+      case PlaylistRankingScope.total:
+        return '总分';
+      case PlaylistRankingScope.me:
+        return '我';
+      case PlaylistRankingScope.partner:
+        return 'TA';
+    }
   }
 
-  List<String> _tagDraftFor(String songId) {
-    return _tagDrafts.putIfAbsent(songId, () => <String>[]);
+  List<Song> _filteredSongs(List<Song> songs) {
+    return songs.where((song) {
+      final resolved = GenreCatalog.resolve(song.genre);
+      if (_filterPrimaryGenreId != null &&
+          resolved.category.id != _filterPrimaryGenreId) {
+        return false;
+      }
+      if (_filterSecondaryGenreId != null &&
+          resolved.subTag?.id != _filterSecondaryGenreId) {
+        return false;
+      }
+      return true;
+    }).toList();
   }
 
-  SongReview? _reviewByAuthor(List<SongReview> reviews, ReviewAuthor author) {
-    for (final review in reviews) {
-      if (review.author == author) {
-        return review;
+  String _genreFilterLabel() {
+    if (_filterPrimaryGenreId == null) {
+      return '全部曲风';
+    }
+    final primary = GenreCatalog.categoryById(_filterPrimaryGenreId!);
+    if (_filterSecondaryGenreId == null) {
+      return primary.name;
+    }
+    GenreSubTag? secondary;
+    for (final child in primary.children) {
+      if (child.id == _filterSecondaryGenreId) {
+        secondary = child;
+        break;
       }
     }
-    return null;
+    return secondary == null ? primary.name : '${primary.name} · ${secondary.name}';
   }
 
-  List<String> _combinedStyleTags(List<SongReview> reviews) {
-    final tags = <String>[];
-    for (final review in reviews) {
-      for (final tag in review.styleTags) {
-        if (tags.any((existing) => existing.toLowerCase() == tag.toLowerCase())) {
-          continue;
-        }
-        tags.add(tag);
-      }
-    }
-    return tags;
-  }
-
-  void _hydrateDraft({
-    required String songId,
-    required SongReview? myReview,
-  }) {
-    final reviewController = _reviewControllerFor(songId);
-    if (myReview != null) {
-      reviewController.text = myReview.content;
-      _scoreDrafts[songId] = <double>[
-        myReview.atmosphereScore.toDouble(),
-        myReview.resonanceScore.toDouble(),
-        myReview.shareScore.toDouble(),
-      ];
-      _tagDrafts[songId] = List<String>.from(myReview.styleTags);
-    } else {
-      reviewController.clear();
-      _scoreDrafts[songId] = <double>[3, 3, 3];
-      _tagDrafts[songId] = <String>[];
-    }
-    _tagControllerFor(songId).clear();
-  }
-
-  void _addTagToDraft(String songId, String rawTag) {
-    final trimmed = rawTag.trim();
-    if (trimmed.isEmpty) {
-      return;
-    }
-
-    final currentTags = List<String>.from(_tagDraftFor(songId));
-    final exists = currentTags.any(
-      (tag) => tag.toLowerCase() == trimmed.toLowerCase(),
+  Future<void> _showGenreFilterSheet() async {
+    var selectedPrimaryId = _filterPrimaryGenreId;
+    var selectedSecondaryId = _filterSecondaryGenreId;
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final selectedPrimary = selectedPrimaryId == null
+                ? null
+                : GenreCatalog.categoryById(selectedPrimaryId!);
+            return Container(
+              margin: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+              decoration: BoxDecoration(
+                color: CoupleUi.surface,
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: CoupleUi.softShadow,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        const Expanded(
+                          child: Text(
+                            '曲风筛选',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: CoupleUi.textPrimary,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _filterPrimaryGenreId = null;
+                              _filterSecondaryGenreId = null;
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('清空'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: <Widget>[
+                        ChoiceChip(
+                          label: const Text('全部'),
+                          selected: selectedPrimaryId == null,
+                          onSelected: (_) {
+                            setSheetState(() {
+                              selectedPrimaryId = null;
+                              selectedSecondaryId = null;
+                            });
+                          },
+                        ),
+                        ...GenreCatalog.categories.map((category) {
+                          final selected = selectedPrimaryId == category.id;
+                          return ChoiceChip(
+                            selected: selected,
+                            selectedColor:
+                                category.primaryColor.withValues(alpha: 0.18),
+                            onSelected: (_) {
+                              setSheetState(() {
+                                selectedPrimaryId = selected ? null : category.id;
+                                selectedSecondaryId = null;
+                              });
+                            },
+                            label: GenreMixedText(
+                              text: category.mixedLabel,
+                              chineseFontFamily: category.chineseFontFamily,
+                              englishFontFamily: category.englishFontFamily,
+                              style: TextStyle(
+                                color: selected
+                                    ? category.primaryColor
+                                    : CoupleUi.textPrimary,
+                                fontSize: 12.2,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                    if (selectedPrimary != null &&
+                        selectedPrimary.children.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: selectedPrimary.children.map((child) {
+                          final selected = selectedSecondaryId == child.id;
+                          return FilterChip(
+                            selected: selected,
+                            selectedColor: child.color.withValues(alpha: 0.14),
+                            side: BorderSide(
+                              color: selected
+                                  ? child.color.withValues(alpha: 0.38)
+                                  : CoupleUi.sectionBorder,
+                            ),
+                            onSelected: (_) {
+                              setSheetState(() {
+                                selectedSecondaryId = selected ? null : child.id;
+                              });
+                            },
+                            label: GenreMixedText(
+                              text: child.name,
+                              chineseFontFamily: selectedPrimary.chineseFontFamily,
+                              englishFontFamily: selectedPrimary.englishFontFamily,
+                              style: TextStyle(
+                                color: selected ? child.color : CoupleUi.textPrimary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: () {
+                          setState(() {
+                            _filterPrimaryGenreId = selectedPrimaryId;
+                            _filterSecondaryGenreId = selectedSecondaryId;
+                          });
+                          Navigator.of(context).pop();
+                        },
+                        style: CoupleUi.primaryButtonStyle(),
+                        child: const Text('应用筛选'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
-    if (exists) {
-      _tagControllerFor(songId).clear();
-      return;
-    }
-
-    setState(() {
-      currentTags.add(trimmed);
-      _tagDrafts[songId] = currentTags;
-      _tagControllerFor(songId).clear();
-    });
   }
 
-  void _removeTagFromDraft(String songId, String tag) {
-    setState(() {
-      _tagDrafts[songId] = _tagDraftFor(songId)
-          .where((item) => item.toLowerCase() != tag.toLowerCase())
-          .toList();
-    });
+  Future<void> _showAddSongSheet() async {
+    var selectedPrimaryId = _selectedPrimaryGenreId;
+    var selectedSecondaryId = _selectedSecondaryGenreId;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final state = ref.watch(playlistControllerProvider);
+            final controller = ref.read(playlistControllerProvider.notifier);
+            return StatefulBuilder(
+              builder: (context, setSheetState) {
+                final primary = GenreCatalog.categoryById(selectedPrimaryId);
+                final children = primary.children;
+
+                Future<void> submit() async {
+                  final genreValue =
+                      GenreCatalog.encode(selectedPrimaryId, selectedSecondaryId);
+                  final ok = await controller.addSong(
+                    name: _songNameController.text,
+                    artist: _artistController.text,
+                    genre: genreValue,
+                  );
+                  if (!ok || !context.mounted) {
+                    return;
+                  }
+                  _songNameController.clear();
+                  _artistController.clear();
+                  setState(() {
+                    _selectedPrimaryGenreId = selectedPrimaryId;
+                    _selectedSecondaryGenreId = selectedSecondaryId;
+                  });
+                  Navigator.of(context).pop();
+                }
+
+                return Padding(
+                  padding: EdgeInsets.only(
+                    left: 12,
+                    right: 12,
+                    bottom: MediaQuery.of(context).viewInsets.bottom + 12,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+                    decoration: BoxDecoration(
+                      color: CoupleUi.surface,
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: CoupleUi.softShadow,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              const Expanded(
+                                child: Text(
+                                  '添加一首歌',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: CoupleUi.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                icon: const Icon(Icons.close),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: _songNameController,
+                            textInputAction: TextInputAction.next,
+                            decoration: CoupleUi.inputDecoration(labelText: '歌名'),
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: _artistController,
+                            textInputAction: TextInputAction.next,
+                            decoration: CoupleUi.inputDecoration(labelText: '歌手'),
+                          ),
+                          const SizedBox(height: 14),
+                          const Text(
+                            '一级曲风',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: CoupleUi.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: GenreCatalog.categories.map((category) {
+                              final selected = selectedPrimaryId == category.id;
+                              return ChoiceChip(
+                                selected: selected,
+                                onSelected: (_) {
+                                  setSheetState(() {
+                                    selectedPrimaryId = category.id;
+                                    selectedSecondaryId = null;
+                                  });
+                                },
+                                selectedColor:
+                                    category.primaryColor.withValues(alpha: 0.18),
+                                label: GenreMixedText(
+                                  text: category.mixedLabel,
+                                  chineseFontFamily: category.chineseFontFamily,
+                                  englishFontFamily: category.englishFontFamily,
+                                  style: TextStyle(
+                                    color: selected
+                                        ? category.primaryColor
+                                        : CoupleUi.textPrimary,
+                                    fontSize: 12.4,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 14),
+                          Row(
+                            children: <Widget>[
+                              const Text(
+                                '二级曲风',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: CoupleUi.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton(
+                                onPressed: selectedSecondaryId == null
+                                    ? null
+                                    : () => setSheetState(
+                                          () => selectedSecondaryId = null,
+                                        ),
+                                child: const Text('仅使用一级'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          if (children.isEmpty)
+                            const Text(
+                              '当前一级曲风没有二级分类，可直接保存。',
+                              style: TextStyle(color: CoupleUi.textSecondary),
+                            )
+                          else
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: children.map((child) {
+                                final selected = selectedSecondaryId == child.id;
+                                return FilterChip(
+                                  selected: selected,
+                                  selectedColor:
+                                      child.color.withValues(alpha: 0.14),
+                                  side: BorderSide(
+                                    color: selected
+                                        ? child.color.withValues(alpha: 0.38)
+                                        : CoupleUi.sectionBorder,
+                                  ),
+                                  onSelected: (_) {
+                                    setSheetState(() {
+                                      selectedSecondaryId =
+                                          selected ? null : child.id;
+                                    });
+                                  },
+                                  label: GenreMixedText(
+                                    text: child.name,
+                                    chineseFontFamily: primary.chineseFontFamily,
+                                    englishFontFamily: primary.englishFontFamily,
+                                    style: TextStyle(
+                                      color: selected
+                                          ? child.color
+                                          : CoupleUi.textPrimary,
+                                      fontSize: 12.1,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          if (state.errorMessage != null &&
+                              state.errorMessage!.isNotEmpty) ...<Widget>[
+                            const SizedBox(height: 10),
+                            Text(
+                              state.errorMessage!,
+                              style: const TextStyle(
+                                color: Color(0xFFC45A68),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 14),
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              onPressed: state.isSubmittingSong ? null : submit,
+                              style: CoupleUi.primaryButtonStyle(),
+                              icon: state.isSubmittingSong
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.library_add_outlined),
+                              label: Text(
+                                state.isSubmittingSong ? '保存中...' : '保存到歌单',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
-  String _preferenceText(SongPreference preference) {
-    switch (preference) {
-      case SongPreference.like:
-        return '喜欢';
-      case SongPreference.dislike:
-        return '暂时跳过';
-      case SongPreference.none:
-        return '待决定';
-    }
-  }
-
-  Color _preferenceColor(SongPreference preference) {
-    switch (preference) {
-      case SongPreference.like:
-        return const Color(0xFFDA7A8B);
-      case SongPreference.dislike:
-        return const Color(0xFF8D88A4);
-      case SongPreference.none:
-        return const Color(0xFF7C95CF);
-    }
-  }
-
-  String _scoreTierText(int totalScore) {
-    if (totalScore <= 5) {
-      return '还在慢慢升温';
-    }
-    if (totalScore <= 10) {
-      return '已经很合拍';
-    }
-    return '值得循环播放';
-  }
-
-  String _relationText(SongReview? myReview, SongReview? partnerReview) {
-    if (myReview == null && partnerReview == null) {
-      return '这首歌还没有人写下感受，不如先从它带给你的氛围开始。';
-    }
-    if (myReview != null && partnerReview == null) {
-      return '你的乐评已经写好了，等 TA 回应后就能一起对照彼此的感受。';
-    }
-    if (myReview == null && partnerReview != null) {
-      return 'TA 已经先写下了自己的感受，现在很适合补上你的这一面。';
-    }
-    final diff = (myReview!.totalScore - partnerReview!.totalScore).abs();
-    if (diff <= 1) {
-      return '你们对这首歌的感受非常接近，几乎落在同一个频率上。';
-    }
-    if (diff <= 3) {
-      return '你们听到的重点略有不同，但整体氛围依然是靠近的。';
-    }
-    return '这首歌击中了你们不同的地方，这种反差也很值得聊一聊。';
-  }
-
-  Map<_PlaylistSection, List<Song>> _groupSongs(List<Song> songs) {
-    return <_PlaylistSection, List<Song>>{
-      _PlaylistSection.favorite: songs
-          .where((song) => song.preference == SongPreference.like)
-          .toList(),
-      _PlaylistSection.undecided: songs
-          .where((song) => song.preference == SongPreference.none)
-          .toList(),
-      _PlaylistSection.skipped: songs
-          .where((song) => song.preference == SongPreference.dislike)
-          .toList(),
-    };
+  void _showRankingSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final state = ref.watch(playlistControllerProvider);
+            final controller = ref.read(playlistControllerProvider.notifier);
+            final entries = controller.rankingsFor(
+              state.rankingPeriod,
+              scope: state.rankingScope,
+            );
+            final eliteChips = <Song>[
+              ...state.songs.where((song) => !song.isDeleted),
+            ]..sort((a, b) {
+                final byTime = a.createdAt.compareTo(b.createdAt);
+                if (byTime != 0) {
+                  return byTime;
+                }
+                return a.id.compareTo(b.id);
+              });
+            eliteChips.removeWhere(
+              (song) => controller.totalScoreFor(song.id) < 28,
+            );
+            return Container(
+              margin: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+              decoration: BoxDecoration(
+                color: CoupleUi.surface,
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: CoupleUi.softShadow,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      const Expanded(
+                        child: Text(
+                          '双人歌曲排行榜',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: CoupleUi.textPrimary,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<PlaylistRankingPeriod>(
+                    segments: PlaylistRankingPeriod.values
+                        .map(
+                          (period) => ButtonSegment<PlaylistRankingPeriod>(
+                            value: period,
+                            label: Text(_periodLabel(period)),
+                          ),
+                        )
+                        .toList(),
+                    selected: <PlaylistRankingPeriod>{state.rankingPeriod},
+                    onSelectionChanged: (next) {
+                      controller.setRankingPeriod(next.first);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<PlaylistRankingScope>(
+                    segments: PlaylistRankingScope.values
+                        .map(
+                          (scope) => ButtonSegment<PlaylistRankingScope>(
+                            value: scope,
+                            label: Text(_scopeLabel(scope)),
+                          ),
+                        )
+                        .toList(),
+                    selected: <PlaylistRankingScope>{state.rankingScope},
+                    onSelectionChanged: (next) {
+                      controller.setRankingScope(next.first);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  if (eliteChips.isNotEmpty) ...<Widget>[
+                    const Text(
+                      '高分展示（总分 ≥ 28）',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        color: CoupleUi.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: <Widget>[
+                        for (final song in eliteChips)
+                          Chip(
+                            backgroundColor:
+                                CoupleUi.primary.withValues(alpha: 0.14),
+                            side: BorderSide.none,
+                            label: Text(
+                              '${CoupleUi.greekSymbolForIndex(controller.greekBadgeIndexForSong(song.id)!)} ${song.name}',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  if (entries.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 26),
+                      child: Center(
+                        child: Text(
+                          '这个时间段还没有评分，先一起给喜欢的歌打个分吧。',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: CoupleUi.textSecondary),
+                        ),
+                      ),
+                    )
+                  else
+                    Flexible(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        child: ListView.separated(
+                          key: ValueKey<String>(
+                            '${state.rankingPeriod.name}-${state.rankingScope.name}',
+                          ),
+                          shrinkWrap: true,
+                          itemCount: entries.length,
+                          separatorBuilder: (_, __) =>
+                              const Divider(height: 14),
+                          itemBuilder: (context, index) {
+                            final entry = entries[index];
+                            final displayScore = switch (state.rankingScope) {
+                              PlaylistRankingScope.total => entry.totalScore,
+                              PlaylistRankingScope.me => entry.myScore,
+                              PlaylistRankingScope.partner => entry.partnerScore,
+                            };
+                            final fullCombined =
+                                controller.totalScoreFor(entry.song.id);
+                            final greekIdx =
+                                controller.greekBadgeIndexForSong(entry.song.id);
+                            final color =
+                                state.rankingScope == PlaylistRankingScope.total
+                                    ? CoupleUi.scoreColorCombined31(displayScore)
+                                    : CoupleUi.scoreColorForSingle(displayScore);
+                            final trailingLabel =
+                                fullCombined >= 28 && greekIdx != null
+                                    ? CoupleUi.greekSymbolForIndex(greekIdx)
+                                    : '${displayScore.toStringAsFixed(1)}分';
+                            return ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: CircleAvatar(
+                                backgroundColor: color.withValues(alpha: 0.14),
+                                child: Text(
+                                  '${entry.rank}',
+                                  style: TextStyle(
+                                    color: color,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
+                              title: Text(
+                                entry.song.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style:
+                                    const TextStyle(fontWeight: FontWeight.w900),
+                              ),
+                              subtitle: Text(
+                                '${entry.song.artist} · 我 ${entry.myScore.toStringAsFixed(1)} / TA ${entry.partnerScore.toStringAsFixed(1)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              trailing: Text(
+                                trailingLabel,
+                                style: TextStyle(
+                                  color: color,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(playlistControllerProvider);
     final controller = ref.read(playlistControllerProvider.notifier);
-    final groupedSongs = _groupSongs(state.songs);
+    final songs = _filteredSongs(controller.sortedSongs());
+    final uploadOrdinals = controller.uploadOrdinalBySongId();
 
     return Scaffold(
       backgroundColor: CoupleUi.pageBackground,
       appBar: AppBar(
         title: const Text('双人歌单'),
         backgroundColor: CoupleUi.surface,
-      ),
-      body: DecoratedBox(
-        decoration: CoupleUi.pageBackgroundDecoration(),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              _ComposerEntry(
-                expanded: _composerExpanded,
-                songNameController: _songNameController,
-                artistController: _artistController,
-                onToggle: () {
-                  setState(() {
-                    _composerExpanded = !_composerExpanded;
-                  });
-                },
-                onSubmit: () async {
-                  final ok = await controller.addSong(
-                    name: _songNameController.text,
-                    artist: _artistController.text,
+        actions: <Widget>[
+          PopupMenuButton<_PlaylistMenuAction>(
+            tooltip: '更多',
+            icon: const Icon(Icons.more_horiz),
+            onSelected: (action) {
+              switch (action) {
+                case _PlaylistMenuAction.sortTime:
+                  controller.setSortMode(PlaylistSortMode.time);
+                case _PlaylistMenuAction.sortScore:
+                  controller.setSortMode(PlaylistSortMode.score);
+                case _PlaylistMenuAction.sortAlphabet:
+                  controller.setSortMode(PlaylistSortMode.alphabet);
+                case _PlaylistMenuAction.ranking:
+                  _showRankingSheet();
+                case _PlaylistMenuAction.tagSearch:
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const TagSearchPage(),
+                    ),
                   );
-                  if (!ok) {
-                    return;
-                  }
-                  _songNameController.clear();
-                  _artistController.clear();
-                  setState(() {
-                    _composerExpanded = false;
-                  });
-                },
-              ),
-              if (state.errorMessage != null && state.errorMessage!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    state.errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                case _PlaylistMenuAction.genreFilter:
+                  _showGenreFilterSheet();
+              }
+            },
+            itemBuilder: (context) => <PopupMenuEntry<_PlaylistMenuAction>>[
+              PopupMenuItem<_PlaylistMenuAction>(
+                value: _PlaylistMenuAction.sortTime,
+                child: _MenuRow(
+                  label: '按时间',
+                  selected: state.sortMode == PlaylistSortMode.time,
                 ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _refreshPlaylist,
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: _PlaylistSection.values
-                        .map(
-                          (section) => _PlaylistSectionCard(
-                            title: section.title,
-                            subtitle: section.subtitle,
-                            count: groupedSongs[section]?.length ?? 0,
-                            children: [
-                              if ((groupedSongs[section] ?? const <Song>[]).isEmpty)
-                                _EmptySectionHint(text: section.emptyHint),
-                              ...(groupedSongs[section] ?? const <Song>[]).map((song) {
-                              final reviews =
-                                  state.reviewsBySongId[song.id] ?? const <SongReview>[];
-                              final myReview =
-                                  _reviewByAuthor(reviews, ReviewAuthor.me);
-                              final partnerReview =
-                                  _reviewByAuthor(reviews, ReviewAuthor.partner);
-                              final isSelected = state.selectedSongId == song.id;
-                              final hasDraftTags = _tagDrafts.containsKey(song.id);
-
-                              if (isSelected &&
-                                  !_scoreDrafts.containsKey(song.id) &&
-                                  !_tagDrafts.containsKey(song.id)) {
-                                _hydrateDraft(songId: song.id, myReview: myReview);
-                              }
-
-                              final scoreDraft = _scoreDraftFor(song.id);
-                              final tagDraft = _tagDraftFor(song.id);
-                              final draftTotal =
-                                  (scoreDraft[0] + scoreDraft[1] + scoreDraft[2]).round();
-                              final heroTotal = myReview?.totalScore ?? draftTotal;
-
-                              return PlaylistCard(
-                                song: song,
-                                expanded: isSelected,
-                                preferenceLabel: _preferenceText(song.preference),
-                                preferenceColor: _preferenceColor(song.preference),
-                                reviewCountLabel: '${reviews.length} 条乐评',
-                                previewTags: isSelected && hasDraftTags
-                                    ? tagDraft
-                                    : _combinedStyleTags(reviews),
-                                myReview: myReview,
-                                partnerReview: partnerReview,
-                                relationText: _relationText(myReview, partnerReview),
-                                totalScore: heroTotal,
-                                scoreTierText: _scoreTierText(heroTotal),
-                                scoreValues: scoreDraft,
-                                reviewController: _reviewControllerFor(song.id),
-                                tagController: _tagControllerFor(song.id),
-                                onExpandToggle: () async {
-                                  if (isSelected) {
-                                    controller.selectSong(null);
-                                    return;
-                                  }
-                                  await controller.loadReviews(song.id);
-                                  final latestReviews = ref
-                                          .read(playlistControllerProvider)
-                                          .reviewsBySongId[song.id] ??
-                                      reviews;
-                                  _hydrateDraft(
-                                    songId: song.id,
-                                    myReview: _reviewByAuthor(
-                                      latestReviews,
-                                      ReviewAuthor.me,
-                                    ),
-                                  );
-                                  controller.selectSong(song.id);
-                                },
-                                onLike: () {
-                                  controller.togglePreference(
-                                    song.id,
-                                    SongPreference.like,
-                                  );
-                                },
-                                onDislike: () {
-                                  controller.togglePreference(
-                                    song.id,
-                                    SongPreference.dislike,
-                                  );
-                                },
-                                onScoreChanged: (index, value) {
-                                  setState(() {
-                                    scoreDraft[index] = value;
-                                  });
-                                },
-                                onSubmitReview: () async {
-                                  final ok = await controller.addOrUpdateReview(
-                                    songId: song.id,
-                                    content: _reviewControllerFor(song.id).text,
-                                    styleTags: tagDraft,
-                                    atmosphereScore: scoreDraft[0].round(),
-                                    resonanceScore: scoreDraft[1].round(),
-                                    shareScore: scoreDraft[2].round(),
-                                  );
-                                  if (!ok) {
-                                    return;
-                                  }
-                                  await controller.loadReviews(song.id);
-                                  final latestMyReview = _reviewByAuthor(
-                                    ref
-                                            .read(playlistControllerProvider)
-                                            .reviewsBySongId[song.id] ??
-                                        const <SongReview>[],
-                                    ReviewAuthor.me,
-                                  );
-                                  if (!mounted) {
-                                    return;
-                                  }
-                                  setState(() {
-                                    if (latestMyReview != null) {
-                                      _tagDrafts[song.id] =
-                                          List<String>.from(latestMyReview.styleTags);
-                                    }
-                                  });
-                                },
-                                onAddTag: () {
-                                  _addTagToDraft(
-                                    song.id,
-                                    _tagControllerFor(song.id).text,
-                                  );
-                                },
-                                onRemoveTag: (tag) {
-                                  _removeTagFromDraft(song.id, tag);
-                                },
-                                onSuggestionTap: (tag) {
-                                  _addTagToDraft(song.id, tag);
-                                },
-                              );
-                              }),
-                            ],
-                          ),
-                        )
-                        .toList(),
-                  ),
+              ),
+              PopupMenuItem<_PlaylistMenuAction>(
+                value: _PlaylistMenuAction.sortScore,
+                child: _MenuRow(
+                  label: '按评分',
+                  selected: state.sortMode == PlaylistSortMode.score,
+                ),
+              ),
+              PopupMenuItem<_PlaylistMenuAction>(
+                value: _PlaylistMenuAction.sortAlphabet,
+                child: _MenuRow(
+                  label: '按字母',
+                  selected: state.sortMode == PlaylistSortMode.alphabet,
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem<_PlaylistMenuAction>(
+                value: _PlaylistMenuAction.genreFilter,
+                child: Row(
+                  children: <Widget>[
+                    const Icon(Icons.tune_outlined),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text('曲风筛选 · ${_genreFilterLabel()}')),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<_PlaylistMenuAction>(
+                value: _PlaylistMenuAction.ranking,
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.leaderboard_outlined),
+                    SizedBox(width: 10),
+                    Text('排行榜'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<_PlaylistMenuAction>(
+                value: _PlaylistMenuAction.tagSearch,
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.search_outlined),
+                    SizedBox(width: 10),
+                    Text('标签与曲风检索'),
+                  ],
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddSongSheet,
+        backgroundColor: CoupleUi.primaryStrong,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
+      ),
+      body: DecoratedBox(
+        decoration: CoupleUi.pageBackgroundDecoration(),
+        child: RefreshIndicator(
+          onRefresh: _refreshPlaylist,
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 88),
+            itemCount: songs.isEmpty ? 2 : songs.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _ListHeader(
+                  count: songs.length,
+                  sortLabel: _sortLabel(state.sortMode),
+                  errorMessage: state.errorMessage,
+                );
+              }
+              if (songs.isEmpty) {
+                return const _EmptyPlaylist();
+              }
+
+              final song = songs[index - 1];
+              return TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0.95, end: 1),
+                duration: Duration(
+                  milliseconds: 120 + ((index - 1) * 25).clamp(0, 220),
+                ),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.scale(scale: value, child: child),
+                  );
+                },
+                child: PlaylistCard(
+                  song: song,
+                  combinedTotal: controller.totalScoreFor(song.id),
+                  uploadOrdinal: uploadOrdinals[song.id] ?? 1,
+                  greekBadgeIndex: controller.greekBadgeIndexForSong(song.id),
+                  onTap: () async {
+                    final deleted = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute<bool>(
+                        builder: (_) => SongDetailPage(song: song),
+                      ),
+                    );
+                    if (deleted == true && mounted) {
+                      await controller.load();
+                    }
+                  },
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -417,80 +869,59 @@ class _PlaylistPageState extends ConsumerState<PlaylistPage>
   }
 }
 
-class _ComposerEntry extends StatelessWidget {
-  const _ComposerEntry({
-    required this.expanded,
-    required this.songNameController,
-    required this.artistController,
-    required this.onToggle,
-    required this.onSubmit,
+class _ListHeader extends StatelessWidget {
+  const _ListHeader({
+    required this.count,
+    required this.sortLabel,
+    required this.errorMessage,
   });
 
-  final bool expanded;
-  final TextEditingController songNameController;
-  final TextEditingController artistController;
-  final VoidCallback onToggle;
-  final VoidCallback onSubmit;
+  final int count;
+  final String sortLabel;
+  final String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-      decoration: CoupleUi.sectionCardDecoration(
-        color: CoupleUi.surfaceMuted,
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Icon(
-                Icons.queue_music_outlined,
-                size: 18,
-                color: Color(0xFF746B89),
-              ),
-              const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  '往你们的共享歌单里加一首歌',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF584F6E),
+                  '$count 首歌',
+                  style: const TextStyle(
+                    color: CoupleUi.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: onToggle,
-                child: Text(expanded ? '收起' : '展开'),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: CoupleUi.partner.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  sortLabel,
+                  style: const TextStyle(
+                    color: CoupleUi.partner,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ],
           ),
-          if (expanded) ...<Widget>[
+          if (errorMessage != null && errorMessage!.isNotEmpty) ...<Widget>[
             const SizedBox(height: 8),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    controller: songNameController,
-                    decoration: CoupleUi.inputDecoration(labelText: '歌名'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: artistController,
-                    decoration: CoupleUi.inputDecoration(labelText: '歌手'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: FilledButton.tonalIcon(
-                onPressed: onSubmit,
-                icon: const Icon(Icons.library_add_outlined),
-                label: const Text('保存歌曲'),
+            Text(
+              errorMessage!,
+              style: const TextStyle(
+                color: Color(0xFFC45A68),
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -500,126 +931,64 @@ class _ComposerEntry extends StatelessWidget {
   }
 }
 
-class _PlaylistSectionCard extends StatelessWidget {
-  const _PlaylistSectionCard({
-    required this.title,
-    required this.subtitle,
-    required this.count,
-    required this.children,
-  });
-
-  final String title;
-  final String subtitle;
-  final int count;
-  final List<Widget> children;
+class _EmptyPlaylist extends StatelessWidget {
+  const _EmptyPlaylist();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 34, 18, 34),
       decoration: CoupleUi.sectionCardDecoration(
-        color: const Color(0xFFFCFBFD),
+        color: Colors.white.withValues(alpha: 0.88),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: const Column(
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF302A40),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12.5,
-                        color: Color(0xFF716B81),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFE8F5),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  '$count',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF665C7E),
-                  ),
-                ),
-              ),
-            ],
+          Icon(Icons.queue_music_outlined, size: 42, color: CoupleUi.partner),
+          SizedBox(height: 12),
+          Text(
+            '还没有歌曲',
+            style: TextStyle(
+              color: CoupleUi.textPrimary,
+              fontWeight: FontWeight.w900,
+              fontSize: 17,
+            ),
           ),
-          const SizedBox(height: 12),
-          ...children,
+          SizedBox(height: 6),
+          Text(
+            '点右下角 + 添加第一首，之后你们可以分别打分、写歌评和查看曲风细分标签。',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: CoupleUi.textSecondary, height: 1.4),
+          ),
         ],
       ),
     );
   }
 }
 
-class _EmptySectionHint extends StatelessWidget {
-  const _EmptySectionHint({required this.text});
+class _MenuRow extends StatelessWidget {
+  const _MenuRow({required this.label, required this.selected});
 
-  final String text;
+  final String label;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: CoupleUi.nestedCardDecoration(),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Color(0xFF716B80),
-          height: 1.4,
-        ),
-      ),
+    return Row(
+      children: <Widget>[
+        Icon(selected ? Icons.check_circle : Icons.circle_outlined),
+        const SizedBox(width: 10),
+        Text(label),
+      ],
     );
   }
 }
 
-enum _PlaylistSection {
-  favorite(
-    title: '一起喜欢',
-    subtitle: '已经被你们默契点亮的歌。',
-    emptyHint: '把那些让你们觉得温柔、安心、想循环的歌放进这里。',
-  ),
-  undecided(
-    title: '待决定',
-    subtitle: '新加入、还在感受中的歌。',
-    emptyHint: '新歌会先落在这里，等你们慢慢写下第一反应。',
-  ),
-  skipped(
-    title: '暂时跳过',
-    subtitle: '这阶段还没有被击中的歌。',
-    emptyHint: '今天没感觉也没关系，先放在这里，之后随时还能再听。',
-  );
-
-  const _PlaylistSection({
-    required this.title,
-    required this.subtitle,
-    required this.emptyHint,
-  });
-
-  final String title;
-  final String subtitle;
-  final String emptyHint;
+enum _PlaylistMenuAction {
+  sortTime,
+  sortScore,
+  sortAlphabet,
+  genreFilter,
+  ranking,
+  tagSearch,
 }

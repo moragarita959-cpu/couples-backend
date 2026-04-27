@@ -63,6 +63,18 @@ class DistanceMockDataSource {
     )..where((t) => t.id.equals('primary'))).getSingleOrNull();
   }
 
+  Future<(String? userId, String? coupleId)> loadIdentityContext() async {
+    final profile = await (_db.select(_db.localUserProfileTable)..limit(1)).getSingleOrNull();
+    if (profile == null) {
+      return (null, null);
+    }
+    final coupleId = profile.coupleId;
+    return (
+      profile.userId.trim().isEmpty ? null : profile.userId,
+      coupleId == null || coupleId.trim().isEmpty ? null : coupleId,
+    );
+  }
+
   Future<void> _persist({
     required bool distanceEnabled,
     required String? distanceText,

@@ -9,6 +9,7 @@ abstract class ChatRepository {
   Future<void> syncMessages({
     required String currentUserId,
     required String coupleId,
+    DateTime? since,
   });
 
   Future<ChatMessage> createOptimisticMessage({

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../../core/storage/drift/app_database.dart';
+import '../../domain/bill_tag_catalog.dart';
 import '../../domain/entities/bill_record.dart';
 import '../models/bill_record_model.dart';
 
@@ -39,9 +40,13 @@ class BillLocalDataSource {
   Future<void> markDeleted({
     required String id,
     required DateTime updatedAt,
+    String? ownerUserId,
   }) async {
     await (_db.update(_db.billRecordsTable)..where((t) => t.id.equals(id))).write(
       BillRecordsTableCompanion(
+        ownerUserId: ownerUserId == null || ownerUserId.trim().isEmpty
+            ? const Value.absent()
+            : Value<String>(ownerUserId.trim()),
         isDeleted: const Value<bool>(true),
         pendingSync: const Value<bool>(true),
         updatedAt: Value<DateTime>(updatedAt),
@@ -68,29 +73,30 @@ class BillLocalDataSource {
   BillPeriodSummary _buildPeriodSummary(List<BillRecord> records) {
     double incomeTotal = 0;
     double expenseTotal = 0;
-    final expenseByCategory = <BillCategory, double>{};
+    final expenseByCategoryKey = <String, double>{};
 
     for (final record in records) {
       if (record.type == BillType.income) {
         incomeTotal += record.amount;
       } else {
         expenseTotal += record.amount;
-        expenseByCategory.update(
-          record.category,
+        final key = BillTagCatalog.normalizeKey(record.categoryKey);
+        expenseByCategoryKey.update(
+          key,
           (value) => value + record.amount,
           ifAbsent: () => record.amount,
         );
       }
     }
 
-    final sortedEntries = expenseByCategory.entries.toList()
+    final sortedEntries = expenseByCategoryKey.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return BillPeriodSummary(
       incomeTotal: incomeTotal,
       expenseTotal: expenseTotal,
       balance: incomeTotal - expenseTotal,
-      expenseByCategory: Map<BillCategory, double>.fromEntries(sortedEntries),
+      expenseByCategoryKey: Map<String, double>.fromEntries(sortedEntries),
       recordCount: records.length,
     );
   }

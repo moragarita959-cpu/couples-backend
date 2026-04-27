@@ -41,6 +41,43 @@ class FeedLocalDataSource {
         );
   }
 
+  Future<void> upsertEventsFromCloud(List<FeedEventModel> events) async {
+    if (events.isEmpty) {
+      return;
+    }
+    await _db.batch((batch) {
+      for (final event in events) {
+        batch.insert(
+          _db.feedEventsTable,
+          FeedEventsTableCompanion.insert(
+            id: event.id,
+            eventType: _eventTypeToDbValue(event.eventType),
+            actorSide: _actorSideToDbValue(event.actorSide),
+            targetType: _targetTypeToDbValue(event.targetType),
+            targetId: event.targetId,
+            summaryText: event.summaryText,
+            createdAt: event.createdAt,
+            isRead: Value<bool>(event.isRead),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+    });
+  }
+
+  Future<(String? userId, String? coupleId)> loadIdentityContext() async {
+    final profile = await (_db.select(_db.localUserProfileTable)..limit(1)).getSingleOrNull();
+    if (profile == null) {
+      return (null, null);
+    }
+    final userId = profile.userId.trim();
+    final coupleId = (profile.coupleId ?? '').trim();
+    return (
+      userId.isEmpty ? null : userId,
+      coupleId.isEmpty ? null : coupleId,
+    );
+  }
+
   Future<void> _ensureSeeded() async {
     if (_seedChecked) {
       return;

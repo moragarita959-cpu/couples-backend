@@ -17,8 +17,13 @@ class BillCloudDataSource {
     return payload.map(BillRecordModel.fromCloudJson).toList();
   }
 
-  Future<BillRecordModel> upsertItem(BillRecordModel item) async {
-    final payload = await _apiClient.upsertBillRecord(item.toCloudJson());
+  Future<BillRecordModel> upsertItem(
+    BillRecordModel item, {
+    required String actorUserId,
+  }) async {
+    final payload = await _apiClient.upsertBillRecord(
+      item.toCloudJson(actorUserId: actorUserId),
+    );
     return BillRecordModel.fromCloudJson(payload);
   }
 
@@ -26,11 +31,13 @@ class BillCloudDataSource {
     required String id,
     required String coupleId,
     required DateTime updatedAt,
+    required String actorUserId,
   }) {
     return _apiClient.deleteBillRecord(
       coupleId: coupleId,
       id: id,
       updatedAt: updatedAt,
+      actorUserId: actorUserId,
     );
   }
 }

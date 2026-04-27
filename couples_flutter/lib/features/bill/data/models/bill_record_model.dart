@@ -1,3 +1,4 @@
+import '../../domain/bill_tag_catalog.dart';
 import '../../domain/entities/bill_record.dart';
 import '../../../../core/storage/drift/app_database.dart';
 import 'package:drift/drift.dart';
@@ -6,8 +7,9 @@ class BillRecordModel extends BillRecord {
   const BillRecordModel({
     required super.id,
     required super.coupleId,
+    required super.ownerUserId,
     required super.type,
-    required super.category,
+    required super.categoryKey,
     required super.amount,
     required super.note,
     required super.createdAt,
@@ -20,8 +22,9 @@ class BillRecordModel extends BillRecord {
     return BillRecordModel(
       id: row.id,
       coupleId: row.coupleId,
+      ownerUserId: row.ownerUserId,
       type: row.type == 'income' ? BillType.income : BillType.expense,
-      category: _categoryFromRaw(row.category),
+      categoryKey: BillTagCatalog.normalizeKey(row.categoryKey),
       amount: row.amount,
       note: row.note,
       createdAt: row.createdAt,
@@ -35,8 +38,9 @@ class BillRecordModel extends BillRecord {
     return BillRecordModel(
       id: item.id,
       coupleId: item.coupleId,
+      ownerUserId: item.ownerUserId,
       type: item.type,
-      category: item.category,
+      categoryKey: BillTagCatalog.normalizeKey(item.categoryKey),
       amount: item.amount,
       note: item.note,
       createdAt: item.createdAt,
@@ -50,10 +54,20 @@ class BillRecordModel extends BillRecord {
     return BillRecordModel(
       id: json['id'] as String,
       coupleId: json['coupleId'] as String? ?? '',
+      ownerUserId: _stringFromAny(
+        json,
+        const <String>[
+          'ownerUserId',
+          'owner_user_id',
+          'actorUserId',
+          'userId',
+          'createdBy',
+        ],
+      ),
       type: (json['type'] as String? ?? 'expense') == 'income'
           ? BillType.income
           : BillType.expense,
-      category: _categoryFromRaw(json['category'] as String? ?? 'other'),
+      categoryKey: BillTagCatalog.normalizeKey(json['category'] as String?),
       amount: (json['amount'] as num?)?.toDouble() ?? 0,
       note: json['note'] as String? ?? '',
       createdAt: DateTime.parse(json['createdAt'] as String).toLocal(),
@@ -67,9 +81,10 @@ class BillRecordModel extends BillRecord {
     return BillRecordsTableCompanion.insert(
       id: id,
       coupleId: Value<String>(coupleId),
+      ownerUserId: Value<String>(ownerUserId),
       type: type == BillType.income ? 'income' : 'expense',
       amount: amount,
-      category: Value<String>(_categoryToRaw(category)),
+      categoryKey: Value<String>(BillTagCatalog.normalizeKey(categoryKey)),
       note: note,
       createdAt: createdAt,
       updatedAt: Value<DateTime>(updatedAt),
@@ -78,12 +93,14 @@ class BillRecordModel extends BillRecord {
     );
   }
 
-  Map<String, dynamic> toCloudJson() {
+  Map<String, dynamic> toCloudJson({required String actorUserId}) {
     return <String, dynamic>{
       'id': id,
       'coupleId': coupleId,
+      'ownerUserId': ownerUserId,
+      'actorUserId': actorUserId,
       'type': type == BillType.income ? 'income' : 'expense',
-      'category': _categoryToRaw(category),
+      'category': BillTagCatalog.normalizeKey(categoryKey),
       'amount': amount,
       'note': note,
       'createdAt': createdAt.toUtc().toIso8601String(),
@@ -96,8 +113,9 @@ class BillRecordModel extends BillRecord {
   BillRecordModel copyWith({
     String? id,
     String? coupleId,
+    String? ownerUserId,
     BillType? type,
-    BillCategory? category,
+    String? categoryKey,
     double? amount,
     String? note,
     DateTime? createdAt,
@@ -108,8 +126,9 @@ class BillRecordModel extends BillRecord {
     return BillRecordModel(
       id: id ?? this.id,
       coupleId: coupleId ?? this.coupleId,
+      ownerUserId: ownerUserId ?? this.ownerUserId,
       type: type ?? this.type,
-      category: category ?? this.category,
+      categoryKey: categoryKey ?? this.categoryKey,
       amount: amount ?? this.amount,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
@@ -119,12 +138,20 @@ class BillRecordModel extends BillRecord {
     );
   }
 
-  static String _categoryToRaw(BillCategory category) => category.name;
-
-  static BillCategory _categoryFromRaw(String raw) {
-    return BillCategory.values.firstWhere(
-      (item) => item.name == raw,
-      orElse: () => BillCategory.other,
-    );
+  static String _stringFromAny(
+    Map<String, dynamic> json,
+    List<String> keys,
+  ) {
+    for (final key in keys) {
+      final value = json[key];
+      if (value == null) {
+        continue;
+      }
+      final text = value.toString().trim();
+      if (text.isNotEmpty) {
+        return text;
+      }
+    }
+    return '';
   }
 }

@@ -1,16 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../bill/domain/entities/bill_record.dart';
 import '../../../bill/domain/repositories/bill_repository.dart';
 import '../../../chat/domain/entities/chat_message.dart';
 import '../../../chat/domain/repositories/chat_repository.dart';
 import '../../../countdown/domain/entities/countdown_event.dart';
 import '../../../countdown/domain/repositories/countdown_repository.dart';
+import '../../../distance/domain/entities/distance_info.dart';
 import '../../../distance/domain/usecases/disable_distance.dart';
 import '../../../distance/domain/usecases/enable_distance.dart';
 import '../../../distance/domain/usecases/get_distance_info.dart';
 import '../../../poke/domain/usecases/get_last_poke.dart';
 import '../../../poke/domain/usecases/get_poke_events.dart';
 import '../../../poke/domain/usecases/send_poke.dart';
+import '../../../poke/domain/entities/poke_event.dart';
+import '../../../feed/domain/usecases/add_feed_event.dart';
+import '../../../feed/domain/entities/feed_event.dart';
+import '../../../todo/domain/entities/todo_item.dart';
 import '../../../todo/domain/repositories/todo_repository.dart';
 import '../../domain/usecases/evaluate_interaction_quality.dart';
 import 'home_summary_vm.dart';
@@ -31,8 +37,10 @@ class HomeSummaryController extends StateNotifier<HomeSummaryVm> {
     this._getCountdownLoveDays,
     this._resolveCurrentUserId,
     this._resolveCurrentCoupleId,
-    this._resolveCoupleIdentity,
-  ) : super(const HomeSummaryVm.initial()) {
+    this._resolveCoupleIdentity, {
+    AddFeedEvent? addFeedEvent,
+  }) : _addFeedEvent = addFeedEvent,
+       super(const HomeSummaryVm.initial()) {
     load();
   }
 
@@ -45,6 +53,7 @@ class HomeSummaryController extends StateNotifier<HomeSummaryVm> {
   final GetLastPoke _getLastPoke;
   final GetPokeEvents _getPokeEvents;
   final SendPoke _sendPoke;
+  final AddFeedEvent? _addFeedEvent;
   final ChatRepository _chatRepository;
   final EvaluateInteractionQuality _evaluateInteractionQuality;
   final int Function() _getCountdownLoveDays;
@@ -54,31 +63,52 @@ class HomeSummaryController extends StateNotifier<HomeSummaryVm> {
 
   static final DateTime _fallbackLoveStart = DateTime(2024, 1, 1);
 
+  /// Suppress duplicate poke rows in the feed when user taps rapidly.
+  DateTime? _lastPokeFeedAt;
+
   Future<void> load() async {
     try {
       final coupleId = _resolveCurrentCoupleId();
-      final countdownEvents =
-          coupleId == null || coupleId.isEmpty
-              ? const <CountdownEvent>[]
-              : await _countdownRepository.loadAll(coupleId: coupleId);
-      final todos =
-          coupleId == null || coupleId.isEmpty
-              ? const []
-              : await _todoRepository.loadAll(coupleId: coupleId);
-      final bills =
-          coupleId == null || coupleId.isEmpty
-              ? const []
-              : await _billRepository.loadAll(coupleId: coupleId);
-      final distanceInfo = await _getDistanceInfo();
-      final lastPoke = await _getLastPoke();
+      final countdownEvents = await _safeLoad(
+        () => coupleId == null || coupleId.isEmpty
+            ? Future.value(const <CountdownEvent>[])
+            : _countdownRepository.loadAll(coupleId: coupleId),
+        const <CountdownEvent>[],
+      );
+      final todos = await _safeLoad(
+        () => coupleId == null || coupleId.isEmpty
+            ? Future.value(const <TodoItem>[])
+            : _todoRepository.loadAll(coupleId: coupleId),
+        const <TodoItem>[],
+      );
+      final bills = await _safeLoad(
+        () => coupleId == null || coupleId.isEmpty
+            ? Future.value(const <BillRecord>[])
+            : _billRepository.loadAll(coupleId: coupleId),
+        const <BillRecord>[],
+      );
+      final distanceInfo = await _safeLoad(
+        _getDistanceInfo.call,
+        _distanceInfoFromState(),
+      );
+      final lastPoke = await _safeLoad(_getLastPoke.call, null);
       final currentUserId = _resolveCurrentUserId();
-      final chatMessages = currentUserId == null || currentUserId.isEmpty
-          ? const <ChatMessage>[]
-          : await _chatRepository.getMessages(currentUserId: currentUserId);
-      final chatStats = currentUserId == null || currentUserId.isEmpty
-          ? null
-          : await _chatRepository.getChatStats(currentUserId: currentUserId);
-      final pokeEvents = await _getPokeEvents();
+      final chatMessages = await _safeLoad(
+        () => currentUserId == null || currentUserId.isEmpty
+            ? Future.value(const <ChatMessage>[])
+            : _chatRepository.getMessages(currentUserId: currentUserId),
+        const <ChatMessage>[],
+      );
+      final chatStats = await _safeLoad(
+        () => currentUserId == null || currentUserId.isEmpty
+            ? Future.value(null)
+            : _chatRepository.getChatStats(currentUserId: currentUserId),
+        null,
+      );
+      final pokeEvents = await _safeLoad(
+        _getPokeEvents.call,
+        const <PokeEvent>[],
+      );
 
       final now = DateTime.now();
       final today = _dateOnly(now);
@@ -106,10 +136,16 @@ class HomeSummaryController extends StateNotifier<HomeSummaryVm> {
               _dateOnly(event.date).isAtSameMomentAs(today);
         }).toList(),
         weekBillTotal: bills
-            .where((item) => !item.isDeleted && !item.createdAt.isBefore(weekStart))
+            .where(
+              (item) => !item.isDeleted && !item.createdAt.isBefore(weekStart),
+            )
+            .where((item) => item.type == BillType.expense)
             .fold<double>(0, (sum, item) => sum + item.amount),
         monthBillTotal: bills
-            .where((item) => !item.isDeleted && !item.createdAt.isBefore(monthStart))
+            .where(
+              (item) => !item.isDeleted && !item.createdAt.isBefore(monthStart),
+            )
+            .where((item) => item.type == BillType.expense)
             .fold<double>(0, (sum, item) => sum + item.amount),
         todayInteractionCount: interactionSummary.todayInteractionCount,
         todayPokeCount: interactionSummary.todayPokeCount,
@@ -131,7 +167,16 @@ class HomeSummaryController extends StateNotifier<HomeSummaryVm> {
         totalChatCharacterCount: chatStats?.totalCharacterCount ?? 0,
         isDistanceEnabled: distanceInfo.isEnabled,
         distanceKm: _parseDistanceKm(distanceInfo.distanceText),
+        myLatitude: distanceInfo.myLatitude,
+        myLongitude: distanceInfo.myLongitude,
+        partnerLatitude: distanceInfo.partnerLatitude,
+        partnerLongitude: distanceInfo.partnerLongitude,
+        myLocationVisible: distanceInfo.myLocationVisible,
+        partnerLocationVisible: distanceInfo.partnerLocationVisible,
+        myLocationLabel: distanceInfo.myLocationLabel,
+        partnerLocationLabel: distanceInfo.partnerLocationLabel,
         lastPokeTime: lastPoke?.createdAt,
+        lastPokeFromPartner: lastPoke?.sender == PokeSender.partner,
         nextEvent: nextEvent,
         isPoking: false,
         justPoked: false,
@@ -140,6 +185,29 @@ class HomeSummaryController extends StateNotifier<HomeSummaryVm> {
     } catch (_) {
       state = state.copyWith(errorMessage: '首页数据加载失败');
     }
+  }
+
+  Future<T> _safeLoad<T>(Future<T> Function() loader, T fallback) async {
+    try {
+      return await loader();
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  DistanceInfo _distanceInfoFromState() {
+    return DistanceInfo(
+      isEnabled: state.isDistanceEnabled,
+      distanceText: state.distanceKm == null ? null : '${state.distanceKm} km',
+      myLatitude: state.myLatitude,
+      myLongitude: state.myLongitude,
+      partnerLatitude: state.partnerLatitude,
+      partnerLongitude: state.partnerLongitude,
+      myLocationVisible: state.myLocationVisible,
+      partnerLocationVisible: state.partnerLocationVisible,
+      myLocationLabel: state.myLocationLabel,
+      partnerLocationLabel: state.partnerLocationLabel,
+    );
   }
 
   Future<void> toggleDistance() async {
@@ -151,6 +219,14 @@ class HomeSummaryController extends StateNotifier<HomeSummaryVm> {
       state = state.copyWith(
         isDistanceEnabled: info.isEnabled,
         distanceKm: _parseDistanceKm(info.distanceText),
+        myLatitude: info.myLatitude,
+        myLongitude: info.myLongitude,
+        partnerLatitude: info.partnerLatitude,
+        partnerLongitude: info.partnerLongitude,
+        myLocationVisible: info.myLocationVisible,
+        partnerLocationVisible: info.partnerLocationVisible,
+        myLocationLabel: info.myLocationLabel,
+        partnerLocationLabel: info.partnerLocationLabel,
         errorMessage: null,
       );
     } catch (_) {
@@ -167,6 +243,20 @@ class HomeSummaryController extends StateNotifier<HomeSummaryVm> {
 
     try {
       final event = await _sendPoke();
+      if (_addFeedEvent != null) {
+        final nowTs = DateTime.now();
+        if (_lastPokeFeedAt == null ||
+            nowTs.difference(_lastPokeFeedAt!) >= const Duration(seconds: 2)) {
+          await _addFeedEvent(
+            eventType: FeedEventType.todoCreated,
+            actorSide: FeedActorSide.me,
+            targetType: FeedTargetType.todo,
+            targetId: event.id,
+            summaryText: '你戳了 TA 一下',
+          );
+          _lastPokeFeedAt = nowTs;
+        }
+      }
       final now = DateTime.now();
       final currentUserId = _resolveCurrentUserId();
       final chatMessages = currentUserId == null || currentUserId.isEmpty
@@ -187,6 +277,7 @@ class HomeSummaryController extends StateNotifier<HomeSummaryVm> {
         isPoking: false,
         justPoked: true,
         lastPokeTime: event.createdAt,
+        lastPokeFromPartner: false,
         todayInteractionCount: interactionSummary.todayInteractionCount,
         todayPokeCount: interactionSummary.todayPokeCount,
         todayQuality: interactionSummary.todayQuality,

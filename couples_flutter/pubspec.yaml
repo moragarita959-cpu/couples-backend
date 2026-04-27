@@ -41,8 +41,14 @@ dependencies:
   record: ^6.1.1
   path_provider: ^2.1.5
   flutter_local_notifications: ^19.4.2
+  geolocator: ^13.0.2
+  firebase_core: ^3.15.2
+  firebase_messaging: ^15.1.3
   timezone: ^0.10.1
   json_annotation: ^4.9.0
+  fl_chart: ^0.70.2
+  web: ^1.1.1
+  cupertino_icons: ^1.0.9
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +70,229 @@ flutter:
 
   assets:
     - assets/audio/
+    - assets/fonts/genres/zh/
+    - assets/fonts/genres/en/
+
+  fonts:
+    - family: GenrePopZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenrePopZh.ttf
+    - family: GenrePopEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenrePopEn.ttf
+    - family: GenreRockZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreRockZh.ttf
+    - family: GenreRockEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreRockEn.ttf
+    - family: GenreMetalZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreMetalZh.ttf
+    - family: GenreMetalEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreMetalEn.ttf
+    - family: GenreFolkZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreFolkZh.ttf
+    - family: GenreFolkEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreFolkEn.ttf
+    - family: GenreElectronicZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreElectronicZh.ttf
+    - family: GenreElectronicEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreElectronicEn.ttf
+    - family: GenreHipHopZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreHipHopZh.ttf
+    - family: GenreHipHopEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreHipHopEn.ttf
+    - family: GenreRnBZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreRnBZh.ttf
+    - family: GenreRnBEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreRnBEn.ttf
+    - family: GenreJazzZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreJazzZh.ttf
+    - family: GenreJazzEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreJazzEn.ttf
+    - family: GenreBluesZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreBluesZh.ttf
+    - family: GenreBluesEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreBluesEn.ttf
+    - family: GenreClassicalZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreClassicalZh.ttf
+    - family: GenreClassicalEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreClassicalEn.ttf
+    - family: GenreGuofengZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreGuofengZh.ttf
+    - family: GenreGuofengEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreGuofengEn.ttf
+    - family: GenreLightMusicZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreLightMusicZh.ttf
+    - family: GenreLightMusicEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreLightMusicEn.ttf
+    - family: GenreAmbientZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreAmbientZh.ttf
+    - family: GenreAmbientEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreAmbientEn.ttf
+    - family: GenreOSTZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreOSTZh.ttf
+    - family: GenreOSTEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreOSTEn.ttf
+    - family: GenreClubZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreClubZh.ttf
+    - family: GenreClubEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreClubEn.ttf
+    - family: GenreFunkZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreFunkZh.ttf
+    - family: GenreFunkEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreFunkEn.ttf
+    - family: GenreLatinZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreLatinZh.ttf
+    - family: GenreLatinEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreLatinEn.ttf
+    - family: GenreReggaeZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreReggaeZh.ttf
+    - family: GenreReggaeEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreReggaeEn.ttf
+    - family: GenreCountryZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreCountryZh.ttf
+    - family: GenreCountryEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreCountryEn.ttf
+    - family: GenrePunkZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenrePunkZh.ttf
+    - family: GenrePunkEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenrePunkEn.ttf
+    - family: GenreIndieZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreIndieZh.ttf
+    - family: GenreIndieEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreIndieEn.ttf
+    - family: GenreExperimentalZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreExperimentalZh.ttf
+    - family: GenreExperimentalEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreExperimentalEn.ttf
+    - family: GenreLofiZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreLofiZh.ttf
+    - family: GenreLofiEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreLofiEn.ttf
+    - family: GenreACGZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreACGZh.ttf
+    - family: GenreACGEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreACGEn.ttf
+    - family: GenreOperaZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreOperaZh.ttf
+    - family: GenreOperaEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreOperaEn.ttf
+    - family: GenreNewAgeZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreNewAgeZh.ttf
+    - family: GenreNewAgeEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreNewAgeEn.ttf
+    - family: GenreGospelZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreGospelZh.ttf
+    - family: GenreGospelEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreGospelEn.ttf
+    - family: GenreIndustrialZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreIndustrialZh.ttf
+    - family: GenreIndustrialEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreIndustrialEn.ttf
+    - family: GenreEmoZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreEmoZh.ttf
+    - family: GenreEmoEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreEmoEn.ttf
+    - family: GenreVocalZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreVocalZh.ttf
+    - family: GenreVocalEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreVocalEn.ttf
+    - family: GenreChildrenZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreChildrenZh.ttf
+    - family: GenreChildrenEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreChildrenEn.ttf
+    - family: GenreInstrumentalRockZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreInstrumentalRockZh.ttf
+    - family: GenreInstrumentalRockEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreInstrumentalRockEn.ttf
+    - family: GenreMathProgZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreMathProgZh.ttf
+    - family: GenreMathProgEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreMathProgEn.ttf
+    - family: GenreKawaiiFutureZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreKawaiiFutureZh.ttf
+    - family: GenreKawaiiFutureEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreKawaiiFutureEn.ttf
+    - family: GenreHyperpopZh
+      fonts:
+        - asset: assets/fonts/genres/zh/GenreHyperpopZh.ttf
+    - family: GenreHyperpopEn
+      fonts:
+        - asset: assets/fonts/genres/en/GenreHyperpopEn.ttf
+    - family: NotoSansSC
+      fonts:
+        - asset: assets/fonts/genres/zh/NotoSansSC.ttf
+    - family: NotoSerifSC
+      fonts:
+        - asset: assets/fonts/genres/zh/NotoSerifSC.ttf
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/genres/en/SpaceGrotesk.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

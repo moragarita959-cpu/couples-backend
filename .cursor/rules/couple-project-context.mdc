@@ -1,0 +1,49 @@
+---
+description: Couple 项目目标、栈、目录与模块同步现状（协作基线，始终生效）
+alwaysApply: true
+---
+
+# 项目认知基线
+
+## 目标
+
+私用双人情侣应用；阶段目标：**本地可用 + 部分云同步**，Railway 部署 Node 后端，双端互通。
+
+## 技术栈
+
+- Flutter：`couples_flutter`（Riverpod、`StateNotifier` 部分、`go_router`、Drift）。
+- 后端：`couples_backend`（Express + **SQLite 文件** + 聊天静态媒体目录）。
+- `ApiClient`：`COUPLES_API_BASE_URL` 非空走 HTTP；**空则内存假数据，无法双机互通**。
+- `couples-app`：旧 **uni-app / Vue2**，非当前 Flutter 主线，勿默认混用。
+
+## 目录
+
+- `couples_flutter/lib/app`：`providers.dart`、`app_router.dart`。
+- `couples_flutter/lib/core`：网络、Drift（`app_database.dart` 等）。
+- `couples_flutter/lib/features/<feature>/`：按功能分域。
+- `couples_backend/src/server.js`：实际路由以代码为准（README 可能滞后）。
+
+## 模块与同步（代码现状）
+
+| 区域 | 说明 |
+|------|------|
+| Auth / Couple | 云端 `bootstrap-user`、`bind-couple-by-pair-code` |
+| Chat | 云 + 本地表；媒体上传与 list/send |
+| Todo / Bill / Countdown | 典型 **Local + Cloud**，含 `pendingSync` 与合并 |
+| Schedule / Playlist | 云 list/upsert（及 delete 等）+ 本地 |
+| Poke | 云 list/send + 本地 |
+| Feed | **仅 `FeedLocalDataSource`**，无后端 Feed API，跨设备不同步 |
+| Distance | **无独立路由**；在倒计时页与 `relationshipSettings` 本地表；**无跨设备同步 API** |
+| Diary / Album | 路由占位，**建设中** |
+
+## 优先级提示
+
+1. P0：绑定 + 配置 baseUrl 下的闭环与双机验证（含弱网/离线恢复）。
+2. P1：若 Feed 为「共同动态」需上云与设计冲突规则；否则 UI/文档标明单机预期。
+3. Distance：需产品定义（文案 vs 位置）再动 API。
+4. 小步更新后端 README 或与客户端共用的 API 清单。
+
+## 注意事项
+
+- 类名含 `Mock` 的 DataSource 可能指 **本地 Drift 实现**，不一定是假业务。
+- 改 Drift：`schemaVersion` + `migration` 必对齐。

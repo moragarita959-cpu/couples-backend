@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +33,8 @@ class ChatController extends StateNotifier<ChatState> {
   final Random _random = Random();
   Timer? _pollingTimer;
   Timer? _typingDebounceTimer;
+  DateTime? _lastSyncedMessageAt;
+  int _consecutiveReloadFailures = 0;
   bool _lastTypingValue = false;
 
   Future<void> _initialize() async {
@@ -40,10 +42,7 @@ class ChatController extends StateNotifier<ChatState> {
     final coupleId = _currentCoupleIdResolver();
 
     if (currentUserId == null || currentUserId.isEmpty) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: '请先初始化当前设备身份。',
-      );
+      state = state.copyWith(isLoading: false, errorMessage: '请先初始化当前设备身份。');
       return;
     }
 
@@ -59,12 +58,18 @@ class ChatController extends StateNotifier<ChatState> {
 
     await _reload(syncFirst: true);
     _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-      await _reload(syncFirst: true, silent: true);
+    _pollingTimer = Timer.periodic(const Duration(milliseconds: 1200), (
+      _,
+    ) async {
+      await _reload(syncFirst: true, silent: true, incrementalSync: true);
     });
   }
 
-  Future<void> _reload({required bool syncFirst, bool silent = false}) async {
+  Future<void> _reload({
+    required bool syncFirst,
+    bool silent = false,
+    bool incrementalSync = false,
+  }) async {
     final currentUserId = _currentUserIdResolver();
     final coupleId = _currentCoupleIdResolver();
     if (currentUserId == null ||
@@ -84,18 +89,21 @@ class ChatController extends StateNotifier<ChatState> {
 
     try {
       if (syncFirst) {
-        await _syncMessages(currentUserId: currentUserId, coupleId: coupleId);
+        await _syncMessages(
+          currentUserId: currentUserId,
+          coupleId: coupleId,
+          since: incrementalSync ? _lastSyncedMessageAt : null,
+        );
       }
       await _refreshFromLocal(
         currentUserId: currentUserId,
         coupleId: coupleId,
         silent: silent,
       );
+      _consecutiveReloadFailures = 0;
     } catch (_) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: '聊天数据加载失败，请稍后重试。',
-      );
+      _consecutiveReloadFailures += 1;
+      state = state.copyWith(isLoading: false, errorMessage: '聊天数据加载失败，请稍后重试。');
     }
   }
 
@@ -120,6 +128,9 @@ class ChatController extends StateNotifier<ChatState> {
       needsBinding: false,
       errorMessage: null,
     );
+    if (messages.isNotEmpty) {
+      _lastSyncedMessageAt = messages.last.timestamp.toUtc();
+    }
   }
 
   void onComposerTextChanged(String value) {
@@ -192,9 +203,7 @@ class ChatController extends StateNotifier<ChatState> {
         currentUserId.isEmpty ||
         coupleId == null ||
         coupleId.isEmpty) {
-      state = state.copyWith(
-        errorMessage: '请先完成情侣绑定，再开始聊天。',
-      );
+      state = state.copyWith(errorMessage: '请先完成情侣绑定，再开始聊天。');
       return;
     }
 
@@ -227,15 +236,9 @@ class ChatController extends StateNotifier<ChatState> {
             sourcePath: localMediaPath,
           );
         } catch (error) {
-          await _chatRepository.discardOptimisticMessage(
-            clientMessageId: clientMessageId,
-          );
-          await _refreshFromLocal(
-            currentUserId: currentUserId,
-            coupleId: coupleId,
-          );
           state = state.copyWith(
-            errorMessage: _mediaUploadErrorMessage(messageType, error),
+            errorMessage:
+                '${_mediaUploadErrorMessage(messageType, error)}（本地草稿已保留）',
           );
           return;
         }
@@ -250,15 +253,19 @@ class ChatController extends StateNotifier<ChatState> {
         mediaUrl: uploadedMediaUrl,
         mediaDurationMs: mediaDurationMs,
       );
-      await _reload(syncFirst: true, silent: true);
+      await _reload(syncFirst: true, silent: true, incrementalSync: true);
     } catch (_) {
-      await _chatRepository.discardOptimisticMessage(
-        clientMessageId: clientMessageId,
-      );
       await _refreshFromLocal(currentUserId: currentUserId, coupleId: coupleId);
-      state = state.copyWith(errorMessage: '消息发送失败，请稍后再试。');
+      state = state.copyWith(errorMessage: '消息发送失败，已保留本地草稿。');
     } finally {
       state = state.copyWith(isSending: false);
+      if (_consecutiveReloadFailures >= 3) {
+        // 网络持续失败时退化到更慢轮询，避免继续抢资源。
+        _pollingTimer?.cancel();
+        _pollingTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+          await _reload(syncFirst: true, silent: true, incrementalSync: true);
+        });
+      }
     }
   }
 

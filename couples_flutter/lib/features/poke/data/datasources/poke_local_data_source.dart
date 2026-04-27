@@ -25,13 +25,12 @@ class PokeLocalDataSource {
   }
 
   Future<void> replacePokeEvents(List<PokeEvent> events) async {
+    if (events.isEmpty) {
+      return;
+    }
     await _db.transaction(() async {
-      await _db.delete(_db.pokeEventsTable).go();
-      if (events.isEmpty) {
-        return;
-      }
       await _db.batch((batch) {
-        batch.insertAll(
+        batch.insertAllOnConflictUpdate(
           _db.pokeEventsTable,
           events
               .map(

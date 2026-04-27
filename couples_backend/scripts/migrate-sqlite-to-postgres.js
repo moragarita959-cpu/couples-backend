@@ -131,6 +131,121 @@ async function migratePlaylistReviews(client) {
   return rows.length;
 }
 
+async function migrateIdeaNotes(client) {
+  const rows = readRows('idea_notes');
+  for (const row of rows) {
+    await client.query(
+      `
+      INSERT INTO idea_notes (
+        id, couple_id, author_user_id, type, title, content, mood_tag,
+        color_style, layout_style, created_at, updated_at
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      ON CONFLICT (id) DO UPDATE SET
+        couple_id = EXCLUDED.couple_id,
+        author_user_id = EXCLUDED.author_user_id,
+        type = EXCLUDED.type,
+        title = EXCLUDED.title,
+        content = EXCLUDED.content,
+        mood_tag = EXCLUDED.mood_tag,
+        color_style = EXCLUDED.color_style,
+        layout_style = EXCLUDED.layout_style,
+        created_at = EXCLUDED.created_at,
+        updated_at = EXCLUDED.updated_at
+      `,
+      [
+        row.id,
+        row.couple_id,
+        row.author_user_id,
+        row.type,
+        row.title || null,
+        row.content,
+        row.mood_tag || null,
+        row.color_style || null,
+        row.layout_style || null,
+        row.created_at,
+        row.updated_at,
+      ],
+    );
+  }
+  return rows.length;
+}
+
+async function migrateExcerptNotes(client) {
+  const rows = readRows('excerpt_notes');
+  for (const row of rows) {
+    await client.query(
+      `
+      INSERT INTO excerpt_notes (
+        id, couple_id, author_user_id, category, quote_text, source_title,
+        source_author, source_detail, personal_note, card_style, color_style,
+        created_at, updated_at
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+      ON CONFLICT (id) DO UPDATE SET
+        couple_id = EXCLUDED.couple_id,
+        author_user_id = EXCLUDED.author_user_id,
+        category = EXCLUDED.category,
+        quote_text = EXCLUDED.quote_text,
+        source_title = EXCLUDED.source_title,
+        source_author = EXCLUDED.source_author,
+        source_detail = EXCLUDED.source_detail,
+        personal_note = EXCLUDED.personal_note,
+        card_style = EXCLUDED.card_style,
+        color_style = EXCLUDED.color_style,
+        created_at = EXCLUDED.created_at,
+        updated_at = EXCLUDED.updated_at
+      `,
+      [
+        row.id,
+        row.couple_id,
+        row.author_user_id,
+        row.category,
+        row.quote_text,
+        row.source_title || null,
+        row.source_author || null,
+        row.source_detail || null,
+        row.personal_note || null,
+        row.card_style || null,
+        row.color_style || null,
+        row.created_at,
+        row.updated_at,
+      ],
+    );
+  }
+  return rows.length;
+}
+
+async function migrateThoughtComments(client) {
+  const rows = readRows('thought_comments');
+  for (const row of rows) {
+    await client.query(
+      `
+      INSERT INTO thought_comments (
+        id, couple_id, target_type, target_id, author_user_id, content, created_at, updated_at
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      ON CONFLICT (id) DO UPDATE SET
+        couple_id = EXCLUDED.couple_id,
+        target_type = EXCLUDED.target_type,
+        target_id = EXCLUDED.target_id,
+        author_user_id = EXCLUDED.author_user_id,
+        content = EXCLUDED.content,
+        created_at = EXCLUDED.created_at,
+        updated_at = EXCLUDED.updated_at
+      `,
+      [
+        row.id,
+        row.couple_id,
+        row.target_type,
+        row.target_id,
+        row.author_user_id,
+        row.content,
+        row.created_at,
+        row.updated_at,
+      ],
+    );
+  }
+  return rows.length;
+}
+
 async function main() {
   const client = await pg.connect();
   try {
@@ -138,9 +253,12 @@ async function main() {
     const billCount = await migrateBillRecords(client);
     const songCount = await migratePlaylistSongs(client);
     const reviewCount = await migratePlaylistReviews(client);
+    const ideaCount = await migrateIdeaNotes(client);
+    const excerptCount = await migrateExcerptNotes(client);
+    const thoughtCommentCount = await migrateThoughtComments(client);
     await client.query('COMMIT');
     console.log(
-      `Migration completed. bill_records=${billCount}, playlist_songs=${songCount}, playlist_reviews=${reviewCount}`,
+      `Migration completed. bill_records=${billCount}, playlist_songs=${songCount}, playlist_reviews=${reviewCount}, idea_notes=${ideaCount}, excerpt_notes=${excerptCount}, thought_comments=${thoughtCommentCount}`,
     );
   } catch (error) {
     await client.query('ROLLBACK');

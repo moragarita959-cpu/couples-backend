@@ -6,7 +6,11 @@ class AddSong {
 
   final PlaylistRepository _repository;
 
-  Future<Song> call(String name, String artist) {
-    return _repository.addSong(name, artist);
+  Future<Song> call({
+    required String name,
+    required String artist,
+    required String genre,
+  }) {
+    return _repository.addSong(name: name, artist: artist, genre: genre);
   }
 }

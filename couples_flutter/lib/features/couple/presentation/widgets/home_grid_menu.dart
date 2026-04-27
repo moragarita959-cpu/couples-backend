@@ -18,11 +18,11 @@ class HomeGridMenu extends ConsumerWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       childAspectRatio: 1.38,
-      children: [
+      children: <Widget>[
         _FeatureCard(
           icon: Icons.chat_bubble_outline,
           title: '聊天',
-          subtitle: '和 TA 说说话',
+          subtitle: '和 TA 说说今天的小事',
           onTap: () => context.push('/chat'),
         ),
         _FeatureCard(
@@ -36,8 +36,8 @@ class HomeGridMenu extends ConsumerWidget {
           icon: Icons.event_note_outlined,
           title: '倒计时',
           subtitle: summary.todayCountdownEvents.isEmpty
-              ? '今天没有事件'
-              : '今天 ${summary.todayCountdownEvents.length} 个事件',
+              ? '今天没有特别安排'
+              : '今天有 ${summary.todayCountdownEvents.length} 个提醒',
           badgeText: summary.todayCountdownEvents.isEmpty
               ? null
               : '${summary.todayCountdownEvents.length}',
@@ -46,8 +46,20 @@ class HomeGridMenu extends ConsumerWidget {
         _FeatureCard(
           icon: Icons.library_music_outlined,
           title: '歌单',
-          subtitle: '收藏一起喜欢的歌',
+          subtitle: '收藏一起喜欢的音乐',
           onTap: () => context.push('/playlist'),
+        ),
+        _FeatureCard(
+          icon: Icons.photo_album_outlined,
+          title: '相册',
+          subtitle: '把回忆安静收进这里',
+          onTap: () => context.push('/album'),
+        ),
+        _FeatureCard(
+          icon: Icons.sticky_note_2_outlined,
+          title: '想法文摘',
+          subtitle: '把灵感和心动的句子收藏起来',
+          onTap: () => context.push('/thoughts'),
         ),
         _FeatureCard(
           icon: Icons.checklist_rounded,
@@ -106,7 +118,7 @@ class _FeatureCardState extends State<_FeatureCard> {
             color: const Color(0xFFFEFEFE),
             borderRadius: BorderRadius.circular(13),
             border: Border.all(color: const Color(0x13000000)),
-            boxShadow: const [
+            boxShadow: const <BoxShadow>[
               BoxShadow(
                 color: Color(0x09000000),
                 blurRadius: 5,
@@ -125,12 +137,12 @@ class _FeatureCardState extends State<_FeatureCard> {
               });
             },
             child: Stack(
-              children: [
+              children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.fromLTRB(11, 9, 11, 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       Container(
                         width: 28,
                         height: 28,

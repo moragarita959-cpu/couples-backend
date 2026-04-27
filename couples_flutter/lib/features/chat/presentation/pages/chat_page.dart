@@ -12,6 +12,7 @@ import 'package:record/record.dart';
 import '../../../../app/providers.dart';
 import '../../../../core/ui/couple_ui.dart';
 import '../../domain/entities/chat_message.dart';
+import '../../domain/entities/chat_stats.dart';
 import '../state/chat_state.dart';
 import '../widgets/chat_message_widget.dart';
 
@@ -108,15 +109,25 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   }
 
   Future<void> _pickAndSendImage() async {
-    final picked = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-    );
-    if (picked == null) {
-      return;
+    try {
+      final picked = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (picked == null) {
+        return;
+      }
+      await ref.read(chatControllerProvider.notifier).sendImage(picked.path);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('图片发送失败，请稍后重试。')),
+        );
     }
-
-    await ref.read(chatControllerProvider.notifier).sendImage(picked.path);
   }
 
   Future<void> _toggleVoiceRecording() async {
@@ -182,10 +193,107 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       return;
     }
 
-    await ref.read(chatControllerProvider.notifier).sendVoice(
-          audioPath: path,
-          durationMs: duration.inMilliseconds,
+    try {
+      await ref.read(chatControllerProvider.notifier).sendVoice(
+            audioPath: path,
+            durationMs: duration.inMilliseconds,
+          );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('语音发送失败，请稍后重试。')),
         );
+    }
+  }
+
+  void _showStatsSheet(ChatStats? stats) {
+    showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          margin: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+          decoration: BoxDecoration(
+            color: CoupleUi.surface,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: CoupleUi.softShadow,
+          ),
+          child: SingleChildScrollView(
+            child: stats == null
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: Text(
+                        '暂无聊天统计',
+                        style: TextStyle(color: CoupleUi.textSecondary),
+                      ),
+                    ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                        '聊天统计',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: CoupleUi.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _statsTile('消息数量', '${stats.totalMessages} 条'),
+                      _statsTile('连续聊天', '${stats.streakDays} 天'),
+                      _statsTile(
+                        '主动度占比',
+                        '我 ${(stats.meInitiativeRatio * 100).toStringAsFixed(0)}% / TA ${(stats.partnerInitiativeRatio * 100).toStringAsFixed(0)}%',
+                      ),
+                      _statsTile('总字数', '${stats.totalCharacterCount} 字'),
+                      _statsTile(
+                        '双方字数',
+                        '我 ${stats.meCharacterCount} / TA ${stats.partnerCharacterCount}',
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _statsTile(String label, String value) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: CoupleUi.nestedCardDecoration(),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: CoupleUi.textSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: CoupleUi.textPrimary,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   KeyEventResult _handleComposerKey(FocusNode node, KeyEvent event) {
@@ -244,10 +352,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       }
     });
 
-    final stats = state.stats;
-    final meRatio = ((stats?.meInitiativeRatio ?? 0) * 100).round();
-    final partnerRatio = ((stats?.partnerInitiativeRatio ?? 0) * 100).round();
-
     return Scaffold(
       backgroundColor: CoupleUi.pageBackground,
       appBar: AppBar(
@@ -283,6 +387,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ),
           ],
         ),
+        actions: <Widget>[
+          IconButton(
+            tooltip: '聊天统计',
+            onPressed: () => _showStatsSheet(state.stats),
+            icon: const Icon(Icons.insights_outlined),
+          ),
+        ],
       ),
       body: SafeArea(
         child: DecoratedBox(
@@ -304,16 +415,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   ),
                 )
               else ...[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
-                  child: _StatsPanel(
-                    totalMessages: stats?.totalMessages ?? 0,
-                    streakDays: stats?.streakDays ?? 0,
-                    meRatio: meRatio,
-                    partnerRatio: partnerRatio,
-                    totalCharacterCount: stats?.totalCharacterCount ?? 0,
-                  ),
-                ),
                 Expanded(
                   child: ListView.builder(
                     controller: _scrollController,
@@ -359,99 +460,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final minutes = value.inMinutes;
     final seconds = (value.inSeconds % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
-  }
-}
-
-class _StatsPanel extends StatelessWidget {
-  const _StatsPanel({
-    required this.totalMessages,
-    required this.streakDays,
-    required this.meRatio,
-    required this.partnerRatio,
-    required this.totalCharacterCount,
-  });
-
-  final int totalMessages;
-  final int streakDays;
-  final int meRatio;
-  final int partnerRatio;
-  final int totalCharacterCount;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: CoupleUi.sectionCardDecoration(),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _StatCard(label: '消息数', value: '$totalMessages'),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _StatCard(label: '连续互动', value: '$streakDays 天'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _StatCard(
-                  label: '主动度',
-                  value: '我 $meRatio% / TA $partnerRatio%',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _StatCard(
-                  label: '聊天字数',
-                  value: '$totalCharacterCount 字',
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: CoupleUi.nestedCardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, color: Color(0xFF8D7B82)),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF3D2B34),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

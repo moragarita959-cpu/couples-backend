@@ -273,6 +273,69 @@ async function initPostgresSchema() {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS idea_notes (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      author_user_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      title TEXT NULL,
+      content TEXT NOT NULL,
+      mood_tag TEXT NULL,
+      color_style TEXT NULL,
+      layout_style TEXT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_idea_notes_couple_updated
+      ON idea_notes(couple_id, updated_at DESC, id DESC);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS excerpt_notes (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      author_user_id TEXT NOT NULL,
+      category TEXT NOT NULL,
+      quote_text TEXT NOT NULL,
+      source_title TEXT NULL,
+      source_author TEXT NULL,
+      source_detail TEXT NULL,
+      personal_note TEXT NULL,
+      card_style TEXT NULL,
+      color_style TEXT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_excerpt_notes_couple_updated
+      ON excerpt_notes(couple_id, updated_at DESC, id DESC);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS thought_comments (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      target_type TEXT NOT NULL,
+      target_id TEXT NOT NULL,
+      author_user_id TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_thought_comments_target_created
+      ON thought_comments(target_type, target_id, created_at, id);
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_thought_comments_couple_target
+      ON thought_comments(couple_id, target_type, target_id);
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS feed_events (
       id TEXT PRIMARY KEY,
       couple_id TEXT NOT NULL,

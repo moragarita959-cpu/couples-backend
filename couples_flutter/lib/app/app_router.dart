@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/album/presentation/pages/album_detail_page.dart';
 import '../features/auth/presentation/pages/auth_login_page.dart';
 import '../features/auth/presentation/pages/auth_success_page.dart';
 import '../features/album/presentation/pages/album_page.dart';
@@ -10,8 +11,14 @@ import '../features/couple/presentation/pages/couple_bind_page.dart';
 import '../features/couple/presentation/pages/couple_home_page.dart';
 import '../features/diary/presentation/pages/diary_page.dart';
 import '../features/feed/presentation/pages/feed_page.dart';
+import '../features/album/presentation/pages/photo_detail_page.dart';
 import '../features/playlist/presentation/pages/playlist_page.dart';
 import '../features/schedule/presentation/pages/schedule_page.dart';
+import '../features/thoughts/presentation/pages/excerpt_detail_page.dart';
+import '../features/thoughts/presentation/pages/excerpt_edit_page.dart';
+import '../features/thoughts/presentation/pages/idea_detail_page.dart';
+import '../features/thoughts/presentation/pages/idea_edit_page.dart';
+import '../features/thoughts/presentation/pages/thoughts_home_page.dart';
 import '../features/todo/presentation/pages/todo_page.dart';
 import '../pages/app_shell_page.dart';
 
@@ -53,6 +60,46 @@ GoRouter buildAppRouter() {
         builder: (context, state) => const SchedulePage(),
       ),
       GoRoute(path: '/album', builder: (context, state) => const AlbumPage()),
+      GoRoute(
+        path: '/thoughts',
+        builder: (context, state) => const ThoughtsHomePage(),
+      ),
+      GoRoute(
+        path: '/thoughts/idea/:ideaId',
+        builder: (context, state) => IdeaDetailPage(
+          ideaId: state.pathParameters['ideaId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/thoughts/excerpt/:excerptId',
+        builder: (context, state) => ExcerptDetailPage(
+          excerptId: state.pathParameters['excerptId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/thoughts/idea/edit',
+        builder: (context, state) => IdeaEditPage(
+          ideaId: state.uri.queryParameters['ideaId'],
+        ),
+      ),
+      GoRoute(
+        path: '/thoughts/excerpt/edit',
+        builder: (context, state) => ExcerptEditPage(
+          excerptId: state.uri.queryParameters['excerptId'],
+        ),
+      ),
+      GoRoute(
+        path: '/album/:albumId',
+        builder: (context, state) => AlbumDetailPage(
+          albumId: state.pathParameters['albumId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/album/photo/:photoId',
+        builder: (context, state) => PhotoDetailPage(
+          photoId: state.pathParameters['photoId'] ?? '',
+        ),
+      ),
       GoRoute(path: '/diary', builder: (context, state) => const DiaryPage()),
     ],
   );

@@ -9,15 +9,18 @@ abstract class BillRepository {
     required String id,
     required String coupleId,
     required DateTime updatedAt,
+    required String actorUserId,
   });
   Future<BillSummary> getSummary({String coupleId = ''});
 
   Future<BillRecord> createRecord(
     BillType type,
-    BillCategory category,
+    String categoryKey,
     double amount,
-    String note,
-  );
+    String note, {
+    required String ownerUserId,
+    required String coupleId,
+  });
 
   Future<List<BillRecord>> getRecords();
 }

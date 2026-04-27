@@ -7,17 +7,40 @@ class PlaylistCloudDataSource {
 
   final ApiClient _apiClient;
 
-  Future<List<SongModel>> listSongs({required String coupleId}) async {
-    final payload = await _apiClient.listPlaylistSongs(coupleId: coupleId);
+  Future<List<SongModel>> listSongs({
+    required String coupleId,
+    required String currentUserId,
+  }) async {
+    final payload = await _apiClient.listPlaylistSongs(
+      coupleId: coupleId,
+      currentUserId: currentUserId,
+    );
     return payload.map(SongModel.fromCloudJson).toList();
   }
 
   Future<SongModel> upsertSong({
     required SongModel song,
     required String coupleId,
+    required String currentUserId,
   }) async {
-    final payload = await _apiClient.upsertPlaylistSong(song.toCloudJson(coupleId: coupleId));
+    final payload = await _apiClient.upsertPlaylistSong(
+      song.toCloudJson(coupleId: coupleId, currentUserId: currentUserId),
+    );
     return SongModel.fromCloudJson(payload);
+  }
+
+  Future<void> deleteSong({
+    required String coupleId,
+    required String currentUserId,
+    required String songId,
+    required DateTime updatedAt,
+  }) {
+    return _apiClient.deletePlaylistSong(
+      coupleId: coupleId,
+      currentUserId: currentUserId,
+      songId: songId,
+      updatedAt: updatedAt,
+    );
   }
 
   Future<List<SongReviewModel>> listReviews({

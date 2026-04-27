@@ -19,20 +19,29 @@ class TodoRepositoryImpl implements TodoRepository {
   Future<List<TodoItem>> refresh({required String coupleId}) async {
     final pending = await _local.getPendingSyncItems(coupleId: coupleId);
     for (final item in pending) {
-      if (item.isDeleted) {
-        await _cloud.deleteItem(
-          id: item.id,
-          coupleId: item.coupleId,
-          updatedAt: item.updatedAt,
-        );
-        await _local.upsertItems([item.copyWith(pendingSync: false)]);
-      } else {
-        final remote = await _cloud.upsertItem(item);
-        await _local.upsertItems([remote.copyWith(pendingSync: false)]);
+      try {
+        if (item.isDeleted) {
+          await _cloud.deleteItem(
+            id: item.id,
+            coupleId: item.coupleId,
+            updatedAt: item.updatedAt,
+          );
+          await _local.upsertItems([item.copyWith(pendingSync: false)]);
+        } else {
+          final remote = await _cloud.upsertItem(item);
+          await _local.upsertItems([remote.copyWith(pendingSync: false)]);
+        }
+      } catch (_) {
+        continue;
       }
     }
 
-    final remoteItems = await _cloud.listItems(coupleId: coupleId);
+    List<TodoItemModel> remoteItems = const <TodoItemModel>[];
+    try {
+      remoteItems = await _cloud.listItems(coupleId: coupleId);
+    } catch (_) {
+      return _local.loadAll(coupleId: coupleId);
+    }
     final localItems = await _local.loadAll(coupleId: coupleId);
     final localMap = <String, TodoItemModel>{
       for (final item in localItems.cast<TodoItemModel>()) item.id: item,

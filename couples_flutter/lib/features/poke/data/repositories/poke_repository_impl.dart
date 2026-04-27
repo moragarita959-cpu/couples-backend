@@ -11,6 +11,8 @@ class PokeRepositoryImpl implements PokeRepository {
     this._resolveCoupleId,
   );
 
+  static const _pokeMessage = '轻轻戳了你一下';
+
   final PokeLocalDataSource _localDataSource;
   final PokeCloudDataSource _cloudDataSource;
   final String? Function() _resolveCurrentUserId;
@@ -18,29 +20,34 @@ class PokeRepositoryImpl implements PokeRepository {
 
   @override
   Future<PokeEvent> sendPoke() async {
+    final local = PokeEvent(
+      id: 'poke-${DateTime.now().microsecondsSinceEpoch}',
+      sender: PokeSender.me,
+      createdAt: DateTime.now(),
+      message: _pokeMessage,
+    );
+    await _localDataSource.upsertPokeEvent(local);
+
     final coupleId = _resolveCoupleId();
     final currentUserId = _resolveCurrentUserId();
     if (coupleId == null ||
         coupleId.isEmpty ||
         currentUserId == null ||
         currentUserId.isEmpty) {
-      final local = PokeEvent(
-        id: 'poke-${DateTime.now().microsecondsSinceEpoch}',
-        sender: PokeSender.me,
-        createdAt: DateTime.now(),
-        message: '轻轻戳了你一下',
-      );
-      await _localDataSource.upsertPokeEvent(local);
       return local;
     }
 
-    final event = await _cloudDataSource.sendPoke(
-      coupleId: coupleId,
-      currentUserId: currentUserId,
-      message: '轻轻戳了你一下',
-    );
-    await _localDataSource.upsertPokeEvent(event);
-    return event;
+    try {
+      final event = await _cloudDataSource.sendPoke(
+        coupleId: coupleId,
+        currentUserId: currentUserId,
+        message: _pokeMessage,
+      );
+      await _localDataSource.upsertPokeEvent(event);
+      return event;
+    } catch (_) {
+      return local;
+    }
   }
 
   @override
@@ -60,11 +67,15 @@ class PokeRepositoryImpl implements PokeRepository {
         coupleId.isNotEmpty &&
         currentUserId != null &&
         currentUserId.isNotEmpty) {
-      final remote = await _cloudDataSource.listPokeEvents(
-        coupleId: coupleId,
-        currentUserId: currentUserId,
-      );
-      await _localDataSource.replacePokeEvents(remote);
+      try {
+        final remote = await _cloudDataSource.listPokeEvents(
+          coupleId: coupleId,
+          currentUserId: currentUserId,
+        );
+        await _localDataSource.replacePokeEvents(remote);
+      } catch (_) {
+        // Keep local poke history visible when cloud sync fails.
+      }
     }
     return _localDataSource.getPokeEvents();
   }

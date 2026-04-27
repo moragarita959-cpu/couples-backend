@@ -6,6 +6,11 @@ import 'package:just_audio/just_audio.dart';
 import '../../../../core/ui/couple_ui.dart';
 import '../../domain/entities/chat_message.dart';
 
+const String _chatApiBaseUrl = String.fromEnvironment(
+  'COUPLES_API_BASE_URL',
+  defaultValue: '',
+);
+
 class ChatMessageWidget extends StatefulWidget {
   const ChatMessageWidget({super.key, required this.message});
 
@@ -19,6 +24,7 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
   AudioPlayer? _voicePlayer;
   bool _voiceReady = false;
   bool _isPlaying = false;
+  bool _voiceLoadFailed = false;
 
   String _formatTime(DateTime time) {
     final hour = time.hour.toString().padLeft(2, '0');
@@ -42,6 +48,7 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     }
     _voiceReady = false;
     _isPlaying = false;
+    _voiceLoadFailed = false;
     _voicePlayer?.dispose();
     _voicePlayer = null;
     _initVoicePlayerIfNeeded();
@@ -69,20 +76,28 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
       return;
     }
     try {
-      if (_isNetworkUrl(mediaUrl)) {
-        await _voicePlayer!.setUrl(mediaUrl);
+      final resolved = _resolveAudioSource(mediaUrl);
+      if (resolved == null) {
+        throw const FormatException('invalid_audio_source');
+      }
+      if (_isNetworkUrl(resolved)) {
+        await _voicePlayer!.setUrl(resolved);
+      } else if (resolved.startsWith('file://')) {
+        await _voicePlayer!.setFilePath(Uri.parse(resolved).toFilePath());
       } else {
-        await _voicePlayer!.setFilePath(mediaUrl);
+        await _voicePlayer!.setUrl(resolved);
       }
       if (mounted) {
         setState(() {
           _voiceReady = true;
+          _voiceLoadFailed = false;
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
           _voiceReady = false;
+          _voiceLoadFailed = true;
         });
       }
     }
@@ -110,6 +125,56 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     return value.startsWith('http://') || value.startsWith('https://');
   }
 
+  String? _resolveAudioSource(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+    final normalizedRemote = _normalizeRemoteMediaUrl(trimmed);
+    if (normalizedRemote != null && _isNetworkUrl(normalizedRemote)) {
+      return normalizedRemote;
+    }
+    if (trimmed.startsWith('file://')) {
+      return trimmed;
+    }
+    final file = File(trimmed);
+    if (!file.existsSync()) {
+      return null;
+    }
+    return file.uri.toString();
+  }
+
+  String? _normalizeRemoteMediaUrl(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+    final base = _chatApiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+    if (trimmed.startsWith('/')) {
+      return base.isEmpty ? null : '$base$trimmed';
+    }
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      final uri = Uri.tryParse(trimmed);
+      final baseUri = base.isEmpty ? null : Uri.tryParse(base);
+      if (uri == null || baseUri == null) {
+        return trimmed;
+      }
+      if (uri.path.startsWith('/media/chat/') && uri.host != baseUri.host) {
+        return baseUri
+            .replace(
+              path: uri.path,
+              query: uri.hasQuery ? uri.query : null,
+            )
+            .toString();
+      }
+      return trimmed;
+    }
+    if (trimmed.startsWith('media/chat/')) {
+      return base.isEmpty ? null : '$base/$trimmed';
+    }
+    return null;
+  }
+
   String _formatVoiceDuration(int? durationMs) {
     if (durationMs == null || durationMs <= 0) {
       return '0:00';
@@ -130,6 +195,7 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
           onTap: _toggleVoicePlayback,
           isPlayable: _voiceReady,
           isPlaying: _isPlaying,
+          hasError: _voiceLoadFailed,
         );
       case ChatMessageType.text:
         return Text(
@@ -246,9 +312,11 @@ class _ChatImageContent extends StatelessWidget {
       );
     }
 
-    final imageWidget = _isNetworkUrl(mediaUrl!)
+    final normalizedRemote = _normalizeRemoteMediaUrl(mediaUrl!);
+    final resolvedFile = _resolveLocalFile(mediaUrl!);
+    final imageWidget = normalizedRemote != null && _isNetworkUrl(normalizedRemote)
         ? Image.network(
-            mediaUrl!,
+            normalizedRemote,
             fit: BoxFit.cover,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) {
@@ -262,11 +330,13 @@ class _ChatImageContent extends StatelessWidget {
             },
             errorBuilder: (_, __, ___) => const _ImageFallback(),
           )
-        : Image.file(
-            File(mediaUrl!),
+        : resolvedFile != null
+        ? Image.file(
+            resolvedFile,
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => const _ImageFallback(),
-          );
+          )
+        : const _ImageFallback();
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
@@ -280,6 +350,51 @@ class _ChatImageContent extends StatelessWidget {
         child: imageWidget,
       ),
     );
+  }
+
+  File? _resolveLocalFile(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+    if (trimmed.startsWith('file://')) {
+      final path = Uri.parse(trimmed).toFilePath();
+      final file = File(path);
+      return file.existsSync() ? file : null;
+    }
+    final file = File(trimmed);
+    return file.existsSync() ? file : null;
+  }
+
+  String? _normalizeRemoteMediaUrl(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+    final base = _chatApiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+    if (trimmed.startsWith('/')) {
+      return base.isEmpty ? null : '$base$trimmed';
+    }
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      final uri = Uri.tryParse(trimmed);
+      final baseUri = base.isEmpty ? null : Uri.tryParse(base);
+      if (uri == null || baseUri == null) {
+        return trimmed;
+      }
+      if (uri.path.startsWith('/media/chat/') && uri.host != baseUri.host) {
+        return baseUri
+            .replace(
+              path: uri.path,
+              query: uri.hasQuery ? uri.query : null,
+            )
+            .toString();
+      }
+      return trimmed;
+    }
+    if (trimmed.startsWith('media/chat/')) {
+      return base.isEmpty ? null : '$base/$trimmed';
+    }
+    return null;
   }
 }
 
@@ -312,12 +427,14 @@ class _ChatVoiceContent extends StatelessWidget {
     required this.onTap,
     required this.isPlayable,
     required this.isPlaying,
+    required this.hasError,
   });
 
   final String durationLabel;
   final VoidCallback onTap;
   final bool isPlayable;
   final bool isPlaying;
+  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
@@ -338,7 +455,9 @@ class _ChatVoiceContent extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                isPlayable ? '语音消息' : '语音准备中...',
+                isPlayable
+                    ? '语音消息'
+                    : (hasError ? '语音加载失败' : '语音准备中...'),
                 style: const TextStyle(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,

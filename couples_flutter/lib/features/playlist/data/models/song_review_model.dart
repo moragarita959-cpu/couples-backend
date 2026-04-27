@@ -56,6 +56,9 @@ class SongReviewModel extends SongReview {
   }
 
   factory SongReviewModel.fromCloudJson(Map<String, dynamic> json) {
+    final singleScore = _toDouble(json['singleScore']);
+    final encodedSingle =
+        singleScore == null ? null : _encodeSingleScore(singleScore);
     return SongReviewModel(
       id: json['id'] as String,
       songId: json['songId'] as String,
@@ -66,9 +69,13 @@ class SongReviewModel extends SongReview {
       styleTags: (json['styleTags'] as List<dynamic>? ?? const <dynamic>[])
           .whereType<String>()
           .toList(),
-      atmosphereScore: json['atmosphereScore'] as int? ?? 0,
-      resonanceScore: json['resonanceScore'] as int? ?? 0,
-      shareScore: json['shareScore'] as int? ?? 0,
+      atmosphereScore:
+          encodedSingle ?? (json['atmosphereScore'] as num?)?.round() ?? 0,
+      resonanceScore: encodedSingle == null
+          ? (json['resonanceScore'] as num?)?.round() ?? 0
+          : 0,
+      shareScore:
+          encodedSingle == null ? (json['shareScore'] as num?)?.round() ?? 0 : 0,
       createdAt: DateTime.parse(json['createdAt'] as String).toLocal(),
     );
   }
@@ -101,8 +108,24 @@ class SongReviewModel extends SongReview {
       'atmosphereScore': atmosphereScore,
       'resonanceScore': resonanceScore,
       'shareScore': shareScore,
+      'singleScore': singleScore,
       'createdAt': createdAt.toUtc().toIso8601String(),
     };
+  }
+
+  static int _encodeSingleScore(double score) {
+    final normalized = score.clamp(-15.0, 15.0);
+    return (normalized * 10).round();
+  }
+
+  static double? _toDouble(Object? value) {
+    if (value is num) {
+      return value.toDouble();
+    }
+    if (value is String) {
+      return double.tryParse(value.trim());
+    }
+    return null;
   }
 
   static String _encodeStyleTags(List<String> tags) => jsonEncode(tags);

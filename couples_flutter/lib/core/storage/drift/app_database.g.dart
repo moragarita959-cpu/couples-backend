@@ -3,6 +3,1618 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
+class $AlbumsTableTable extends AlbumsTable
+    with TableInfo<$AlbumsTableTable, AlbumsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AlbumsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _coupleIdMeta = const VerificationMeta(
+    'coupleId',
+  );
+  @override
+  late final GeneratedColumn<String> coupleId = GeneratedColumn<String>(
+    'couple_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _coverPhotoUrlMeta = const VerificationMeta(
+    'coverPhotoUrl',
+  );
+  @override
+  late final GeneratedColumn<String> coverPhotoUrl = GeneratedColumn<String>(
+    'cover_photo_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByUserIdMeta = const VerificationMeta(
+    'createdByUserId',
+  );
+  @override
+  late final GeneratedColumn<String> createdByUserId = GeneratedColumn<String>(
+    'created_by_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    coupleId,
+    title,
+    description,
+    coverPhotoUrl,
+    createdByUserId,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'albums';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AlbumsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('couple_id')) {
+      context.handle(
+        _coupleIdMeta,
+        coupleId.isAcceptableOrUnknown(data['couple_id']!, _coupleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_coupleIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cover_photo_url')) {
+      context.handle(
+        _coverPhotoUrlMeta,
+        coverPhotoUrl.isAcceptableOrUnknown(
+          data['cover_photo_url']!,
+          _coverPhotoUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_by_user_id')) {
+      context.handle(
+        _createdByUserIdMeta,
+        createdByUserId.isAcceptableOrUnknown(
+          data['created_by_user_id']!,
+          _createdByUserIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByUserIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AlbumsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AlbumsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      coupleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}couple_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      coverPhotoUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cover_photo_url'],
+      ),
+      createdByUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by_user_id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AlbumsTableTable createAlias(String alias) {
+    return $AlbumsTableTable(attachedDatabase, alias);
+  }
+}
+
+class AlbumsTableData extends DataClass implements Insertable<AlbumsTableData> {
+  final String id;
+  final String coupleId;
+  final String title;
+  final String description;
+  final String? coverPhotoUrl;
+  final String createdByUserId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const AlbumsTableData({
+    required this.id,
+    required this.coupleId,
+    required this.title,
+    required this.description,
+    this.coverPhotoUrl,
+    required this.createdByUserId,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['couple_id'] = Variable<String>(coupleId);
+    map['title'] = Variable<String>(title);
+    map['description'] = Variable<String>(description);
+    if (!nullToAbsent || coverPhotoUrl != null) {
+      map['cover_photo_url'] = Variable<String>(coverPhotoUrl);
+    }
+    map['created_by_user_id'] = Variable<String>(createdByUserId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AlbumsTableCompanion toCompanion(bool nullToAbsent) {
+    return AlbumsTableCompanion(
+      id: Value(id),
+      coupleId: Value(coupleId),
+      title: Value(title),
+      description: Value(description),
+      coverPhotoUrl: coverPhotoUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverPhotoUrl),
+      createdByUserId: Value(createdByUserId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AlbumsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AlbumsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      coupleId: serializer.fromJson<String>(json['coupleId']),
+      title: serializer.fromJson<String>(json['title']),
+      description: serializer.fromJson<String>(json['description']),
+      coverPhotoUrl: serializer.fromJson<String?>(json['coverPhotoUrl']),
+      createdByUserId: serializer.fromJson<String>(json['createdByUserId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'coupleId': serializer.toJson<String>(coupleId),
+      'title': serializer.toJson<String>(title),
+      'description': serializer.toJson<String>(description),
+      'coverPhotoUrl': serializer.toJson<String?>(coverPhotoUrl),
+      'createdByUserId': serializer.toJson<String>(createdByUserId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AlbumsTableData copyWith({
+    String? id,
+    String? coupleId,
+    String? title,
+    String? description,
+    Value<String?> coverPhotoUrl = const Value.absent(),
+    String? createdByUserId,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => AlbumsTableData(
+    id: id ?? this.id,
+    coupleId: coupleId ?? this.coupleId,
+    title: title ?? this.title,
+    description: description ?? this.description,
+    coverPhotoUrl: coverPhotoUrl.present
+        ? coverPhotoUrl.value
+        : this.coverPhotoUrl,
+    createdByUserId: createdByUserId ?? this.createdByUserId,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AlbumsTableData copyWithCompanion(AlbumsTableCompanion data) {
+    return AlbumsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      coupleId: data.coupleId.present ? data.coupleId.value : this.coupleId,
+      title: data.title.present ? data.title.value : this.title,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      coverPhotoUrl: data.coverPhotoUrl.present
+          ? data.coverPhotoUrl.value
+          : this.coverPhotoUrl,
+      createdByUserId: data.createdByUserId.present
+          ? data.createdByUserId.value
+          : this.createdByUserId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlbumsTableData(')
+          ..write('id: $id, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('coverPhotoUrl: $coverPhotoUrl, ')
+          ..write('createdByUserId: $createdByUserId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    coupleId,
+    title,
+    description,
+    coverPhotoUrl,
+    createdByUserId,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AlbumsTableData &&
+          other.id == this.id &&
+          other.coupleId == this.coupleId &&
+          other.title == this.title &&
+          other.description == this.description &&
+          other.coverPhotoUrl == this.coverPhotoUrl &&
+          other.createdByUserId == this.createdByUserId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AlbumsTableCompanion extends UpdateCompanion<AlbumsTableData> {
+  final Value<String> id;
+  final Value<String> coupleId;
+  final Value<String> title;
+  final Value<String> description;
+  final Value<String?> coverPhotoUrl;
+  final Value<String> createdByUserId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AlbumsTableCompanion({
+    this.id = const Value.absent(),
+    this.coupleId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.description = const Value.absent(),
+    this.coverPhotoUrl = const Value.absent(),
+    this.createdByUserId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AlbumsTableCompanion.insert({
+    required String id,
+    required String coupleId,
+    required String title,
+    this.description = const Value.absent(),
+    this.coverPhotoUrl = const Value.absent(),
+    required String createdByUserId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       coupleId = Value(coupleId),
+       title = Value(title),
+       createdByUserId = Value(createdByUserId),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<AlbumsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? coupleId,
+    Expression<String>? title,
+    Expression<String>? description,
+    Expression<String>? coverPhotoUrl,
+    Expression<String>? createdByUserId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (coupleId != null) 'couple_id': coupleId,
+      if (title != null) 'title': title,
+      if (description != null) 'description': description,
+      if (coverPhotoUrl != null) 'cover_photo_url': coverPhotoUrl,
+      if (createdByUserId != null) 'created_by_user_id': createdByUserId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AlbumsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? coupleId,
+    Value<String>? title,
+    Value<String>? description,
+    Value<String?>? coverPhotoUrl,
+    Value<String>? createdByUserId,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AlbumsTableCompanion(
+      id: id ?? this.id,
+      coupleId: coupleId ?? this.coupleId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      coverPhotoUrl: coverPhotoUrl ?? this.coverPhotoUrl,
+      createdByUserId: createdByUserId ?? this.createdByUserId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (coupleId.present) {
+      map['couple_id'] = Variable<String>(coupleId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (coverPhotoUrl.present) {
+      map['cover_photo_url'] = Variable<String>(coverPhotoUrl.value);
+    }
+    if (createdByUserId.present) {
+      map['created_by_user_id'] = Variable<String>(createdByUserId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlbumsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('coverPhotoUrl: $coverPhotoUrl, ')
+          ..write('createdByUserId: $createdByUserId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AlbumPhotosTableTable extends AlbumPhotosTable
+    with TableInfo<$AlbumPhotosTableTable, AlbumPhotosTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AlbumPhotosTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _albumIdMeta = const VerificationMeta(
+    'albumId',
+  );
+  @override
+  late final GeneratedColumn<String> albumId = GeneratedColumn<String>(
+    'album_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _coupleIdMeta = const VerificationMeta(
+    'coupleId',
+  );
+  @override
+  late final GeneratedColumn<String> coupleId = GeneratedColumn<String>(
+    'couple_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _uploaderUserIdMeta = const VerificationMeta(
+    'uploaderUserId',
+  );
+  @override
+  late final GeneratedColumn<String> uploaderUserId = GeneratedColumn<String>(
+    'uploader_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
+    'imageUrl',
+  );
+  @override
+  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
+    'image_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _localPathMeta = const VerificationMeta(
+    'localPath',
+  );
+  @override
+  late final GeneratedColumn<String> localPath = GeneratedColumn<String>(
+    'local_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _captionMeta = const VerificationMeta(
+    'caption',
+  );
+  @override
+  late final GeneratedColumn<String> caption = GeneratedColumn<String>(
+    'caption',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _takenAtMeta = const VerificationMeta(
+    'takenAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> takenAt = GeneratedColumn<DateTime>(
+    'taken_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    albumId,
+    coupleId,
+    uploaderUserId,
+    imageUrl,
+    localPath,
+    caption,
+    takenAt,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'album_photos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AlbumPhotosTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('album_id')) {
+      context.handle(
+        _albumIdMeta,
+        albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_albumIdMeta);
+    }
+    if (data.containsKey('couple_id')) {
+      context.handle(
+        _coupleIdMeta,
+        coupleId.isAcceptableOrUnknown(data['couple_id']!, _coupleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_coupleIdMeta);
+    }
+    if (data.containsKey('uploader_user_id')) {
+      context.handle(
+        _uploaderUserIdMeta,
+        uploaderUserId.isAcceptableOrUnknown(
+          data['uploader_user_id']!,
+          _uploaderUserIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_uploaderUserIdMeta);
+    }
+    if (data.containsKey('image_url')) {
+      context.handle(
+        _imageUrlMeta,
+        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
+      );
+    }
+    if (data.containsKey('local_path')) {
+      context.handle(
+        _localPathMeta,
+        localPath.isAcceptableOrUnknown(data['local_path']!, _localPathMeta),
+      );
+    }
+    if (data.containsKey('caption')) {
+      context.handle(
+        _captionMeta,
+        caption.isAcceptableOrUnknown(data['caption']!, _captionMeta),
+      );
+    }
+    if (data.containsKey('taken_at')) {
+      context.handle(
+        _takenAtMeta,
+        takenAt.isAcceptableOrUnknown(data['taken_at']!, _takenAtMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AlbumPhotosTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AlbumPhotosTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      albumId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}album_id'],
+      )!,
+      coupleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}couple_id'],
+      )!,
+      uploaderUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uploader_user_id'],
+      )!,
+      imageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_url'],
+      ),
+      localPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_path'],
+      ),
+      caption: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}caption'],
+      )!,
+      takenAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}taken_at'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AlbumPhotosTableTable createAlias(String alias) {
+    return $AlbumPhotosTableTable(attachedDatabase, alias);
+  }
+}
+
+class AlbumPhotosTableData extends DataClass
+    implements Insertable<AlbumPhotosTableData> {
+  final String id;
+  final String albumId;
+  final String coupleId;
+  final String uploaderUserId;
+  final String? imageUrl;
+  final String? localPath;
+  final String caption;
+  final DateTime? takenAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const AlbumPhotosTableData({
+    required this.id,
+    required this.albumId,
+    required this.coupleId,
+    required this.uploaderUserId,
+    this.imageUrl,
+    this.localPath,
+    required this.caption,
+    this.takenAt,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['album_id'] = Variable<String>(albumId);
+    map['couple_id'] = Variable<String>(coupleId);
+    map['uploader_user_id'] = Variable<String>(uploaderUserId);
+    if (!nullToAbsent || imageUrl != null) {
+      map['image_url'] = Variable<String>(imageUrl);
+    }
+    if (!nullToAbsent || localPath != null) {
+      map['local_path'] = Variable<String>(localPath);
+    }
+    map['caption'] = Variable<String>(caption);
+    if (!nullToAbsent || takenAt != null) {
+      map['taken_at'] = Variable<DateTime>(takenAt);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AlbumPhotosTableCompanion toCompanion(bool nullToAbsent) {
+    return AlbumPhotosTableCompanion(
+      id: Value(id),
+      albumId: Value(albumId),
+      coupleId: Value(coupleId),
+      uploaderUserId: Value(uploaderUserId),
+      imageUrl: imageUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageUrl),
+      localPath: localPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localPath),
+      caption: Value(caption),
+      takenAt: takenAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(takenAt),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AlbumPhotosTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AlbumPhotosTableData(
+      id: serializer.fromJson<String>(json['id']),
+      albumId: serializer.fromJson<String>(json['albumId']),
+      coupleId: serializer.fromJson<String>(json['coupleId']),
+      uploaderUserId: serializer.fromJson<String>(json['uploaderUserId']),
+      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
+      localPath: serializer.fromJson<String?>(json['localPath']),
+      caption: serializer.fromJson<String>(json['caption']),
+      takenAt: serializer.fromJson<DateTime?>(json['takenAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'albumId': serializer.toJson<String>(albumId),
+      'coupleId': serializer.toJson<String>(coupleId),
+      'uploaderUserId': serializer.toJson<String>(uploaderUserId),
+      'imageUrl': serializer.toJson<String?>(imageUrl),
+      'localPath': serializer.toJson<String?>(localPath),
+      'caption': serializer.toJson<String>(caption),
+      'takenAt': serializer.toJson<DateTime?>(takenAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AlbumPhotosTableData copyWith({
+    String? id,
+    String? albumId,
+    String? coupleId,
+    String? uploaderUserId,
+    Value<String?> imageUrl = const Value.absent(),
+    Value<String?> localPath = const Value.absent(),
+    String? caption,
+    Value<DateTime?> takenAt = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => AlbumPhotosTableData(
+    id: id ?? this.id,
+    albumId: albumId ?? this.albumId,
+    coupleId: coupleId ?? this.coupleId,
+    uploaderUserId: uploaderUserId ?? this.uploaderUserId,
+    imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
+    localPath: localPath.present ? localPath.value : this.localPath,
+    caption: caption ?? this.caption,
+    takenAt: takenAt.present ? takenAt.value : this.takenAt,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AlbumPhotosTableData copyWithCompanion(AlbumPhotosTableCompanion data) {
+    return AlbumPhotosTableData(
+      id: data.id.present ? data.id.value : this.id,
+      albumId: data.albumId.present ? data.albumId.value : this.albumId,
+      coupleId: data.coupleId.present ? data.coupleId.value : this.coupleId,
+      uploaderUserId: data.uploaderUserId.present
+          ? data.uploaderUserId.value
+          : this.uploaderUserId,
+      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      localPath: data.localPath.present ? data.localPath.value : this.localPath,
+      caption: data.caption.present ? data.caption.value : this.caption,
+      takenAt: data.takenAt.present ? data.takenAt.value : this.takenAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlbumPhotosTableData(')
+          ..write('id: $id, ')
+          ..write('albumId: $albumId, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('uploaderUserId: $uploaderUserId, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('localPath: $localPath, ')
+          ..write('caption: $caption, ')
+          ..write('takenAt: $takenAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    albumId,
+    coupleId,
+    uploaderUserId,
+    imageUrl,
+    localPath,
+    caption,
+    takenAt,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AlbumPhotosTableData &&
+          other.id == this.id &&
+          other.albumId == this.albumId &&
+          other.coupleId == this.coupleId &&
+          other.uploaderUserId == this.uploaderUserId &&
+          other.imageUrl == this.imageUrl &&
+          other.localPath == this.localPath &&
+          other.caption == this.caption &&
+          other.takenAt == this.takenAt &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AlbumPhotosTableCompanion extends UpdateCompanion<AlbumPhotosTableData> {
+  final Value<String> id;
+  final Value<String> albumId;
+  final Value<String> coupleId;
+  final Value<String> uploaderUserId;
+  final Value<String?> imageUrl;
+  final Value<String?> localPath;
+  final Value<String> caption;
+  final Value<DateTime?> takenAt;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AlbumPhotosTableCompanion({
+    this.id = const Value.absent(),
+    this.albumId = const Value.absent(),
+    this.coupleId = const Value.absent(),
+    this.uploaderUserId = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.localPath = const Value.absent(),
+    this.caption = const Value.absent(),
+    this.takenAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AlbumPhotosTableCompanion.insert({
+    required String id,
+    required String albumId,
+    required String coupleId,
+    required String uploaderUserId,
+    this.imageUrl = const Value.absent(),
+    this.localPath = const Value.absent(),
+    this.caption = const Value.absent(),
+    this.takenAt = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       albumId = Value(albumId),
+       coupleId = Value(coupleId),
+       uploaderUserId = Value(uploaderUserId),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<AlbumPhotosTableData> custom({
+    Expression<String>? id,
+    Expression<String>? albumId,
+    Expression<String>? coupleId,
+    Expression<String>? uploaderUserId,
+    Expression<String>? imageUrl,
+    Expression<String>? localPath,
+    Expression<String>? caption,
+    Expression<DateTime>? takenAt,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (albumId != null) 'album_id': albumId,
+      if (coupleId != null) 'couple_id': coupleId,
+      if (uploaderUserId != null) 'uploader_user_id': uploaderUserId,
+      if (imageUrl != null) 'image_url': imageUrl,
+      if (localPath != null) 'local_path': localPath,
+      if (caption != null) 'caption': caption,
+      if (takenAt != null) 'taken_at': takenAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AlbumPhotosTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? albumId,
+    Value<String>? coupleId,
+    Value<String>? uploaderUserId,
+    Value<String?>? imageUrl,
+    Value<String?>? localPath,
+    Value<String>? caption,
+    Value<DateTime?>? takenAt,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AlbumPhotosTableCompanion(
+      id: id ?? this.id,
+      albumId: albumId ?? this.albumId,
+      coupleId: coupleId ?? this.coupleId,
+      uploaderUserId: uploaderUserId ?? this.uploaderUserId,
+      imageUrl: imageUrl ?? this.imageUrl,
+      localPath: localPath ?? this.localPath,
+      caption: caption ?? this.caption,
+      takenAt: takenAt ?? this.takenAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (albumId.present) {
+      map['album_id'] = Variable<String>(albumId.value);
+    }
+    if (coupleId.present) {
+      map['couple_id'] = Variable<String>(coupleId.value);
+    }
+    if (uploaderUserId.present) {
+      map['uploader_user_id'] = Variable<String>(uploaderUserId.value);
+    }
+    if (imageUrl.present) {
+      map['image_url'] = Variable<String>(imageUrl.value);
+    }
+    if (localPath.present) {
+      map['local_path'] = Variable<String>(localPath.value);
+    }
+    if (caption.present) {
+      map['caption'] = Variable<String>(caption.value);
+    }
+    if (takenAt.present) {
+      map['taken_at'] = Variable<DateTime>(takenAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlbumPhotosTableCompanion(')
+          ..write('id: $id, ')
+          ..write('albumId: $albumId, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('uploaderUserId: $uploaderUserId, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('localPath: $localPath, ')
+          ..write('caption: $caption, ')
+          ..write('takenAt: $takenAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PhotoCommentsTableTable extends PhotoCommentsTable
+    with TableInfo<$PhotoCommentsTableTable, PhotoCommentsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PhotoCommentsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _photoIdMeta = const VerificationMeta(
+    'photoId',
+  );
+  @override
+  late final GeneratedColumn<String> photoId = GeneratedColumn<String>(
+    'photo_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _coupleIdMeta = const VerificationMeta(
+    'coupleId',
+  );
+  @override
+  late final GeneratedColumn<String> coupleId = GeneratedColumn<String>(
+    'couple_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorUserIdMeta = const VerificationMeta(
+    'authorUserId',
+  );
+  @override
+  late final GeneratedColumn<String> authorUserId = GeneratedColumn<String>(
+    'author_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    photoId,
+    coupleId,
+    authorUserId,
+    content,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'photo_comments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PhotoCommentsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('photo_id')) {
+      context.handle(
+        _photoIdMeta,
+        photoId.isAcceptableOrUnknown(data['photo_id']!, _photoIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_photoIdMeta);
+    }
+    if (data.containsKey('couple_id')) {
+      context.handle(
+        _coupleIdMeta,
+        coupleId.isAcceptableOrUnknown(data['couple_id']!, _coupleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_coupleIdMeta);
+    }
+    if (data.containsKey('author_user_id')) {
+      context.handle(
+        _authorUserIdMeta,
+        authorUserId.isAcceptableOrUnknown(
+          data['author_user_id']!,
+          _authorUserIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_authorUserIdMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PhotoCommentsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PhotoCommentsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      photoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_id'],
+      )!,
+      coupleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}couple_id'],
+      )!,
+      authorUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_user_id'],
+      )!,
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PhotoCommentsTableTable createAlias(String alias) {
+    return $PhotoCommentsTableTable(attachedDatabase, alias);
+  }
+}
+
+class PhotoCommentsTableData extends DataClass
+    implements Insertable<PhotoCommentsTableData> {
+  final String id;
+  final String photoId;
+  final String coupleId;
+  final String authorUserId;
+  final String content;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const PhotoCommentsTableData({
+    required this.id,
+    required this.photoId,
+    required this.coupleId,
+    required this.authorUserId,
+    required this.content,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['photo_id'] = Variable<String>(photoId);
+    map['couple_id'] = Variable<String>(coupleId);
+    map['author_user_id'] = Variable<String>(authorUserId);
+    map['content'] = Variable<String>(content);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  PhotoCommentsTableCompanion toCompanion(bool nullToAbsent) {
+    return PhotoCommentsTableCompanion(
+      id: Value(id),
+      photoId: Value(photoId),
+      coupleId: Value(coupleId),
+      authorUserId: Value(authorUserId),
+      content: Value(content),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory PhotoCommentsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PhotoCommentsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      photoId: serializer.fromJson<String>(json['photoId']),
+      coupleId: serializer.fromJson<String>(json['coupleId']),
+      authorUserId: serializer.fromJson<String>(json['authorUserId']),
+      content: serializer.fromJson<String>(json['content']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'photoId': serializer.toJson<String>(photoId),
+      'coupleId': serializer.toJson<String>(coupleId),
+      'authorUserId': serializer.toJson<String>(authorUserId),
+      'content': serializer.toJson<String>(content),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  PhotoCommentsTableData copyWith({
+    String? id,
+    String? photoId,
+    String? coupleId,
+    String? authorUserId,
+    String? content,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => PhotoCommentsTableData(
+    id: id ?? this.id,
+    photoId: photoId ?? this.photoId,
+    coupleId: coupleId ?? this.coupleId,
+    authorUserId: authorUserId ?? this.authorUserId,
+    content: content ?? this.content,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  PhotoCommentsTableData copyWithCompanion(PhotoCommentsTableCompanion data) {
+    return PhotoCommentsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      photoId: data.photoId.present ? data.photoId.value : this.photoId,
+      coupleId: data.coupleId.present ? data.coupleId.value : this.coupleId,
+      authorUserId: data.authorUserId.present
+          ? data.authorUserId.value
+          : this.authorUserId,
+      content: data.content.present ? data.content.value : this.content,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PhotoCommentsTableData(')
+          ..write('id: $id, ')
+          ..write('photoId: $photoId, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('authorUserId: $authorUserId, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    photoId,
+    coupleId,
+    authorUserId,
+    content,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PhotoCommentsTableData &&
+          other.id == this.id &&
+          other.photoId == this.photoId &&
+          other.coupleId == this.coupleId &&
+          other.authorUserId == this.authorUserId &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PhotoCommentsTableCompanion
+    extends UpdateCompanion<PhotoCommentsTableData> {
+  final Value<String> id;
+  final Value<String> photoId;
+  final Value<String> coupleId;
+  final Value<String> authorUserId;
+  final Value<String> content;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const PhotoCommentsTableCompanion({
+    this.id = const Value.absent(),
+    this.photoId = const Value.absent(),
+    this.coupleId = const Value.absent(),
+    this.authorUserId = const Value.absent(),
+    this.content = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PhotoCommentsTableCompanion.insert({
+    required String id,
+    required String photoId,
+    required String coupleId,
+    required String authorUserId,
+    required String content,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       photoId = Value(photoId),
+       coupleId = Value(coupleId),
+       authorUserId = Value(authorUserId),
+       content = Value(content),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<PhotoCommentsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? photoId,
+    Expression<String>? coupleId,
+    Expression<String>? authorUserId,
+    Expression<String>? content,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (photoId != null) 'photo_id': photoId,
+      if (coupleId != null) 'couple_id': coupleId,
+      if (authorUserId != null) 'author_user_id': authorUserId,
+      if (content != null) 'content': content,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PhotoCommentsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? photoId,
+    Value<String>? coupleId,
+    Value<String>? authorUserId,
+    Value<String>? content,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return PhotoCommentsTableCompanion(
+      id: id ?? this.id,
+      photoId: photoId ?? this.photoId,
+      coupleId: coupleId ?? this.coupleId,
+      authorUserId: authorUserId ?? this.authorUserId,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (photoId.present) {
+      map['photo_id'] = Variable<String>(photoId.value);
+    }
+    if (coupleId.present) {
+      map['couple_id'] = Variable<String>(coupleId.value);
+    }
+    if (authorUserId.present) {
+      map['author_user_id'] = Variable<String>(authorUserId.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PhotoCommentsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('photoId: $photoId, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('authorUserId: $authorUserId, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ChatMessagesTableTable extends ChatMessagesTable
     with TableInfo<$ChatMessagesTableTable, ChatMessagesTableData> {
   @override
@@ -616,6 +2228,18 @@ class $BillRecordsTableTable extends BillRecordsTable
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _ownerUserIdMeta = const VerificationMeta(
+    'ownerUserId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerUserId = GeneratedColumn<String>(
+    'owner_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
@@ -634,17 +2258,17 @@ class $BillRecordsTableTable extends BillRecordsTable
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _categoryMeta = const VerificationMeta(
-    'category',
+  static const VerificationMeta _categoryKeyMeta = const VerificationMeta(
+    'categoryKey',
   );
   @override
-  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+  late final GeneratedColumn<String> categoryKey = GeneratedColumn<String>(
     'category',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('other'),
+    defaultValue: const Constant('other.misc'),
   );
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
@@ -712,9 +2336,10 @@ class $BillRecordsTableTable extends BillRecordsTable
   List<GeneratedColumn> get $columns => [
     id,
     coupleId,
+    ownerUserId,
     type,
     amount,
-    category,
+    categoryKey,
     note,
     createdAt,
     updatedAt,
@@ -744,6 +2369,15 @@ class $BillRecordsTableTable extends BillRecordsTable
         coupleId.isAcceptableOrUnknown(data['couple_id']!, _coupleIdMeta),
       );
     }
+    if (data.containsKey('owner_user_id')) {
+      context.handle(
+        _ownerUserIdMeta,
+        ownerUserId.isAcceptableOrUnknown(
+          data['owner_user_id']!,
+          _ownerUserIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('type')) {
       context.handle(
         _typeMeta,
@@ -762,8 +2396,8 @@ class $BillRecordsTableTable extends BillRecordsTable
     }
     if (data.containsKey('category')) {
       context.handle(
-        _categoryMeta,
-        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+        _categoryKeyMeta,
+        categoryKey.isAcceptableOrUnknown(data['category']!, _categoryKeyMeta),
       );
     }
     if (data.containsKey('note')) {
@@ -820,6 +2454,10 @@ class $BillRecordsTableTable extends BillRecordsTable
         DriftSqlType.string,
         data['${effectivePrefix}couple_id'],
       )!,
+      ownerUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_user_id'],
+      )!,
       type: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}type'],
@@ -828,7 +2466,7 @@ class $BillRecordsTableTable extends BillRecordsTable
         DriftSqlType.double,
         data['${effectivePrefix}amount'],
       )!,
-      category: attachedDatabase.typeMapping.read(
+      categoryKey: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}category'],
       )!,
@@ -865,9 +2503,12 @@ class BillRecordsTableData extends DataClass
     implements Insertable<BillRecordsTableData> {
   final String id;
   final String coupleId;
+  final String ownerUserId;
   final String type;
   final double amount;
-  final String category;
+
+  /// Persisted SQLite column `category`: `parent.child` tag keys.
+  final String categoryKey;
   final String note;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -876,9 +2517,10 @@ class BillRecordsTableData extends DataClass
   const BillRecordsTableData({
     required this.id,
     required this.coupleId,
+    required this.ownerUserId,
     required this.type,
     required this.amount,
-    required this.category,
+    required this.categoryKey,
     required this.note,
     required this.createdAt,
     required this.updatedAt,
@@ -890,9 +2532,10 @@ class BillRecordsTableData extends DataClass
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['couple_id'] = Variable<String>(coupleId);
+    map['owner_user_id'] = Variable<String>(ownerUserId);
     map['type'] = Variable<String>(type);
     map['amount'] = Variable<double>(amount);
-    map['category'] = Variable<String>(category);
+    map['category'] = Variable<String>(categoryKey);
     map['note'] = Variable<String>(note);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -905,9 +2548,10 @@ class BillRecordsTableData extends DataClass
     return BillRecordsTableCompanion(
       id: Value(id),
       coupleId: Value(coupleId),
+      ownerUserId: Value(ownerUserId),
       type: Value(type),
       amount: Value(amount),
-      category: Value(category),
+      categoryKey: Value(categoryKey),
       note: Value(note),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -924,9 +2568,10 @@ class BillRecordsTableData extends DataClass
     return BillRecordsTableData(
       id: serializer.fromJson<String>(json['id']),
       coupleId: serializer.fromJson<String>(json['coupleId']),
+      ownerUserId: serializer.fromJson<String>(json['ownerUserId']),
       type: serializer.fromJson<String>(json['type']),
       amount: serializer.fromJson<double>(json['amount']),
-      category: serializer.fromJson<String>(json['category']),
+      categoryKey: serializer.fromJson<String>(json['categoryKey']),
       note: serializer.fromJson<String>(json['note']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -940,9 +2585,10 @@ class BillRecordsTableData extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'coupleId': serializer.toJson<String>(coupleId),
+      'ownerUserId': serializer.toJson<String>(ownerUserId),
       'type': serializer.toJson<String>(type),
       'amount': serializer.toJson<double>(amount),
-      'category': serializer.toJson<String>(category),
+      'categoryKey': serializer.toJson<String>(categoryKey),
       'note': serializer.toJson<String>(note),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -954,9 +2600,10 @@ class BillRecordsTableData extends DataClass
   BillRecordsTableData copyWith({
     String? id,
     String? coupleId,
+    String? ownerUserId,
     String? type,
     double? amount,
-    String? category,
+    String? categoryKey,
     String? note,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -965,9 +2612,10 @@ class BillRecordsTableData extends DataClass
   }) => BillRecordsTableData(
     id: id ?? this.id,
     coupleId: coupleId ?? this.coupleId,
+    ownerUserId: ownerUserId ?? this.ownerUserId,
     type: type ?? this.type,
     amount: amount ?? this.amount,
-    category: category ?? this.category,
+    categoryKey: categoryKey ?? this.categoryKey,
     note: note ?? this.note,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -978,9 +2626,14 @@ class BillRecordsTableData extends DataClass
     return BillRecordsTableData(
       id: data.id.present ? data.id.value : this.id,
       coupleId: data.coupleId.present ? data.coupleId.value : this.coupleId,
+      ownerUserId: data.ownerUserId.present
+          ? data.ownerUserId.value
+          : this.ownerUserId,
       type: data.type.present ? data.type.value : this.type,
       amount: data.amount.present ? data.amount.value : this.amount,
-      category: data.category.present ? data.category.value : this.category,
+      categoryKey: data.categoryKey.present
+          ? data.categoryKey.value
+          : this.categoryKey,
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -996,9 +2649,10 @@ class BillRecordsTableData extends DataClass
     return (StringBuffer('BillRecordsTableData(')
           ..write('id: $id, ')
           ..write('coupleId: $coupleId, ')
+          ..write('ownerUserId: $ownerUserId, ')
           ..write('type: $type, ')
           ..write('amount: $amount, ')
-          ..write('category: $category, ')
+          ..write('categoryKey: $categoryKey, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1012,9 +2666,10 @@ class BillRecordsTableData extends DataClass
   int get hashCode => Object.hash(
     id,
     coupleId,
+    ownerUserId,
     type,
     amount,
-    category,
+    categoryKey,
     note,
     createdAt,
     updatedAt,
@@ -1027,9 +2682,10 @@ class BillRecordsTableData extends DataClass
       (other is BillRecordsTableData &&
           other.id == this.id &&
           other.coupleId == this.coupleId &&
+          other.ownerUserId == this.ownerUserId &&
           other.type == this.type &&
           other.amount == this.amount &&
-          other.category == this.category &&
+          other.categoryKey == this.categoryKey &&
           other.note == this.note &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -1040,9 +2696,10 @@ class BillRecordsTableData extends DataClass
 class BillRecordsTableCompanion extends UpdateCompanion<BillRecordsTableData> {
   final Value<String> id;
   final Value<String> coupleId;
+  final Value<String> ownerUserId;
   final Value<String> type;
   final Value<double> amount;
-  final Value<String> category;
+  final Value<String> categoryKey;
   final Value<String> note;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -1052,9 +2709,10 @@ class BillRecordsTableCompanion extends UpdateCompanion<BillRecordsTableData> {
   const BillRecordsTableCompanion({
     this.id = const Value.absent(),
     this.coupleId = const Value.absent(),
+    this.ownerUserId = const Value.absent(),
     this.type = const Value.absent(),
     this.amount = const Value.absent(),
-    this.category = const Value.absent(),
+    this.categoryKey = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1065,9 +2723,10 @@ class BillRecordsTableCompanion extends UpdateCompanion<BillRecordsTableData> {
   BillRecordsTableCompanion.insert({
     required String id,
     this.coupleId = const Value.absent(),
+    this.ownerUserId = const Value.absent(),
     required String type,
     required double amount,
-    this.category = const Value.absent(),
+    this.categoryKey = const Value.absent(),
     required String note,
     required DateTime createdAt,
     this.updatedAt = const Value.absent(),
@@ -1082,9 +2741,10 @@ class BillRecordsTableCompanion extends UpdateCompanion<BillRecordsTableData> {
   static Insertable<BillRecordsTableData> custom({
     Expression<String>? id,
     Expression<String>? coupleId,
+    Expression<String>? ownerUserId,
     Expression<String>? type,
     Expression<double>? amount,
-    Expression<String>? category,
+    Expression<String>? categoryKey,
     Expression<String>? note,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -1095,9 +2755,10 @@ class BillRecordsTableCompanion extends UpdateCompanion<BillRecordsTableData> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (coupleId != null) 'couple_id': coupleId,
+      if (ownerUserId != null) 'owner_user_id': ownerUserId,
       if (type != null) 'type': type,
       if (amount != null) 'amount': amount,
-      if (category != null) 'category': category,
+      if (categoryKey != null) 'category': categoryKey,
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1110,9 +2771,10 @@ class BillRecordsTableCompanion extends UpdateCompanion<BillRecordsTableData> {
   BillRecordsTableCompanion copyWith({
     Value<String>? id,
     Value<String>? coupleId,
+    Value<String>? ownerUserId,
     Value<String>? type,
     Value<double>? amount,
-    Value<String>? category,
+    Value<String>? categoryKey,
     Value<String>? note,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -1123,9 +2785,10 @@ class BillRecordsTableCompanion extends UpdateCompanion<BillRecordsTableData> {
     return BillRecordsTableCompanion(
       id: id ?? this.id,
       coupleId: coupleId ?? this.coupleId,
+      ownerUserId: ownerUserId ?? this.ownerUserId,
       type: type ?? this.type,
       amount: amount ?? this.amount,
-      category: category ?? this.category,
+      categoryKey: categoryKey ?? this.categoryKey,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1144,14 +2807,17 @@ class BillRecordsTableCompanion extends UpdateCompanion<BillRecordsTableData> {
     if (coupleId.present) {
       map['couple_id'] = Variable<String>(coupleId.value);
     }
+    if (ownerUserId.present) {
+      map['owner_user_id'] = Variable<String>(ownerUserId.value);
+    }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
     }
-    if (category.present) {
-      map['category'] = Variable<String>(category.value);
+    if (categoryKey.present) {
+      map['category'] = Variable<String>(categoryKey.value);
     }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
@@ -1179,9 +2845,10 @@ class BillRecordsTableCompanion extends UpdateCompanion<BillRecordsTableData> {
     return (StringBuffer('BillRecordsTableCompanion(')
           ..write('id: $id, ')
           ..write('coupleId: $coupleId, ')
+          ..write('ownerUserId: $ownerUserId, ')
           ..write('type: $type, ')
           ..write('amount: $amount, ')
-          ..write('category: $category, ')
+          ..write('categoryKey: $categoryKey, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -4854,6 +6521,70 @@ class $SongsTableTable extends SongsTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _genreMeta = const VerificationMeta('genre');
+  @override
+  late final GeneratedColumn<String> genre = GeneratedColumn<String>(
+    'genre',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _recommenderMeta = const VerificationMeta(
+    'recommender',
+  );
+  @override
+  late final GeneratedColumn<String> recommender = GeneratedColumn<String>(
+    'recommender',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('me'),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _pendingSyncMeta = const VerificationMeta(
+    'pendingSync',
+  );
+  @override
+  late final GeneratedColumn<bool> pendingSync = GeneratedColumn<bool>(
+    'pending_sync',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("pending_sync" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _preferenceMeta = const VerificationMeta(
     'preference',
   );
@@ -4871,6 +6602,11 @@ class $SongsTableTable extends SongsTable
     name,
     artist,
     createdAt,
+    genre,
+    recommender,
+    updatedAt,
+    isDeleted,
+    pendingSync,
     preference,
   ];
   @override
@@ -4914,6 +6650,42 @@ class $SongsTableTable extends SongsTable
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('genre')) {
+      context.handle(
+        _genreMeta,
+        genre.isAcceptableOrUnknown(data['genre']!, _genreMeta),
+      );
+    }
+    if (data.containsKey('recommender')) {
+      context.handle(
+        _recommenderMeta,
+        recommender.isAcceptableOrUnknown(
+          data['recommender']!,
+          _recommenderMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('pending_sync')) {
+      context.handle(
+        _pendingSyncMeta,
+        pendingSync.isAcceptableOrUnknown(
+          data['pending_sync']!,
+          _pendingSyncMeta,
+        ),
+      );
+    }
     if (data.containsKey('preference')) {
       context.handle(
         _preferenceMeta,
@@ -4947,6 +6719,26 @@ class $SongsTableTable extends SongsTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      genre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}genre'],
+      )!,
+      recommender: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recommender'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      pendingSync: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}pending_sync'],
+      )!,
       preference: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}preference'],
@@ -4965,12 +6757,22 @@ class SongsTableData extends DataClass implements Insertable<SongsTableData> {
   final String name;
   final String artist;
   final DateTime createdAt;
+  final String genre;
+  final String recommender;
+  final DateTime updatedAt;
+  final bool isDeleted;
+  final bool pendingSync;
   final String preference;
   const SongsTableData({
     required this.id,
     required this.name,
     required this.artist,
     required this.createdAt,
+    required this.genre,
+    required this.recommender,
+    required this.updatedAt,
+    required this.isDeleted,
+    required this.pendingSync,
     required this.preference,
   });
   @override
@@ -4980,6 +6782,11 @@ class SongsTableData extends DataClass implements Insertable<SongsTableData> {
     map['name'] = Variable<String>(name);
     map['artist'] = Variable<String>(artist);
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['genre'] = Variable<String>(genre);
+    map['recommender'] = Variable<String>(recommender);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['pending_sync'] = Variable<bool>(pendingSync);
     map['preference'] = Variable<String>(preference);
     return map;
   }
@@ -4990,6 +6797,11 @@ class SongsTableData extends DataClass implements Insertable<SongsTableData> {
       name: Value(name),
       artist: Value(artist),
       createdAt: Value(createdAt),
+      genre: Value(genre),
+      recommender: Value(recommender),
+      updatedAt: Value(updatedAt),
+      isDeleted: Value(isDeleted),
+      pendingSync: Value(pendingSync),
       preference: Value(preference),
     );
   }
@@ -5004,6 +6816,11 @@ class SongsTableData extends DataClass implements Insertable<SongsTableData> {
       name: serializer.fromJson<String>(json['name']),
       artist: serializer.fromJson<String>(json['artist']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      genre: serializer.fromJson<String>(json['genre']),
+      recommender: serializer.fromJson<String>(json['recommender']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      pendingSync: serializer.fromJson<bool>(json['pendingSync']),
       preference: serializer.fromJson<String>(json['preference']),
     );
   }
@@ -5015,6 +6832,11 @@ class SongsTableData extends DataClass implements Insertable<SongsTableData> {
       'name': serializer.toJson<String>(name),
       'artist': serializer.toJson<String>(artist),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'genre': serializer.toJson<String>(genre),
+      'recommender': serializer.toJson<String>(recommender),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'pendingSync': serializer.toJson<bool>(pendingSync),
       'preference': serializer.toJson<String>(preference),
     };
   }
@@ -5024,12 +6846,22 @@ class SongsTableData extends DataClass implements Insertable<SongsTableData> {
     String? name,
     String? artist,
     DateTime? createdAt,
+    String? genre,
+    String? recommender,
+    DateTime? updatedAt,
+    bool? isDeleted,
+    bool? pendingSync,
     String? preference,
   }) => SongsTableData(
     id: id ?? this.id,
     name: name ?? this.name,
     artist: artist ?? this.artist,
     createdAt: createdAt ?? this.createdAt,
+    genre: genre ?? this.genre,
+    recommender: recommender ?? this.recommender,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isDeleted: isDeleted ?? this.isDeleted,
+    pendingSync: pendingSync ?? this.pendingSync,
     preference: preference ?? this.preference,
   );
   SongsTableData copyWithCompanion(SongsTableCompanion data) {
@@ -5038,6 +6870,15 @@ class SongsTableData extends DataClass implements Insertable<SongsTableData> {
       name: data.name.present ? data.name.value : this.name,
       artist: data.artist.present ? data.artist.value : this.artist,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      genre: data.genre.present ? data.genre.value : this.genre,
+      recommender: data.recommender.present
+          ? data.recommender.value
+          : this.recommender,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      pendingSync: data.pendingSync.present
+          ? data.pendingSync.value
+          : this.pendingSync,
       preference: data.preference.present
           ? data.preference.value
           : this.preference,
@@ -5051,13 +6892,29 @@ class SongsTableData extends DataClass implements Insertable<SongsTableData> {
           ..write('name: $name, ')
           ..write('artist: $artist, ')
           ..write('createdAt: $createdAt, ')
+          ..write('genre: $genre, ')
+          ..write('recommender: $recommender, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('pendingSync: $pendingSync, ')
           ..write('preference: $preference')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, artist, createdAt, preference);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    artist,
+    createdAt,
+    genre,
+    recommender,
+    updatedAt,
+    isDeleted,
+    pendingSync,
+    preference,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5066,6 +6923,11 @@ class SongsTableData extends DataClass implements Insertable<SongsTableData> {
           other.name == this.name &&
           other.artist == this.artist &&
           other.createdAt == this.createdAt &&
+          other.genre == this.genre &&
+          other.recommender == this.recommender &&
+          other.updatedAt == this.updatedAt &&
+          other.isDeleted == this.isDeleted &&
+          other.pendingSync == this.pendingSync &&
           other.preference == this.preference);
 }
 
@@ -5074,6 +6936,11 @@ class SongsTableCompanion extends UpdateCompanion<SongsTableData> {
   final Value<String> name;
   final Value<String> artist;
   final Value<DateTime> createdAt;
+  final Value<String> genre;
+  final Value<String> recommender;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isDeleted;
+  final Value<bool> pendingSync;
   final Value<String> preference;
   final Value<int> rowid;
   const SongsTableCompanion({
@@ -5081,6 +6948,11 @@ class SongsTableCompanion extends UpdateCompanion<SongsTableData> {
     this.name = const Value.absent(),
     this.artist = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.genre = const Value.absent(),
+    this.recommender = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.pendingSync = const Value.absent(),
     this.preference = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -5089,6 +6961,11 @@ class SongsTableCompanion extends UpdateCompanion<SongsTableData> {
     required String name,
     required String artist,
     required DateTime createdAt,
+    this.genre = const Value.absent(),
+    this.recommender = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.pendingSync = const Value.absent(),
     required String preference,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -5101,6 +6978,11 @@ class SongsTableCompanion extends UpdateCompanion<SongsTableData> {
     Expression<String>? name,
     Expression<String>? artist,
     Expression<DateTime>? createdAt,
+    Expression<String>? genre,
+    Expression<String>? recommender,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDeleted,
+    Expression<bool>? pendingSync,
     Expression<String>? preference,
     Expression<int>? rowid,
   }) {
@@ -5109,6 +6991,11 @@ class SongsTableCompanion extends UpdateCompanion<SongsTableData> {
       if (name != null) 'name': name,
       if (artist != null) 'artist': artist,
       if (createdAt != null) 'created_at': createdAt,
+      if (genre != null) 'genre': genre,
+      if (recommender != null) 'recommender': recommender,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (pendingSync != null) 'pending_sync': pendingSync,
       if (preference != null) 'preference': preference,
       if (rowid != null) 'rowid': rowid,
     });
@@ -5119,6 +7006,11 @@ class SongsTableCompanion extends UpdateCompanion<SongsTableData> {
     Value<String>? name,
     Value<String>? artist,
     Value<DateTime>? createdAt,
+    Value<String>? genre,
+    Value<String>? recommender,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isDeleted,
+    Value<bool>? pendingSync,
     Value<String>? preference,
     Value<int>? rowid,
   }) {
@@ -5127,6 +7019,11 @@ class SongsTableCompanion extends UpdateCompanion<SongsTableData> {
       name: name ?? this.name,
       artist: artist ?? this.artist,
       createdAt: createdAt ?? this.createdAt,
+      genre: genre ?? this.genre,
+      recommender: recommender ?? this.recommender,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      pendingSync: pendingSync ?? this.pendingSync,
       preference: preference ?? this.preference,
       rowid: rowid ?? this.rowid,
     );
@@ -5147,6 +7044,21 @@ class SongsTableCompanion extends UpdateCompanion<SongsTableData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (genre.present) {
+      map['genre'] = Variable<String>(genre.value);
+    }
+    if (recommender.present) {
+      map['recommender'] = Variable<String>(recommender.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (pendingSync.present) {
+      map['pending_sync'] = Variable<bool>(pendingSync.value);
+    }
     if (preference.present) {
       map['preference'] = Variable<String>(preference.value);
     }
@@ -5163,6 +7075,11 @@ class SongsTableCompanion extends UpdateCompanion<SongsTableData> {
           ..write('name: $name, ')
           ..write('artist: $artist, ')
           ..write('createdAt: $createdAt, ')
+          ..write('genre: $genre, ')
+          ..write('recommender: $recommender, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('pendingSync: $pendingSync, ')
           ..write('preference: $preference, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -6667,9 +8584,2331 @@ class TodoProgressTableCompanion
   }
 }
 
+class $DailySentencePickTableTable extends DailySentencePickTable
+    with TableInfo<$DailySentencePickTableTable, DailySentencePickTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DailySentencePickTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _feedEventIdMeta = const VerificationMeta(
+    'feedEventId',
+  );
+  @override
+  late final GeneratedColumn<String> feedEventId = GeneratedColumn<String>(
+    'feed_event_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _summaryTextMeta = const VerificationMeta(
+    'summaryText',
+  );
+  @override
+  late final GeneratedColumn<String> summaryText = GeneratedColumn<String>(
+    'summary_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    feedEventId,
+    summaryText,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'daily_sentence_pick';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DailySentencePickTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('feed_event_id')) {
+      context.handle(
+        _feedEventIdMeta,
+        feedEventId.isAcceptableOrUnknown(
+          data['feed_event_id']!,
+          _feedEventIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('summary_text')) {
+      context.handle(
+        _summaryTextMeta,
+        summaryText.isAcceptableOrUnknown(
+          data['summary_text']!,
+          _summaryTextMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_summaryTextMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DailySentencePickTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DailySentencePickTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      feedEventId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}feed_event_id'],
+      ),
+      summaryText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summary_text'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DailySentencePickTableTable createAlias(String alias) {
+    return $DailySentencePickTableTable(attachedDatabase, alias);
+  }
+}
+
+class DailySentencePickTableData extends DataClass
+    implements Insertable<DailySentencePickTableData> {
+  /// Always `primary` — one row per install.
+  final String id;
+  final String? feedEventId;
+  final String summaryText;
+  final DateTime updatedAt;
+  const DailySentencePickTableData({
+    required this.id,
+    this.feedEventId,
+    required this.summaryText,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || feedEventId != null) {
+      map['feed_event_id'] = Variable<String>(feedEventId);
+    }
+    map['summary_text'] = Variable<String>(summaryText);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  DailySentencePickTableCompanion toCompanion(bool nullToAbsent) {
+    return DailySentencePickTableCompanion(
+      id: Value(id),
+      feedEventId: feedEventId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(feedEventId),
+      summaryText: Value(summaryText),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory DailySentencePickTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DailySentencePickTableData(
+      id: serializer.fromJson<String>(json['id']),
+      feedEventId: serializer.fromJson<String?>(json['feedEventId']),
+      summaryText: serializer.fromJson<String>(json['summaryText']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'feedEventId': serializer.toJson<String?>(feedEventId),
+      'summaryText': serializer.toJson<String>(summaryText),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  DailySentencePickTableData copyWith({
+    String? id,
+    Value<String?> feedEventId = const Value.absent(),
+    String? summaryText,
+    DateTime? updatedAt,
+  }) => DailySentencePickTableData(
+    id: id ?? this.id,
+    feedEventId: feedEventId.present ? feedEventId.value : this.feedEventId,
+    summaryText: summaryText ?? this.summaryText,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  DailySentencePickTableData copyWithCompanion(
+    DailySentencePickTableCompanion data,
+  ) {
+    return DailySentencePickTableData(
+      id: data.id.present ? data.id.value : this.id,
+      feedEventId: data.feedEventId.present
+          ? data.feedEventId.value
+          : this.feedEventId,
+      summaryText: data.summaryText.present
+          ? data.summaryText.value
+          : this.summaryText,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DailySentencePickTableData(')
+          ..write('id: $id, ')
+          ..write('feedEventId: $feedEventId, ')
+          ..write('summaryText: $summaryText, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, feedEventId, summaryText, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DailySentencePickTableData &&
+          other.id == this.id &&
+          other.feedEventId == this.feedEventId &&
+          other.summaryText == this.summaryText &&
+          other.updatedAt == this.updatedAt);
+}
+
+class DailySentencePickTableCompanion
+    extends UpdateCompanion<DailySentencePickTableData> {
+  final Value<String> id;
+  final Value<String?> feedEventId;
+  final Value<String> summaryText;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const DailySentencePickTableCompanion({
+    this.id = const Value.absent(),
+    this.feedEventId = const Value.absent(),
+    this.summaryText = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DailySentencePickTableCompanion.insert({
+    required String id,
+    this.feedEventId = const Value.absent(),
+    required String summaryText,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       summaryText = Value(summaryText),
+       updatedAt = Value(updatedAt);
+  static Insertable<DailySentencePickTableData> custom({
+    Expression<String>? id,
+    Expression<String>? feedEventId,
+    Expression<String>? summaryText,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (feedEventId != null) 'feed_event_id': feedEventId,
+      if (summaryText != null) 'summary_text': summaryText,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DailySentencePickTableCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? feedEventId,
+    Value<String>? summaryText,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return DailySentencePickTableCompanion(
+      id: id ?? this.id,
+      feedEventId: feedEventId ?? this.feedEventId,
+      summaryText: summaryText ?? this.summaryText,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (feedEventId.present) {
+      map['feed_event_id'] = Variable<String>(feedEventId.value);
+    }
+    if (summaryText.present) {
+      map['summary_text'] = Variable<String>(summaryText.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DailySentencePickTableCompanion(')
+          ..write('id: $id, ')
+          ..write('feedEventId: $feedEventId, ')
+          ..write('summaryText: $summaryText, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $IdeaNotesTableTable extends IdeaNotesTable
+    with TableInfo<$IdeaNotesTableTable, IdeaNotesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $IdeaNotesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _coupleIdMeta = const VerificationMeta(
+    'coupleId',
+  );
+  @override
+  late final GeneratedColumn<String> coupleId = GeneratedColumn<String>(
+    'couple_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorUserIdMeta = const VerificationMeta(
+    'authorUserId',
+  );
+  @override
+  late final GeneratedColumn<String> authorUserId = GeneratedColumn<String>(
+    'author_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _moodTagMeta = const VerificationMeta(
+    'moodTag',
+  );
+  @override
+  late final GeneratedColumn<String> moodTag = GeneratedColumn<String>(
+    'mood_tag',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _colorStyleMeta = const VerificationMeta(
+    'colorStyle',
+  );
+  @override
+  late final GeneratedColumn<String> colorStyle = GeneratedColumn<String>(
+    'color_style',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _layoutStyleMeta = const VerificationMeta(
+    'layoutStyle',
+  );
+  @override
+  late final GeneratedColumn<String> layoutStyle = GeneratedColumn<String>(
+    'layout_style',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    coupleId,
+    authorUserId,
+    type,
+    title,
+    content,
+    moodTag,
+    colorStyle,
+    layoutStyle,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'idea_notes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<IdeaNotesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('couple_id')) {
+      context.handle(
+        _coupleIdMeta,
+        coupleId.isAcceptableOrUnknown(data['couple_id']!, _coupleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_coupleIdMeta);
+    }
+    if (data.containsKey('author_user_id')) {
+      context.handle(
+        _authorUserIdMeta,
+        authorUserId.isAcceptableOrUnknown(
+          data['author_user_id']!,
+          _authorUserIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_authorUserIdMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('mood_tag')) {
+      context.handle(
+        _moodTagMeta,
+        moodTag.isAcceptableOrUnknown(data['mood_tag']!, _moodTagMeta),
+      );
+    }
+    if (data.containsKey('color_style')) {
+      context.handle(
+        _colorStyleMeta,
+        colorStyle.isAcceptableOrUnknown(data['color_style']!, _colorStyleMeta),
+      );
+    }
+    if (data.containsKey('layout_style')) {
+      context.handle(
+        _layoutStyleMeta,
+        layoutStyle.isAcceptableOrUnknown(
+          data['layout_style']!,
+          _layoutStyleMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  IdeaNotesTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return IdeaNotesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      coupleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}couple_id'],
+      )!,
+      authorUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_user_id'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      )!,
+      moodTag: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mood_tag'],
+      ),
+      colorStyle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color_style'],
+      ),
+      layoutStyle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}layout_style'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $IdeaNotesTableTable createAlias(String alias) {
+    return $IdeaNotesTableTable(attachedDatabase, alias);
+  }
+}
+
+class IdeaNotesTableData extends DataClass
+    implements Insertable<IdeaNotesTableData> {
+  final String id;
+  final String coupleId;
+  final String authorUserId;
+  final String type;
+  final String? title;
+  final String content;
+  final String? moodTag;
+  final String? colorStyle;
+  final String? layoutStyle;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const IdeaNotesTableData({
+    required this.id,
+    required this.coupleId,
+    required this.authorUserId,
+    required this.type,
+    this.title,
+    required this.content,
+    this.moodTag,
+    this.colorStyle,
+    this.layoutStyle,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['couple_id'] = Variable<String>(coupleId);
+    map['author_user_id'] = Variable<String>(authorUserId);
+    map['type'] = Variable<String>(type);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    map['content'] = Variable<String>(content);
+    if (!nullToAbsent || moodTag != null) {
+      map['mood_tag'] = Variable<String>(moodTag);
+    }
+    if (!nullToAbsent || colorStyle != null) {
+      map['color_style'] = Variable<String>(colorStyle);
+    }
+    if (!nullToAbsent || layoutStyle != null) {
+      map['layout_style'] = Variable<String>(layoutStyle);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  IdeaNotesTableCompanion toCompanion(bool nullToAbsent) {
+    return IdeaNotesTableCompanion(
+      id: Value(id),
+      coupleId: Value(coupleId),
+      authorUserId: Value(authorUserId),
+      type: Value(type),
+      title: title == null && nullToAbsent
+          ? const Value.absent()
+          : Value(title),
+      content: Value(content),
+      moodTag: moodTag == null && nullToAbsent
+          ? const Value.absent()
+          : Value(moodTag),
+      colorStyle: colorStyle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(colorStyle),
+      layoutStyle: layoutStyle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(layoutStyle),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory IdeaNotesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return IdeaNotesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      coupleId: serializer.fromJson<String>(json['coupleId']),
+      authorUserId: serializer.fromJson<String>(json['authorUserId']),
+      type: serializer.fromJson<String>(json['type']),
+      title: serializer.fromJson<String?>(json['title']),
+      content: serializer.fromJson<String>(json['content']),
+      moodTag: serializer.fromJson<String?>(json['moodTag']),
+      colorStyle: serializer.fromJson<String?>(json['colorStyle']),
+      layoutStyle: serializer.fromJson<String?>(json['layoutStyle']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'coupleId': serializer.toJson<String>(coupleId),
+      'authorUserId': serializer.toJson<String>(authorUserId),
+      'type': serializer.toJson<String>(type),
+      'title': serializer.toJson<String?>(title),
+      'content': serializer.toJson<String>(content),
+      'moodTag': serializer.toJson<String?>(moodTag),
+      'colorStyle': serializer.toJson<String?>(colorStyle),
+      'layoutStyle': serializer.toJson<String?>(layoutStyle),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  IdeaNotesTableData copyWith({
+    String? id,
+    String? coupleId,
+    String? authorUserId,
+    String? type,
+    Value<String?> title = const Value.absent(),
+    String? content,
+    Value<String?> moodTag = const Value.absent(),
+    Value<String?> colorStyle = const Value.absent(),
+    Value<String?> layoutStyle = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => IdeaNotesTableData(
+    id: id ?? this.id,
+    coupleId: coupleId ?? this.coupleId,
+    authorUserId: authorUserId ?? this.authorUserId,
+    type: type ?? this.type,
+    title: title.present ? title.value : this.title,
+    content: content ?? this.content,
+    moodTag: moodTag.present ? moodTag.value : this.moodTag,
+    colorStyle: colorStyle.present ? colorStyle.value : this.colorStyle,
+    layoutStyle: layoutStyle.present ? layoutStyle.value : this.layoutStyle,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  IdeaNotesTableData copyWithCompanion(IdeaNotesTableCompanion data) {
+    return IdeaNotesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      coupleId: data.coupleId.present ? data.coupleId.value : this.coupleId,
+      authorUserId: data.authorUserId.present
+          ? data.authorUserId.value
+          : this.authorUserId,
+      type: data.type.present ? data.type.value : this.type,
+      title: data.title.present ? data.title.value : this.title,
+      content: data.content.present ? data.content.value : this.content,
+      moodTag: data.moodTag.present ? data.moodTag.value : this.moodTag,
+      colorStyle: data.colorStyle.present
+          ? data.colorStyle.value
+          : this.colorStyle,
+      layoutStyle: data.layoutStyle.present
+          ? data.layoutStyle.value
+          : this.layoutStyle,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IdeaNotesTableData(')
+          ..write('id: $id, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('authorUserId: $authorUserId, ')
+          ..write('type: $type, ')
+          ..write('title: $title, ')
+          ..write('content: $content, ')
+          ..write('moodTag: $moodTag, ')
+          ..write('colorStyle: $colorStyle, ')
+          ..write('layoutStyle: $layoutStyle, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    coupleId,
+    authorUserId,
+    type,
+    title,
+    content,
+    moodTag,
+    colorStyle,
+    layoutStyle,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is IdeaNotesTableData &&
+          other.id == this.id &&
+          other.coupleId == this.coupleId &&
+          other.authorUserId == this.authorUserId &&
+          other.type == this.type &&
+          other.title == this.title &&
+          other.content == this.content &&
+          other.moodTag == this.moodTag &&
+          other.colorStyle == this.colorStyle &&
+          other.layoutStyle == this.layoutStyle &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class IdeaNotesTableCompanion extends UpdateCompanion<IdeaNotesTableData> {
+  final Value<String> id;
+  final Value<String> coupleId;
+  final Value<String> authorUserId;
+  final Value<String> type;
+  final Value<String?> title;
+  final Value<String> content;
+  final Value<String?> moodTag;
+  final Value<String?> colorStyle;
+  final Value<String?> layoutStyle;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const IdeaNotesTableCompanion({
+    this.id = const Value.absent(),
+    this.coupleId = const Value.absent(),
+    this.authorUserId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.title = const Value.absent(),
+    this.content = const Value.absent(),
+    this.moodTag = const Value.absent(),
+    this.colorStyle = const Value.absent(),
+    this.layoutStyle = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  IdeaNotesTableCompanion.insert({
+    required String id,
+    required String coupleId,
+    required String authorUserId,
+    required String type,
+    this.title = const Value.absent(),
+    required String content,
+    this.moodTag = const Value.absent(),
+    this.colorStyle = const Value.absent(),
+    this.layoutStyle = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       coupleId = Value(coupleId),
+       authorUserId = Value(authorUserId),
+       type = Value(type),
+       content = Value(content),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<IdeaNotesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? coupleId,
+    Expression<String>? authorUserId,
+    Expression<String>? type,
+    Expression<String>? title,
+    Expression<String>? content,
+    Expression<String>? moodTag,
+    Expression<String>? colorStyle,
+    Expression<String>? layoutStyle,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (coupleId != null) 'couple_id': coupleId,
+      if (authorUserId != null) 'author_user_id': authorUserId,
+      if (type != null) 'type': type,
+      if (title != null) 'title': title,
+      if (content != null) 'content': content,
+      if (moodTag != null) 'mood_tag': moodTag,
+      if (colorStyle != null) 'color_style': colorStyle,
+      if (layoutStyle != null) 'layout_style': layoutStyle,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  IdeaNotesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? coupleId,
+    Value<String>? authorUserId,
+    Value<String>? type,
+    Value<String?>? title,
+    Value<String>? content,
+    Value<String?>? moodTag,
+    Value<String?>? colorStyle,
+    Value<String?>? layoutStyle,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return IdeaNotesTableCompanion(
+      id: id ?? this.id,
+      coupleId: coupleId ?? this.coupleId,
+      authorUserId: authorUserId ?? this.authorUserId,
+      type: type ?? this.type,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      moodTag: moodTag ?? this.moodTag,
+      colorStyle: colorStyle ?? this.colorStyle,
+      layoutStyle: layoutStyle ?? this.layoutStyle,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (coupleId.present) {
+      map['couple_id'] = Variable<String>(coupleId.value);
+    }
+    if (authorUserId.present) {
+      map['author_user_id'] = Variable<String>(authorUserId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (moodTag.present) {
+      map['mood_tag'] = Variable<String>(moodTag.value);
+    }
+    if (colorStyle.present) {
+      map['color_style'] = Variable<String>(colorStyle.value);
+    }
+    if (layoutStyle.present) {
+      map['layout_style'] = Variable<String>(layoutStyle.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IdeaNotesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('authorUserId: $authorUserId, ')
+          ..write('type: $type, ')
+          ..write('title: $title, ')
+          ..write('content: $content, ')
+          ..write('moodTag: $moodTag, ')
+          ..write('colorStyle: $colorStyle, ')
+          ..write('layoutStyle: $layoutStyle, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ExcerptNotesTableTable extends ExcerptNotesTable
+    with TableInfo<$ExcerptNotesTableTable, ExcerptNotesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExcerptNotesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _coupleIdMeta = const VerificationMeta(
+    'coupleId',
+  );
+  @override
+  late final GeneratedColumn<String> coupleId = GeneratedColumn<String>(
+    'couple_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorUserIdMeta = const VerificationMeta(
+    'authorUserId',
+  );
+  @override
+  late final GeneratedColumn<String> authorUserId = GeneratedColumn<String>(
+    'author_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quoteTextMeta = const VerificationMeta(
+    'quoteText',
+  );
+  @override
+  late final GeneratedColumn<String> quoteText = GeneratedColumn<String>(
+    'quote_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceTitleMeta = const VerificationMeta(
+    'sourceTitle',
+  );
+  @override
+  late final GeneratedColumn<String> sourceTitle = GeneratedColumn<String>(
+    'source_title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceAuthorMeta = const VerificationMeta(
+    'sourceAuthor',
+  );
+  @override
+  late final GeneratedColumn<String> sourceAuthor = GeneratedColumn<String>(
+    'source_author',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceDetailMeta = const VerificationMeta(
+    'sourceDetail',
+  );
+  @override
+  late final GeneratedColumn<String> sourceDetail = GeneratedColumn<String>(
+    'source_detail',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _personalNoteMeta = const VerificationMeta(
+    'personalNote',
+  );
+  @override
+  late final GeneratedColumn<String> personalNote = GeneratedColumn<String>(
+    'personal_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cardStyleMeta = const VerificationMeta(
+    'cardStyle',
+  );
+  @override
+  late final GeneratedColumn<String> cardStyle = GeneratedColumn<String>(
+    'card_style',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _colorStyleMeta = const VerificationMeta(
+    'colorStyle',
+  );
+  @override
+  late final GeneratedColumn<String> colorStyle = GeneratedColumn<String>(
+    'color_style',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    coupleId,
+    authorUserId,
+    category,
+    quoteText,
+    sourceTitle,
+    sourceAuthor,
+    sourceDetail,
+    personalNote,
+    cardStyle,
+    colorStyle,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'excerpt_notes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExcerptNotesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('couple_id')) {
+      context.handle(
+        _coupleIdMeta,
+        coupleId.isAcceptableOrUnknown(data['couple_id']!, _coupleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_coupleIdMeta);
+    }
+    if (data.containsKey('author_user_id')) {
+      context.handle(
+        _authorUserIdMeta,
+        authorUserId.isAcceptableOrUnknown(
+          data['author_user_id']!,
+          _authorUserIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_authorUserIdMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('quote_text')) {
+      context.handle(
+        _quoteTextMeta,
+        quoteText.isAcceptableOrUnknown(data['quote_text']!, _quoteTextMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quoteTextMeta);
+    }
+    if (data.containsKey('source_title')) {
+      context.handle(
+        _sourceTitleMeta,
+        sourceTitle.isAcceptableOrUnknown(
+          data['source_title']!,
+          _sourceTitleMeta,
+        ),
+      );
+    }
+    if (data.containsKey('source_author')) {
+      context.handle(
+        _sourceAuthorMeta,
+        sourceAuthor.isAcceptableOrUnknown(
+          data['source_author']!,
+          _sourceAuthorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('source_detail')) {
+      context.handle(
+        _sourceDetailMeta,
+        sourceDetail.isAcceptableOrUnknown(
+          data['source_detail']!,
+          _sourceDetailMeta,
+        ),
+      );
+    }
+    if (data.containsKey('personal_note')) {
+      context.handle(
+        _personalNoteMeta,
+        personalNote.isAcceptableOrUnknown(
+          data['personal_note']!,
+          _personalNoteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('card_style')) {
+      context.handle(
+        _cardStyleMeta,
+        cardStyle.isAcceptableOrUnknown(data['card_style']!, _cardStyleMeta),
+      );
+    }
+    if (data.containsKey('color_style')) {
+      context.handle(
+        _colorStyleMeta,
+        colorStyle.isAcceptableOrUnknown(data['color_style']!, _colorStyleMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExcerptNotesTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExcerptNotesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      coupleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}couple_id'],
+      )!,
+      authorUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_user_id'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      quoteText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quote_text'],
+      )!,
+      sourceTitle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_title'],
+      ),
+      sourceAuthor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_author'],
+      ),
+      sourceDetail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_detail'],
+      ),
+      personalNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}personal_note'],
+      ),
+      cardStyle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}card_style'],
+      ),
+      colorStyle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color_style'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ExcerptNotesTableTable createAlias(String alias) {
+    return $ExcerptNotesTableTable(attachedDatabase, alias);
+  }
+}
+
+class ExcerptNotesTableData extends DataClass
+    implements Insertable<ExcerptNotesTableData> {
+  final String id;
+  final String coupleId;
+  final String authorUserId;
+  final String category;
+  final String quoteText;
+  final String? sourceTitle;
+  final String? sourceAuthor;
+  final String? sourceDetail;
+  final String? personalNote;
+  final String? cardStyle;
+  final String? colorStyle;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const ExcerptNotesTableData({
+    required this.id,
+    required this.coupleId,
+    required this.authorUserId,
+    required this.category,
+    required this.quoteText,
+    this.sourceTitle,
+    this.sourceAuthor,
+    this.sourceDetail,
+    this.personalNote,
+    this.cardStyle,
+    this.colorStyle,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['couple_id'] = Variable<String>(coupleId);
+    map['author_user_id'] = Variable<String>(authorUserId);
+    map['category'] = Variable<String>(category);
+    map['quote_text'] = Variable<String>(quoteText);
+    if (!nullToAbsent || sourceTitle != null) {
+      map['source_title'] = Variable<String>(sourceTitle);
+    }
+    if (!nullToAbsent || sourceAuthor != null) {
+      map['source_author'] = Variable<String>(sourceAuthor);
+    }
+    if (!nullToAbsent || sourceDetail != null) {
+      map['source_detail'] = Variable<String>(sourceDetail);
+    }
+    if (!nullToAbsent || personalNote != null) {
+      map['personal_note'] = Variable<String>(personalNote);
+    }
+    if (!nullToAbsent || cardStyle != null) {
+      map['card_style'] = Variable<String>(cardStyle);
+    }
+    if (!nullToAbsent || colorStyle != null) {
+      map['color_style'] = Variable<String>(colorStyle);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ExcerptNotesTableCompanion toCompanion(bool nullToAbsent) {
+    return ExcerptNotesTableCompanion(
+      id: Value(id),
+      coupleId: Value(coupleId),
+      authorUserId: Value(authorUserId),
+      category: Value(category),
+      quoteText: Value(quoteText),
+      sourceTitle: sourceTitle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceTitle),
+      sourceAuthor: sourceAuthor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceAuthor),
+      sourceDetail: sourceDetail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceDetail),
+      personalNote: personalNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(personalNote),
+      cardStyle: cardStyle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cardStyle),
+      colorStyle: colorStyle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(colorStyle),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ExcerptNotesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExcerptNotesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      coupleId: serializer.fromJson<String>(json['coupleId']),
+      authorUserId: serializer.fromJson<String>(json['authorUserId']),
+      category: serializer.fromJson<String>(json['category']),
+      quoteText: serializer.fromJson<String>(json['quoteText']),
+      sourceTitle: serializer.fromJson<String?>(json['sourceTitle']),
+      sourceAuthor: serializer.fromJson<String?>(json['sourceAuthor']),
+      sourceDetail: serializer.fromJson<String?>(json['sourceDetail']),
+      personalNote: serializer.fromJson<String?>(json['personalNote']),
+      cardStyle: serializer.fromJson<String?>(json['cardStyle']),
+      colorStyle: serializer.fromJson<String?>(json['colorStyle']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'coupleId': serializer.toJson<String>(coupleId),
+      'authorUserId': serializer.toJson<String>(authorUserId),
+      'category': serializer.toJson<String>(category),
+      'quoteText': serializer.toJson<String>(quoteText),
+      'sourceTitle': serializer.toJson<String?>(sourceTitle),
+      'sourceAuthor': serializer.toJson<String?>(sourceAuthor),
+      'sourceDetail': serializer.toJson<String?>(sourceDetail),
+      'personalNote': serializer.toJson<String?>(personalNote),
+      'cardStyle': serializer.toJson<String?>(cardStyle),
+      'colorStyle': serializer.toJson<String?>(colorStyle),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ExcerptNotesTableData copyWith({
+    String? id,
+    String? coupleId,
+    String? authorUserId,
+    String? category,
+    String? quoteText,
+    Value<String?> sourceTitle = const Value.absent(),
+    Value<String?> sourceAuthor = const Value.absent(),
+    Value<String?> sourceDetail = const Value.absent(),
+    Value<String?> personalNote = const Value.absent(),
+    Value<String?> cardStyle = const Value.absent(),
+    Value<String?> colorStyle = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => ExcerptNotesTableData(
+    id: id ?? this.id,
+    coupleId: coupleId ?? this.coupleId,
+    authorUserId: authorUserId ?? this.authorUserId,
+    category: category ?? this.category,
+    quoteText: quoteText ?? this.quoteText,
+    sourceTitle: sourceTitle.present ? sourceTitle.value : this.sourceTitle,
+    sourceAuthor: sourceAuthor.present ? sourceAuthor.value : this.sourceAuthor,
+    sourceDetail: sourceDetail.present ? sourceDetail.value : this.sourceDetail,
+    personalNote: personalNote.present ? personalNote.value : this.personalNote,
+    cardStyle: cardStyle.present ? cardStyle.value : this.cardStyle,
+    colorStyle: colorStyle.present ? colorStyle.value : this.colorStyle,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ExcerptNotesTableData copyWithCompanion(ExcerptNotesTableCompanion data) {
+    return ExcerptNotesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      coupleId: data.coupleId.present ? data.coupleId.value : this.coupleId,
+      authorUserId: data.authorUserId.present
+          ? data.authorUserId.value
+          : this.authorUserId,
+      category: data.category.present ? data.category.value : this.category,
+      quoteText: data.quoteText.present ? data.quoteText.value : this.quoteText,
+      sourceTitle: data.sourceTitle.present
+          ? data.sourceTitle.value
+          : this.sourceTitle,
+      sourceAuthor: data.sourceAuthor.present
+          ? data.sourceAuthor.value
+          : this.sourceAuthor,
+      sourceDetail: data.sourceDetail.present
+          ? data.sourceDetail.value
+          : this.sourceDetail,
+      personalNote: data.personalNote.present
+          ? data.personalNote.value
+          : this.personalNote,
+      cardStyle: data.cardStyle.present ? data.cardStyle.value : this.cardStyle,
+      colorStyle: data.colorStyle.present
+          ? data.colorStyle.value
+          : this.colorStyle,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExcerptNotesTableData(')
+          ..write('id: $id, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('authorUserId: $authorUserId, ')
+          ..write('category: $category, ')
+          ..write('quoteText: $quoteText, ')
+          ..write('sourceTitle: $sourceTitle, ')
+          ..write('sourceAuthor: $sourceAuthor, ')
+          ..write('sourceDetail: $sourceDetail, ')
+          ..write('personalNote: $personalNote, ')
+          ..write('cardStyle: $cardStyle, ')
+          ..write('colorStyle: $colorStyle, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    coupleId,
+    authorUserId,
+    category,
+    quoteText,
+    sourceTitle,
+    sourceAuthor,
+    sourceDetail,
+    personalNote,
+    cardStyle,
+    colorStyle,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExcerptNotesTableData &&
+          other.id == this.id &&
+          other.coupleId == this.coupleId &&
+          other.authorUserId == this.authorUserId &&
+          other.category == this.category &&
+          other.quoteText == this.quoteText &&
+          other.sourceTitle == this.sourceTitle &&
+          other.sourceAuthor == this.sourceAuthor &&
+          other.sourceDetail == this.sourceDetail &&
+          other.personalNote == this.personalNote &&
+          other.cardStyle == this.cardStyle &&
+          other.colorStyle == this.colorStyle &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ExcerptNotesTableCompanion
+    extends UpdateCompanion<ExcerptNotesTableData> {
+  final Value<String> id;
+  final Value<String> coupleId;
+  final Value<String> authorUserId;
+  final Value<String> category;
+  final Value<String> quoteText;
+  final Value<String?> sourceTitle;
+  final Value<String?> sourceAuthor;
+  final Value<String?> sourceDetail;
+  final Value<String?> personalNote;
+  final Value<String?> cardStyle;
+  final Value<String?> colorStyle;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ExcerptNotesTableCompanion({
+    this.id = const Value.absent(),
+    this.coupleId = const Value.absent(),
+    this.authorUserId = const Value.absent(),
+    this.category = const Value.absent(),
+    this.quoteText = const Value.absent(),
+    this.sourceTitle = const Value.absent(),
+    this.sourceAuthor = const Value.absent(),
+    this.sourceDetail = const Value.absent(),
+    this.personalNote = const Value.absent(),
+    this.cardStyle = const Value.absent(),
+    this.colorStyle = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExcerptNotesTableCompanion.insert({
+    required String id,
+    required String coupleId,
+    required String authorUserId,
+    required String category,
+    required String quoteText,
+    this.sourceTitle = const Value.absent(),
+    this.sourceAuthor = const Value.absent(),
+    this.sourceDetail = const Value.absent(),
+    this.personalNote = const Value.absent(),
+    this.cardStyle = const Value.absent(),
+    this.colorStyle = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       coupleId = Value(coupleId),
+       authorUserId = Value(authorUserId),
+       category = Value(category),
+       quoteText = Value(quoteText),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<ExcerptNotesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? coupleId,
+    Expression<String>? authorUserId,
+    Expression<String>? category,
+    Expression<String>? quoteText,
+    Expression<String>? sourceTitle,
+    Expression<String>? sourceAuthor,
+    Expression<String>? sourceDetail,
+    Expression<String>? personalNote,
+    Expression<String>? cardStyle,
+    Expression<String>? colorStyle,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (coupleId != null) 'couple_id': coupleId,
+      if (authorUserId != null) 'author_user_id': authorUserId,
+      if (category != null) 'category': category,
+      if (quoteText != null) 'quote_text': quoteText,
+      if (sourceTitle != null) 'source_title': sourceTitle,
+      if (sourceAuthor != null) 'source_author': sourceAuthor,
+      if (sourceDetail != null) 'source_detail': sourceDetail,
+      if (personalNote != null) 'personal_note': personalNote,
+      if (cardStyle != null) 'card_style': cardStyle,
+      if (colorStyle != null) 'color_style': colorStyle,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExcerptNotesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? coupleId,
+    Value<String>? authorUserId,
+    Value<String>? category,
+    Value<String>? quoteText,
+    Value<String?>? sourceTitle,
+    Value<String?>? sourceAuthor,
+    Value<String?>? sourceDetail,
+    Value<String?>? personalNote,
+    Value<String?>? cardStyle,
+    Value<String?>? colorStyle,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ExcerptNotesTableCompanion(
+      id: id ?? this.id,
+      coupleId: coupleId ?? this.coupleId,
+      authorUserId: authorUserId ?? this.authorUserId,
+      category: category ?? this.category,
+      quoteText: quoteText ?? this.quoteText,
+      sourceTitle: sourceTitle ?? this.sourceTitle,
+      sourceAuthor: sourceAuthor ?? this.sourceAuthor,
+      sourceDetail: sourceDetail ?? this.sourceDetail,
+      personalNote: personalNote ?? this.personalNote,
+      cardStyle: cardStyle ?? this.cardStyle,
+      colorStyle: colorStyle ?? this.colorStyle,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (coupleId.present) {
+      map['couple_id'] = Variable<String>(coupleId.value);
+    }
+    if (authorUserId.present) {
+      map['author_user_id'] = Variable<String>(authorUserId.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (quoteText.present) {
+      map['quote_text'] = Variable<String>(quoteText.value);
+    }
+    if (sourceTitle.present) {
+      map['source_title'] = Variable<String>(sourceTitle.value);
+    }
+    if (sourceAuthor.present) {
+      map['source_author'] = Variable<String>(sourceAuthor.value);
+    }
+    if (sourceDetail.present) {
+      map['source_detail'] = Variable<String>(sourceDetail.value);
+    }
+    if (personalNote.present) {
+      map['personal_note'] = Variable<String>(personalNote.value);
+    }
+    if (cardStyle.present) {
+      map['card_style'] = Variable<String>(cardStyle.value);
+    }
+    if (colorStyle.present) {
+      map['color_style'] = Variable<String>(colorStyle.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExcerptNotesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('authorUserId: $authorUserId, ')
+          ..write('category: $category, ')
+          ..write('quoteText: $quoteText, ')
+          ..write('sourceTitle: $sourceTitle, ')
+          ..write('sourceAuthor: $sourceAuthor, ')
+          ..write('sourceDetail: $sourceDetail, ')
+          ..write('personalNote: $personalNote, ')
+          ..write('cardStyle: $cardStyle, ')
+          ..write('colorStyle: $colorStyle, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ThoughtCommentsTableTable extends ThoughtCommentsTable
+    with TableInfo<$ThoughtCommentsTableTable, ThoughtCommentsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ThoughtCommentsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _coupleIdMeta = const VerificationMeta(
+    'coupleId',
+  );
+  @override
+  late final GeneratedColumn<String> coupleId = GeneratedColumn<String>(
+    'couple_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetTypeMeta = const VerificationMeta(
+    'targetType',
+  );
+  @override
+  late final GeneratedColumn<String> targetType = GeneratedColumn<String>(
+    'target_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetIdMeta = const VerificationMeta(
+    'targetId',
+  );
+  @override
+  late final GeneratedColumn<String> targetId = GeneratedColumn<String>(
+    'target_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorUserIdMeta = const VerificationMeta(
+    'authorUserId',
+  );
+  @override
+  late final GeneratedColumn<String> authorUserId = GeneratedColumn<String>(
+    'author_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    coupleId,
+    targetType,
+    targetId,
+    authorUserId,
+    content,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'thought_comments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ThoughtCommentsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('couple_id')) {
+      context.handle(
+        _coupleIdMeta,
+        coupleId.isAcceptableOrUnknown(data['couple_id']!, _coupleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_coupleIdMeta);
+    }
+    if (data.containsKey('target_type')) {
+      context.handle(
+        _targetTypeMeta,
+        targetType.isAcceptableOrUnknown(data['target_type']!, _targetTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_targetTypeMeta);
+    }
+    if (data.containsKey('target_id')) {
+      context.handle(
+        _targetIdMeta,
+        targetId.isAcceptableOrUnknown(data['target_id']!, _targetIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_targetIdMeta);
+    }
+    if (data.containsKey('author_user_id')) {
+      context.handle(
+        _authorUserIdMeta,
+        authorUserId.isAcceptableOrUnknown(
+          data['author_user_id']!,
+          _authorUserIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_authorUserIdMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ThoughtCommentsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ThoughtCommentsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      coupleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}couple_id'],
+      )!,
+      targetType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_type'],
+      )!,
+      targetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_id'],
+      )!,
+      authorUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_user_id'],
+      )!,
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ThoughtCommentsTableTable createAlias(String alias) {
+    return $ThoughtCommentsTableTable(attachedDatabase, alias);
+  }
+}
+
+class ThoughtCommentsTableData extends DataClass
+    implements Insertable<ThoughtCommentsTableData> {
+  final String id;
+  final String coupleId;
+  final String targetType;
+  final String targetId;
+  final String authorUserId;
+  final String content;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const ThoughtCommentsTableData({
+    required this.id,
+    required this.coupleId,
+    required this.targetType,
+    required this.targetId,
+    required this.authorUserId,
+    required this.content,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['couple_id'] = Variable<String>(coupleId);
+    map['target_type'] = Variable<String>(targetType);
+    map['target_id'] = Variable<String>(targetId);
+    map['author_user_id'] = Variable<String>(authorUserId);
+    map['content'] = Variable<String>(content);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ThoughtCommentsTableCompanion toCompanion(bool nullToAbsent) {
+    return ThoughtCommentsTableCompanion(
+      id: Value(id),
+      coupleId: Value(coupleId),
+      targetType: Value(targetType),
+      targetId: Value(targetId),
+      authorUserId: Value(authorUserId),
+      content: Value(content),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ThoughtCommentsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ThoughtCommentsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      coupleId: serializer.fromJson<String>(json['coupleId']),
+      targetType: serializer.fromJson<String>(json['targetType']),
+      targetId: serializer.fromJson<String>(json['targetId']),
+      authorUserId: serializer.fromJson<String>(json['authorUserId']),
+      content: serializer.fromJson<String>(json['content']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'coupleId': serializer.toJson<String>(coupleId),
+      'targetType': serializer.toJson<String>(targetType),
+      'targetId': serializer.toJson<String>(targetId),
+      'authorUserId': serializer.toJson<String>(authorUserId),
+      'content': serializer.toJson<String>(content),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ThoughtCommentsTableData copyWith({
+    String? id,
+    String? coupleId,
+    String? targetType,
+    String? targetId,
+    String? authorUserId,
+    String? content,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => ThoughtCommentsTableData(
+    id: id ?? this.id,
+    coupleId: coupleId ?? this.coupleId,
+    targetType: targetType ?? this.targetType,
+    targetId: targetId ?? this.targetId,
+    authorUserId: authorUserId ?? this.authorUserId,
+    content: content ?? this.content,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ThoughtCommentsTableData copyWithCompanion(
+    ThoughtCommentsTableCompanion data,
+  ) {
+    return ThoughtCommentsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      coupleId: data.coupleId.present ? data.coupleId.value : this.coupleId,
+      targetType: data.targetType.present
+          ? data.targetType.value
+          : this.targetType,
+      targetId: data.targetId.present ? data.targetId.value : this.targetId,
+      authorUserId: data.authorUserId.present
+          ? data.authorUserId.value
+          : this.authorUserId,
+      content: data.content.present ? data.content.value : this.content,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ThoughtCommentsTableData(')
+          ..write('id: $id, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('targetType: $targetType, ')
+          ..write('targetId: $targetId, ')
+          ..write('authorUserId: $authorUserId, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    coupleId,
+    targetType,
+    targetId,
+    authorUserId,
+    content,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ThoughtCommentsTableData &&
+          other.id == this.id &&
+          other.coupleId == this.coupleId &&
+          other.targetType == this.targetType &&
+          other.targetId == this.targetId &&
+          other.authorUserId == this.authorUserId &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ThoughtCommentsTableCompanion
+    extends UpdateCompanion<ThoughtCommentsTableData> {
+  final Value<String> id;
+  final Value<String> coupleId;
+  final Value<String> targetType;
+  final Value<String> targetId;
+  final Value<String> authorUserId;
+  final Value<String> content;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ThoughtCommentsTableCompanion({
+    this.id = const Value.absent(),
+    this.coupleId = const Value.absent(),
+    this.targetType = const Value.absent(),
+    this.targetId = const Value.absent(),
+    this.authorUserId = const Value.absent(),
+    this.content = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ThoughtCommentsTableCompanion.insert({
+    required String id,
+    required String coupleId,
+    required String targetType,
+    required String targetId,
+    required String authorUserId,
+    required String content,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       coupleId = Value(coupleId),
+       targetType = Value(targetType),
+       targetId = Value(targetId),
+       authorUserId = Value(authorUserId),
+       content = Value(content),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<ThoughtCommentsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? coupleId,
+    Expression<String>? targetType,
+    Expression<String>? targetId,
+    Expression<String>? authorUserId,
+    Expression<String>? content,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (coupleId != null) 'couple_id': coupleId,
+      if (targetType != null) 'target_type': targetType,
+      if (targetId != null) 'target_id': targetId,
+      if (authorUserId != null) 'author_user_id': authorUserId,
+      if (content != null) 'content': content,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ThoughtCommentsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? coupleId,
+    Value<String>? targetType,
+    Value<String>? targetId,
+    Value<String>? authorUserId,
+    Value<String>? content,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ThoughtCommentsTableCompanion(
+      id: id ?? this.id,
+      coupleId: coupleId ?? this.coupleId,
+      targetType: targetType ?? this.targetType,
+      targetId: targetId ?? this.targetId,
+      authorUserId: authorUserId ?? this.authorUserId,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (coupleId.present) {
+      map['couple_id'] = Variable<String>(coupleId.value);
+    }
+    if (targetType.present) {
+      map['target_type'] = Variable<String>(targetType.value);
+    }
+    if (targetId.present) {
+      map['target_id'] = Variable<String>(targetId.value);
+    }
+    if (authorUserId.present) {
+      map['author_user_id'] = Variable<String>(authorUserId.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ThoughtCommentsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('coupleId: $coupleId, ')
+          ..write('targetType: $targetType, ')
+          ..write('targetId: $targetId, ')
+          ..write('authorUserId: $authorUserId, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $AlbumsTableTable albumsTable = $AlbumsTableTable(this);
+  late final $AlbumPhotosTableTable albumPhotosTable = $AlbumPhotosTableTable(
+    this,
+  );
+  late final $PhotoCommentsTableTable photoCommentsTable =
+      $PhotoCommentsTableTable(this);
   late final $ChatMessagesTableTable chatMessagesTable =
       $ChatMessagesTableTable(this);
   late final $BillRecordsTableTable billRecordsTable = $BillRecordsTableTable(
@@ -6697,11 +10936,21 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TodosTableTable todosTable = $TodosTableTable(this);
   late final $TodoProgressTableTable todoProgressTable =
       $TodoProgressTableTable(this);
+  late final $DailySentencePickTableTable dailySentencePickTable =
+      $DailySentencePickTableTable(this);
+  late final $IdeaNotesTableTable ideaNotesTable = $IdeaNotesTableTable(this);
+  late final $ExcerptNotesTableTable excerptNotesTable =
+      $ExcerptNotesTableTable(this);
+  late final $ThoughtCommentsTableTable thoughtCommentsTable =
+      $ThoughtCommentsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+    albumsTable,
+    albumPhotosTable,
+    photoCommentsTable,
     chatMessagesTable,
     billRecordsTable,
     countdownEventsTable,
@@ -6715,9 +10964,836 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     songReviewsTable,
     todosTable,
     todoProgressTable,
+    dailySentencePickTable,
+    ideaNotesTable,
+    excerptNotesTable,
+    thoughtCommentsTable,
   ];
 }
 
+typedef $$AlbumsTableTableCreateCompanionBuilder =
+    AlbumsTableCompanion Function({
+      required String id,
+      required String coupleId,
+      required String title,
+      Value<String> description,
+      Value<String?> coverPhotoUrl,
+      required String createdByUserId,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AlbumsTableTableUpdateCompanionBuilder =
+    AlbumsTableCompanion Function({
+      Value<String> id,
+      Value<String> coupleId,
+      Value<String> title,
+      Value<String> description,
+      Value<String?> coverPhotoUrl,
+      Value<String> createdByUserId,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$AlbumsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $AlbumsTableTable> {
+  $$AlbumsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coverPhotoUrl => $composableBuilder(
+    column: $table.coverPhotoUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdByUserId => $composableBuilder(
+    column: $table.createdByUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AlbumsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $AlbumsTableTable> {
+  $$AlbumsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get coverPhotoUrl => $composableBuilder(
+    column: $table.coverPhotoUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdByUserId => $composableBuilder(
+    column: $table.createdByUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AlbumsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AlbumsTableTable> {
+  $$AlbumsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get coupleId =>
+      $composableBuilder(column: $table.coupleId, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get coverPhotoUrl => $composableBuilder(
+    column: $table.coverPhotoUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdByUserId => $composableBuilder(
+    column: $table.createdByUserId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$AlbumsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AlbumsTableTable,
+          AlbumsTableData,
+          $$AlbumsTableTableFilterComposer,
+          $$AlbumsTableTableOrderingComposer,
+          $$AlbumsTableTableAnnotationComposer,
+          $$AlbumsTableTableCreateCompanionBuilder,
+          $$AlbumsTableTableUpdateCompanionBuilder,
+          (
+            AlbumsTableData,
+            BaseReferences<_$AppDatabase, $AlbumsTableTable, AlbumsTableData>,
+          ),
+          AlbumsTableData,
+          PrefetchHooks Function()
+        > {
+  $$AlbumsTableTableTableManager(_$AppDatabase db, $AlbumsTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AlbumsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AlbumsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AlbumsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> coupleId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String?> coverPhotoUrl = const Value.absent(),
+                Value<String> createdByUserId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AlbumsTableCompanion(
+                id: id,
+                coupleId: coupleId,
+                title: title,
+                description: description,
+                coverPhotoUrl: coverPhotoUrl,
+                createdByUserId: createdByUserId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String coupleId,
+                required String title,
+                Value<String> description = const Value.absent(),
+                Value<String?> coverPhotoUrl = const Value.absent(),
+                required String createdByUserId,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => AlbumsTableCompanion.insert(
+                id: id,
+                coupleId: coupleId,
+                title: title,
+                description: description,
+                coverPhotoUrl: coverPhotoUrl,
+                createdByUserId: createdByUserId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AlbumsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AlbumsTableTable,
+      AlbumsTableData,
+      $$AlbumsTableTableFilterComposer,
+      $$AlbumsTableTableOrderingComposer,
+      $$AlbumsTableTableAnnotationComposer,
+      $$AlbumsTableTableCreateCompanionBuilder,
+      $$AlbumsTableTableUpdateCompanionBuilder,
+      (
+        AlbumsTableData,
+        BaseReferences<_$AppDatabase, $AlbumsTableTable, AlbumsTableData>,
+      ),
+      AlbumsTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$AlbumPhotosTableTableCreateCompanionBuilder =
+    AlbumPhotosTableCompanion Function({
+      required String id,
+      required String albumId,
+      required String coupleId,
+      required String uploaderUserId,
+      Value<String?> imageUrl,
+      Value<String?> localPath,
+      Value<String> caption,
+      Value<DateTime?> takenAt,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AlbumPhotosTableTableUpdateCompanionBuilder =
+    AlbumPhotosTableCompanion Function({
+      Value<String> id,
+      Value<String> albumId,
+      Value<String> coupleId,
+      Value<String> uploaderUserId,
+      Value<String?> imageUrl,
+      Value<String?> localPath,
+      Value<String> caption,
+      Value<DateTime?> takenAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$AlbumPhotosTableTableFilterComposer
+    extends Composer<_$AppDatabase, $AlbumPhotosTableTable> {
+  $$AlbumPhotosTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get albumId => $composableBuilder(
+    column: $table.albumId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uploaderUserId => $composableBuilder(
+    column: $table.uploaderUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localPath => $composableBuilder(
+    column: $table.localPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get caption => $composableBuilder(
+    column: $table.caption,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get takenAt => $composableBuilder(
+    column: $table.takenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AlbumPhotosTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $AlbumPhotosTableTable> {
+  $$AlbumPhotosTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get albumId => $composableBuilder(
+    column: $table.albumId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uploaderUserId => $composableBuilder(
+    column: $table.uploaderUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localPath => $composableBuilder(
+    column: $table.localPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get caption => $composableBuilder(
+    column: $table.caption,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get takenAt => $composableBuilder(
+    column: $table.takenAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AlbumPhotosTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AlbumPhotosTableTable> {
+  $$AlbumPhotosTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get albumId =>
+      $composableBuilder(column: $table.albumId, builder: (column) => column);
+
+  GeneratedColumn<String> get coupleId =>
+      $composableBuilder(column: $table.coupleId, builder: (column) => column);
+
+  GeneratedColumn<String> get uploaderUserId => $composableBuilder(
+    column: $table.uploaderUserId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get imageUrl =>
+      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get localPath =>
+      $composableBuilder(column: $table.localPath, builder: (column) => column);
+
+  GeneratedColumn<String> get caption =>
+      $composableBuilder(column: $table.caption, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get takenAt =>
+      $composableBuilder(column: $table.takenAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$AlbumPhotosTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AlbumPhotosTableTable,
+          AlbumPhotosTableData,
+          $$AlbumPhotosTableTableFilterComposer,
+          $$AlbumPhotosTableTableOrderingComposer,
+          $$AlbumPhotosTableTableAnnotationComposer,
+          $$AlbumPhotosTableTableCreateCompanionBuilder,
+          $$AlbumPhotosTableTableUpdateCompanionBuilder,
+          (
+            AlbumPhotosTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $AlbumPhotosTableTable,
+              AlbumPhotosTableData
+            >,
+          ),
+          AlbumPhotosTableData,
+          PrefetchHooks Function()
+        > {
+  $$AlbumPhotosTableTableTableManager(
+    _$AppDatabase db,
+    $AlbumPhotosTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AlbumPhotosTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AlbumPhotosTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AlbumPhotosTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> albumId = const Value.absent(),
+                Value<String> coupleId = const Value.absent(),
+                Value<String> uploaderUserId = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                Value<String?> localPath = const Value.absent(),
+                Value<String> caption = const Value.absent(),
+                Value<DateTime?> takenAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AlbumPhotosTableCompanion(
+                id: id,
+                albumId: albumId,
+                coupleId: coupleId,
+                uploaderUserId: uploaderUserId,
+                imageUrl: imageUrl,
+                localPath: localPath,
+                caption: caption,
+                takenAt: takenAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String albumId,
+                required String coupleId,
+                required String uploaderUserId,
+                Value<String?> imageUrl = const Value.absent(),
+                Value<String?> localPath = const Value.absent(),
+                Value<String> caption = const Value.absent(),
+                Value<DateTime?> takenAt = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => AlbumPhotosTableCompanion.insert(
+                id: id,
+                albumId: albumId,
+                coupleId: coupleId,
+                uploaderUserId: uploaderUserId,
+                imageUrl: imageUrl,
+                localPath: localPath,
+                caption: caption,
+                takenAt: takenAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AlbumPhotosTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AlbumPhotosTableTable,
+      AlbumPhotosTableData,
+      $$AlbumPhotosTableTableFilterComposer,
+      $$AlbumPhotosTableTableOrderingComposer,
+      $$AlbumPhotosTableTableAnnotationComposer,
+      $$AlbumPhotosTableTableCreateCompanionBuilder,
+      $$AlbumPhotosTableTableUpdateCompanionBuilder,
+      (
+        AlbumPhotosTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $AlbumPhotosTableTable,
+          AlbumPhotosTableData
+        >,
+      ),
+      AlbumPhotosTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$PhotoCommentsTableTableCreateCompanionBuilder =
+    PhotoCommentsTableCompanion Function({
+      required String id,
+      required String photoId,
+      required String coupleId,
+      required String authorUserId,
+      required String content,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$PhotoCommentsTableTableUpdateCompanionBuilder =
+    PhotoCommentsTableCompanion Function({
+      Value<String> id,
+      Value<String> photoId,
+      Value<String> coupleId,
+      Value<String> authorUserId,
+      Value<String> content,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$PhotoCommentsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PhotoCommentsTableTable> {
+  $$PhotoCommentsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoId => $composableBuilder(
+    column: $table.photoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PhotoCommentsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PhotoCommentsTableTable> {
+  $$PhotoCommentsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get photoId => $composableBuilder(
+    column: $table.photoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PhotoCommentsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PhotoCommentsTableTable> {
+  $$PhotoCommentsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get photoId =>
+      $composableBuilder(column: $table.photoId, builder: (column) => column);
+
+  GeneratedColumn<String> get coupleId =>
+      $composableBuilder(column: $table.coupleId, builder: (column) => column);
+
+  GeneratedColumn<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$PhotoCommentsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PhotoCommentsTableTable,
+          PhotoCommentsTableData,
+          $$PhotoCommentsTableTableFilterComposer,
+          $$PhotoCommentsTableTableOrderingComposer,
+          $$PhotoCommentsTableTableAnnotationComposer,
+          $$PhotoCommentsTableTableCreateCompanionBuilder,
+          $$PhotoCommentsTableTableUpdateCompanionBuilder,
+          (
+            PhotoCommentsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $PhotoCommentsTableTable,
+              PhotoCommentsTableData
+            >,
+          ),
+          PhotoCommentsTableData,
+          PrefetchHooks Function()
+        > {
+  $$PhotoCommentsTableTableTableManager(
+    _$AppDatabase db,
+    $PhotoCommentsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PhotoCommentsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PhotoCommentsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PhotoCommentsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> photoId = const Value.absent(),
+                Value<String> coupleId = const Value.absent(),
+                Value<String> authorUserId = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PhotoCommentsTableCompanion(
+                id: id,
+                photoId: photoId,
+                coupleId: coupleId,
+                authorUserId: authorUserId,
+                content: content,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String photoId,
+                required String coupleId,
+                required String authorUserId,
+                required String content,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => PhotoCommentsTableCompanion.insert(
+                id: id,
+                photoId: photoId,
+                coupleId: coupleId,
+                authorUserId: authorUserId,
+                content: content,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PhotoCommentsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PhotoCommentsTableTable,
+      PhotoCommentsTableData,
+      $$PhotoCommentsTableTableFilterComposer,
+      $$PhotoCommentsTableTableOrderingComposer,
+      $$PhotoCommentsTableTableAnnotationComposer,
+      $$PhotoCommentsTableTableCreateCompanionBuilder,
+      $$PhotoCommentsTableTableUpdateCompanionBuilder,
+      (
+        PhotoCommentsTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $PhotoCommentsTableTable,
+          PhotoCommentsTableData
+        >,
+      ),
+      PhotoCommentsTableData,
+      PrefetchHooks Function()
+    >;
 typedef $$ChatMessagesTableTableCreateCompanionBuilder =
     ChatMessagesTableCompanion Function({
       required String id,
@@ -7019,9 +12095,10 @@ typedef $$BillRecordsTableTableCreateCompanionBuilder =
     BillRecordsTableCompanion Function({
       required String id,
       Value<String> coupleId,
+      Value<String> ownerUserId,
       required String type,
       required double amount,
-      Value<String> category,
+      Value<String> categoryKey,
       required String note,
       required DateTime createdAt,
       Value<DateTime> updatedAt,
@@ -7033,9 +12110,10 @@ typedef $$BillRecordsTableTableUpdateCompanionBuilder =
     BillRecordsTableCompanion Function({
       Value<String> id,
       Value<String> coupleId,
+      Value<String> ownerUserId,
       Value<String> type,
       Value<double> amount,
-      Value<String> category,
+      Value<String> categoryKey,
       Value<String> note,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -7063,6 +12141,11 @@ class $$BillRecordsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get type => $composableBuilder(
     column: $table.type,
     builder: (column) => ColumnFilters(column),
@@ -7073,8 +12156,8 @@ class $$BillRecordsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get category => $composableBuilder(
-    column: $table.category,
+  ColumnFilters<String> get categoryKey => $composableBuilder(
+    column: $table.categoryKey,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7123,6 +12206,11 @@ class $$BillRecordsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get type => $composableBuilder(
     column: $table.type,
     builder: (column) => ColumnOrderings(column),
@@ -7133,8 +12221,8 @@ class $$BillRecordsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get category => $composableBuilder(
-    column: $table.category,
+  ColumnOrderings<String> get categoryKey => $composableBuilder(
+    column: $table.categoryKey,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -7179,14 +12267,21 @@ class $$BillRecordsTableTableAnnotationComposer
   GeneratedColumn<String> get coupleId =>
       $composableBuilder(column: $table.coupleId, builder: (column) => column);
 
+  GeneratedColumn<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
 
-  GeneratedColumn<String> get category =>
-      $composableBuilder(column: $table.category, builder: (column) => column);
+  GeneratedColumn<String> get categoryKey => $composableBuilder(
+    column: $table.categoryKey,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
@@ -7245,9 +12340,10 @@ class $$BillRecordsTableTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> coupleId = const Value.absent(),
+                Value<String> ownerUserId = const Value.absent(),
                 Value<String> type = const Value.absent(),
                 Value<double> amount = const Value.absent(),
-                Value<String> category = const Value.absent(),
+                Value<String> categoryKey = const Value.absent(),
                 Value<String> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -7257,9 +12353,10 @@ class $$BillRecordsTableTableTableManager
               }) => BillRecordsTableCompanion(
                 id: id,
                 coupleId: coupleId,
+                ownerUserId: ownerUserId,
                 type: type,
                 amount: amount,
-                category: category,
+                categoryKey: categoryKey,
                 note: note,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -7271,9 +12368,10 @@ class $$BillRecordsTableTableTableManager
               ({
                 required String id,
                 Value<String> coupleId = const Value.absent(),
+                Value<String> ownerUserId = const Value.absent(),
                 required String type,
                 required double amount,
-                Value<String> category = const Value.absent(),
+                Value<String> categoryKey = const Value.absent(),
                 required String note,
                 required DateTime createdAt,
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -7283,9 +12381,10 @@ class $$BillRecordsTableTableTableManager
               }) => BillRecordsTableCompanion.insert(
                 id: id,
                 coupleId: coupleId,
+                ownerUserId: ownerUserId,
                 type: type,
                 amount: amount,
-                category: category,
+                categoryKey: categoryKey,
                 note: note,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -9229,6 +14328,11 @@ typedef $$SongsTableTableCreateCompanionBuilder =
       required String name,
       required String artist,
       required DateTime createdAt,
+      Value<String> genre,
+      Value<String> recommender,
+      Value<DateTime> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> pendingSync,
       required String preference,
       Value<int> rowid,
     });
@@ -9238,6 +14342,11 @@ typedef $$SongsTableTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String> artist,
       Value<DateTime> createdAt,
+      Value<String> genre,
+      Value<String> recommender,
+      Value<DateTime> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> pendingSync,
       Value<String> preference,
       Value<int> rowid,
     });
@@ -9268,6 +14377,31 @@ class $$SongsTableTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get genre => $composableBuilder(
+    column: $table.genre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recommender => $composableBuilder(
+    column: $table.recommender,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pendingSync => $composableBuilder(
+    column: $table.pendingSync,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9306,6 +14440,31 @@ class $$SongsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get genre => $composableBuilder(
+    column: $table.genre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recommender => $composableBuilder(
+    column: $table.recommender,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get pendingSync => $composableBuilder(
+    column: $table.pendingSync,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get preference => $composableBuilder(
     column: $table.preference,
     builder: (column) => ColumnOrderings(column),
@@ -9332,6 +14491,25 @@ class $$SongsTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get genre =>
+      $composableBuilder(column: $table.genre, builder: (column) => column);
+
+  GeneratedColumn<String> get recommender => $composableBuilder(
+    column: $table.recommender,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<bool> get pendingSync => $composableBuilder(
+    column: $table.pendingSync,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get preference => $composableBuilder(
     column: $table.preference,
@@ -9374,6 +14552,11 @@ class $$SongsTableTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> artist = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String> genre = const Value.absent(),
+                Value<String> recommender = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> pendingSync = const Value.absent(),
                 Value<String> preference = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SongsTableCompanion(
@@ -9381,6 +14564,11 @@ class $$SongsTableTableTableManager
                 name: name,
                 artist: artist,
                 createdAt: createdAt,
+                genre: genre,
+                recommender: recommender,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                pendingSync: pendingSync,
                 preference: preference,
                 rowid: rowid,
               ),
@@ -9390,6 +14578,11 @@ class $$SongsTableTableTableManager
                 required String name,
                 required String artist,
                 required DateTime createdAt,
+                Value<String> genre = const Value.absent(),
+                Value<String> recommender = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> pendingSync = const Value.absent(),
                 required String preference,
                 Value<int> rowid = const Value.absent(),
               }) => SongsTableCompanion.insert(
@@ -9397,6 +14590,11 @@ class $$SongsTableTableTableManager
                 name: name,
                 artist: artist,
                 createdAt: createdAt,
+                genre: genre,
+                recommender: recommender,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                pendingSync: pendingSync,
                 preference: preference,
                 rowid: rowid,
               ),
@@ -10212,10 +15410,1200 @@ typedef $$TodoProgressTableTableProcessedTableManager =
       TodoProgressTableData,
       PrefetchHooks Function()
     >;
+typedef $$DailySentencePickTableTableCreateCompanionBuilder =
+    DailySentencePickTableCompanion Function({
+      required String id,
+      Value<String?> feedEventId,
+      required String summaryText,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$DailySentencePickTableTableUpdateCompanionBuilder =
+    DailySentencePickTableCompanion Function({
+      Value<String> id,
+      Value<String?> feedEventId,
+      Value<String> summaryText,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$DailySentencePickTableTableFilterComposer
+    extends Composer<_$AppDatabase, $DailySentencePickTableTable> {
+  $$DailySentencePickTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get feedEventId => $composableBuilder(
+    column: $table.feedEventId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get summaryText => $composableBuilder(
+    column: $table.summaryText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DailySentencePickTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $DailySentencePickTableTable> {
+  $$DailySentencePickTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get feedEventId => $composableBuilder(
+    column: $table.feedEventId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get summaryText => $composableBuilder(
+    column: $table.summaryText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DailySentencePickTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DailySentencePickTableTable> {
+  $$DailySentencePickTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get feedEventId => $composableBuilder(
+    column: $table.feedEventId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get summaryText => $composableBuilder(
+    column: $table.summaryText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$DailySentencePickTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DailySentencePickTableTable,
+          DailySentencePickTableData,
+          $$DailySentencePickTableTableFilterComposer,
+          $$DailySentencePickTableTableOrderingComposer,
+          $$DailySentencePickTableTableAnnotationComposer,
+          $$DailySentencePickTableTableCreateCompanionBuilder,
+          $$DailySentencePickTableTableUpdateCompanionBuilder,
+          (
+            DailySentencePickTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $DailySentencePickTableTable,
+              DailySentencePickTableData
+            >,
+          ),
+          DailySentencePickTableData,
+          PrefetchHooks Function()
+        > {
+  $$DailySentencePickTableTableTableManager(
+    _$AppDatabase db,
+    $DailySentencePickTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DailySentencePickTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$DailySentencePickTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$DailySentencePickTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> feedEventId = const Value.absent(),
+                Value<String> summaryText = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DailySentencePickTableCompanion(
+                id: id,
+                feedEventId: feedEventId,
+                summaryText: summaryText,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> feedEventId = const Value.absent(),
+                required String summaryText,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => DailySentencePickTableCompanion.insert(
+                id: id,
+                feedEventId: feedEventId,
+                summaryText: summaryText,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DailySentencePickTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DailySentencePickTableTable,
+      DailySentencePickTableData,
+      $$DailySentencePickTableTableFilterComposer,
+      $$DailySentencePickTableTableOrderingComposer,
+      $$DailySentencePickTableTableAnnotationComposer,
+      $$DailySentencePickTableTableCreateCompanionBuilder,
+      $$DailySentencePickTableTableUpdateCompanionBuilder,
+      (
+        DailySentencePickTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $DailySentencePickTableTable,
+          DailySentencePickTableData
+        >,
+      ),
+      DailySentencePickTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$IdeaNotesTableTableCreateCompanionBuilder =
+    IdeaNotesTableCompanion Function({
+      required String id,
+      required String coupleId,
+      required String authorUserId,
+      required String type,
+      Value<String?> title,
+      required String content,
+      Value<String?> moodTag,
+      Value<String?> colorStyle,
+      Value<String?> layoutStyle,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$IdeaNotesTableTableUpdateCompanionBuilder =
+    IdeaNotesTableCompanion Function({
+      Value<String> id,
+      Value<String> coupleId,
+      Value<String> authorUserId,
+      Value<String> type,
+      Value<String?> title,
+      Value<String> content,
+      Value<String?> moodTag,
+      Value<String?> colorStyle,
+      Value<String?> layoutStyle,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$IdeaNotesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $IdeaNotesTableTable> {
+  $$IdeaNotesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get moodTag => $composableBuilder(
+    column: $table.moodTag,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get colorStyle => $composableBuilder(
+    column: $table.colorStyle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get layoutStyle => $composableBuilder(
+    column: $table.layoutStyle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$IdeaNotesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $IdeaNotesTableTable> {
+  $$IdeaNotesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get moodTag => $composableBuilder(
+    column: $table.moodTag,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get colorStyle => $composableBuilder(
+    column: $table.colorStyle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get layoutStyle => $composableBuilder(
+    column: $table.layoutStyle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$IdeaNotesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $IdeaNotesTableTable> {
+  $$IdeaNotesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get coupleId =>
+      $composableBuilder(column: $table.coupleId, builder: (column) => column);
+
+  GeneratedColumn<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get moodTag =>
+      $composableBuilder(column: $table.moodTag, builder: (column) => column);
+
+  GeneratedColumn<String> get colorStyle => $composableBuilder(
+    column: $table.colorStyle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get layoutStyle => $composableBuilder(
+    column: $table.layoutStyle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$IdeaNotesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $IdeaNotesTableTable,
+          IdeaNotesTableData,
+          $$IdeaNotesTableTableFilterComposer,
+          $$IdeaNotesTableTableOrderingComposer,
+          $$IdeaNotesTableTableAnnotationComposer,
+          $$IdeaNotesTableTableCreateCompanionBuilder,
+          $$IdeaNotesTableTableUpdateCompanionBuilder,
+          (
+            IdeaNotesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $IdeaNotesTableTable,
+              IdeaNotesTableData
+            >,
+          ),
+          IdeaNotesTableData,
+          PrefetchHooks Function()
+        > {
+  $$IdeaNotesTableTableTableManager(
+    _$AppDatabase db,
+    $IdeaNotesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$IdeaNotesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$IdeaNotesTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$IdeaNotesTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> coupleId = const Value.absent(),
+                Value<String> authorUserId = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<String?> moodTag = const Value.absent(),
+                Value<String?> colorStyle = const Value.absent(),
+                Value<String?> layoutStyle = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => IdeaNotesTableCompanion(
+                id: id,
+                coupleId: coupleId,
+                authorUserId: authorUserId,
+                type: type,
+                title: title,
+                content: content,
+                moodTag: moodTag,
+                colorStyle: colorStyle,
+                layoutStyle: layoutStyle,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String coupleId,
+                required String authorUserId,
+                required String type,
+                Value<String?> title = const Value.absent(),
+                required String content,
+                Value<String?> moodTag = const Value.absent(),
+                Value<String?> colorStyle = const Value.absent(),
+                Value<String?> layoutStyle = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => IdeaNotesTableCompanion.insert(
+                id: id,
+                coupleId: coupleId,
+                authorUserId: authorUserId,
+                type: type,
+                title: title,
+                content: content,
+                moodTag: moodTag,
+                colorStyle: colorStyle,
+                layoutStyle: layoutStyle,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$IdeaNotesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $IdeaNotesTableTable,
+      IdeaNotesTableData,
+      $$IdeaNotesTableTableFilterComposer,
+      $$IdeaNotesTableTableOrderingComposer,
+      $$IdeaNotesTableTableAnnotationComposer,
+      $$IdeaNotesTableTableCreateCompanionBuilder,
+      $$IdeaNotesTableTableUpdateCompanionBuilder,
+      (
+        IdeaNotesTableData,
+        BaseReferences<_$AppDatabase, $IdeaNotesTableTable, IdeaNotesTableData>,
+      ),
+      IdeaNotesTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$ExcerptNotesTableTableCreateCompanionBuilder =
+    ExcerptNotesTableCompanion Function({
+      required String id,
+      required String coupleId,
+      required String authorUserId,
+      required String category,
+      required String quoteText,
+      Value<String?> sourceTitle,
+      Value<String?> sourceAuthor,
+      Value<String?> sourceDetail,
+      Value<String?> personalNote,
+      Value<String?> cardStyle,
+      Value<String?> colorStyle,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ExcerptNotesTableTableUpdateCompanionBuilder =
+    ExcerptNotesTableCompanion Function({
+      Value<String> id,
+      Value<String> coupleId,
+      Value<String> authorUserId,
+      Value<String> category,
+      Value<String> quoteText,
+      Value<String?> sourceTitle,
+      Value<String?> sourceAuthor,
+      Value<String?> sourceDetail,
+      Value<String?> personalNote,
+      Value<String?> cardStyle,
+      Value<String?> colorStyle,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ExcerptNotesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ExcerptNotesTableTable> {
+  $$ExcerptNotesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quoteText => $composableBuilder(
+    column: $table.quoteText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceTitle => $composableBuilder(
+    column: $table.sourceTitle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceAuthor => $composableBuilder(
+    column: $table.sourceAuthor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceDetail => $composableBuilder(
+    column: $table.sourceDetail,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get personalNote => $composableBuilder(
+    column: $table.personalNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cardStyle => $composableBuilder(
+    column: $table.cardStyle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get colorStyle => $composableBuilder(
+    column: $table.colorStyle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ExcerptNotesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExcerptNotesTableTable> {
+  $$ExcerptNotesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quoteText => $composableBuilder(
+    column: $table.quoteText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceTitle => $composableBuilder(
+    column: $table.sourceTitle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceAuthor => $composableBuilder(
+    column: $table.sourceAuthor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceDetail => $composableBuilder(
+    column: $table.sourceDetail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get personalNote => $composableBuilder(
+    column: $table.personalNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cardStyle => $composableBuilder(
+    column: $table.cardStyle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get colorStyle => $composableBuilder(
+    column: $table.colorStyle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ExcerptNotesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExcerptNotesTableTable> {
+  $$ExcerptNotesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get coupleId =>
+      $composableBuilder(column: $table.coupleId, builder: (column) => column);
+
+  GeneratedColumn<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get quoteText =>
+      $composableBuilder(column: $table.quoteText, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceTitle => $composableBuilder(
+    column: $table.sourceTitle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceAuthor => $composableBuilder(
+    column: $table.sourceAuthor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceDetail => $composableBuilder(
+    column: $table.sourceDetail,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get personalNote => $composableBuilder(
+    column: $table.personalNote,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get cardStyle =>
+      $composableBuilder(column: $table.cardStyle, builder: (column) => column);
+
+  GeneratedColumn<String> get colorStyle => $composableBuilder(
+    column: $table.colorStyle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ExcerptNotesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExcerptNotesTableTable,
+          ExcerptNotesTableData,
+          $$ExcerptNotesTableTableFilterComposer,
+          $$ExcerptNotesTableTableOrderingComposer,
+          $$ExcerptNotesTableTableAnnotationComposer,
+          $$ExcerptNotesTableTableCreateCompanionBuilder,
+          $$ExcerptNotesTableTableUpdateCompanionBuilder,
+          (
+            ExcerptNotesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ExcerptNotesTableTable,
+              ExcerptNotesTableData
+            >,
+          ),
+          ExcerptNotesTableData,
+          PrefetchHooks Function()
+        > {
+  $$ExcerptNotesTableTableTableManager(
+    _$AppDatabase db,
+    $ExcerptNotesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExcerptNotesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExcerptNotesTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExcerptNotesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> coupleId = const Value.absent(),
+                Value<String> authorUserId = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> quoteText = const Value.absent(),
+                Value<String?> sourceTitle = const Value.absent(),
+                Value<String?> sourceAuthor = const Value.absent(),
+                Value<String?> sourceDetail = const Value.absent(),
+                Value<String?> personalNote = const Value.absent(),
+                Value<String?> cardStyle = const Value.absent(),
+                Value<String?> colorStyle = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExcerptNotesTableCompanion(
+                id: id,
+                coupleId: coupleId,
+                authorUserId: authorUserId,
+                category: category,
+                quoteText: quoteText,
+                sourceTitle: sourceTitle,
+                sourceAuthor: sourceAuthor,
+                sourceDetail: sourceDetail,
+                personalNote: personalNote,
+                cardStyle: cardStyle,
+                colorStyle: colorStyle,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String coupleId,
+                required String authorUserId,
+                required String category,
+                required String quoteText,
+                Value<String?> sourceTitle = const Value.absent(),
+                Value<String?> sourceAuthor = const Value.absent(),
+                Value<String?> sourceDetail = const Value.absent(),
+                Value<String?> personalNote = const Value.absent(),
+                Value<String?> cardStyle = const Value.absent(),
+                Value<String?> colorStyle = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ExcerptNotesTableCompanion.insert(
+                id: id,
+                coupleId: coupleId,
+                authorUserId: authorUserId,
+                category: category,
+                quoteText: quoteText,
+                sourceTitle: sourceTitle,
+                sourceAuthor: sourceAuthor,
+                sourceDetail: sourceDetail,
+                personalNote: personalNote,
+                cardStyle: cardStyle,
+                colorStyle: colorStyle,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ExcerptNotesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExcerptNotesTableTable,
+      ExcerptNotesTableData,
+      $$ExcerptNotesTableTableFilterComposer,
+      $$ExcerptNotesTableTableOrderingComposer,
+      $$ExcerptNotesTableTableAnnotationComposer,
+      $$ExcerptNotesTableTableCreateCompanionBuilder,
+      $$ExcerptNotesTableTableUpdateCompanionBuilder,
+      (
+        ExcerptNotesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ExcerptNotesTableTable,
+          ExcerptNotesTableData
+        >,
+      ),
+      ExcerptNotesTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$ThoughtCommentsTableTableCreateCompanionBuilder =
+    ThoughtCommentsTableCompanion Function({
+      required String id,
+      required String coupleId,
+      required String targetType,
+      required String targetId,
+      required String authorUserId,
+      required String content,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ThoughtCommentsTableTableUpdateCompanionBuilder =
+    ThoughtCommentsTableCompanion Function({
+      Value<String> id,
+      Value<String> coupleId,
+      Value<String> targetType,
+      Value<String> targetId,
+      Value<String> authorUserId,
+      Value<String> content,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ThoughtCommentsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ThoughtCommentsTableTable> {
+  $$ThoughtCommentsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetType => $composableBuilder(
+    column: $table.targetType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetId => $composableBuilder(
+    column: $table.targetId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ThoughtCommentsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ThoughtCommentsTableTable> {
+  $$ThoughtCommentsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get coupleId => $composableBuilder(
+    column: $table.coupleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetType => $composableBuilder(
+    column: $table.targetType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetId => $composableBuilder(
+    column: $table.targetId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ThoughtCommentsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ThoughtCommentsTableTable> {
+  $$ThoughtCommentsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get coupleId =>
+      $composableBuilder(column: $table.coupleId, builder: (column) => column);
+
+  GeneratedColumn<String> get targetType => $composableBuilder(
+    column: $table.targetType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get targetId =>
+      $composableBuilder(column: $table.targetId, builder: (column) => column);
+
+  GeneratedColumn<String> get authorUserId => $composableBuilder(
+    column: $table.authorUserId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ThoughtCommentsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ThoughtCommentsTableTable,
+          ThoughtCommentsTableData,
+          $$ThoughtCommentsTableTableFilterComposer,
+          $$ThoughtCommentsTableTableOrderingComposer,
+          $$ThoughtCommentsTableTableAnnotationComposer,
+          $$ThoughtCommentsTableTableCreateCompanionBuilder,
+          $$ThoughtCommentsTableTableUpdateCompanionBuilder,
+          (
+            ThoughtCommentsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ThoughtCommentsTableTable,
+              ThoughtCommentsTableData
+            >,
+          ),
+          ThoughtCommentsTableData,
+          PrefetchHooks Function()
+        > {
+  $$ThoughtCommentsTableTableTableManager(
+    _$AppDatabase db,
+    $ThoughtCommentsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ThoughtCommentsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ThoughtCommentsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ThoughtCommentsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> coupleId = const Value.absent(),
+                Value<String> targetType = const Value.absent(),
+                Value<String> targetId = const Value.absent(),
+                Value<String> authorUserId = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ThoughtCommentsTableCompanion(
+                id: id,
+                coupleId: coupleId,
+                targetType: targetType,
+                targetId: targetId,
+                authorUserId: authorUserId,
+                content: content,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String coupleId,
+                required String targetType,
+                required String targetId,
+                required String authorUserId,
+                required String content,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ThoughtCommentsTableCompanion.insert(
+                id: id,
+                coupleId: coupleId,
+                targetType: targetType,
+                targetId: targetId,
+                authorUserId: authorUserId,
+                content: content,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ThoughtCommentsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ThoughtCommentsTableTable,
+      ThoughtCommentsTableData,
+      $$ThoughtCommentsTableTableFilterComposer,
+      $$ThoughtCommentsTableTableOrderingComposer,
+      $$ThoughtCommentsTableTableAnnotationComposer,
+      $$ThoughtCommentsTableTableCreateCompanionBuilder,
+      $$ThoughtCommentsTableTableUpdateCompanionBuilder,
+      (
+        ThoughtCommentsTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ThoughtCommentsTableTable,
+          ThoughtCommentsTableData
+        >,
+      ),
+      ThoughtCommentsTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
+  $$AlbumsTableTableTableManager get albumsTable =>
+      $$AlbumsTableTableTableManager(_db, _db.albumsTable);
+  $$AlbumPhotosTableTableTableManager get albumPhotosTable =>
+      $$AlbumPhotosTableTableTableManager(_db, _db.albumPhotosTable);
+  $$PhotoCommentsTableTableTableManager get photoCommentsTable =>
+      $$PhotoCommentsTableTableTableManager(_db, _db.photoCommentsTable);
   $$ChatMessagesTableTableTableManager get chatMessagesTable =>
       $$ChatMessagesTableTableTableManager(_db, _db.chatMessagesTable);
   $$BillRecordsTableTableTableManager get billRecordsTable =>
@@ -10248,4 +16636,15 @@ class $AppDatabaseManager {
       $$TodosTableTableTableManager(_db, _db.todosTable);
   $$TodoProgressTableTableTableManager get todoProgressTable =>
       $$TodoProgressTableTableTableManager(_db, _db.todoProgressTable);
+  $$DailySentencePickTableTableTableManager get dailySentencePickTable =>
+      $$DailySentencePickTableTableTableManager(
+        _db,
+        _db.dailySentencePickTable,
+      );
+  $$IdeaNotesTableTableTableManager get ideaNotesTable =>
+      $$IdeaNotesTableTableTableManager(_db, _db.ideaNotesTable);
+  $$ExcerptNotesTableTableTableManager get excerptNotesTable =>
+      $$ExcerptNotesTableTableTableManager(_db, _db.excerptNotesTable);
+  $$ThoughtCommentsTableTableTableManager get thoughtCommentsTable =>
+      $$ThoughtCommentsTableTableTableManager(_db, _db.thoughtCommentsTable);
 }

@@ -171,7 +171,61 @@ class TodoController extends StateNotifier<TodoState> {
     }
   }
 
+  bool canManage(TodoItem item) {
+    return item.owner == TodoOwner.me || item.owner == TodoOwner.shared;
+  }
+
+  Future<bool> updateDetails({
+    required TodoItem item,
+    required String title,
+    required String description,
+    required DateTime? dueAt,
+    required TodoOwner owner,
+  }) async {
+    if (!canManage(item)) {
+      state = state.copyWith(errorMessage: '不能修改 TA 的待办');
+      return false;
+    }
+    final trimmedTitle = title.trim();
+    if (trimmedTitle.isEmpty) {
+      state = state.copyWith(errorMessage: '请输入待办标题');
+      return false;
+    }
+    final optimistic = item.copyWith(
+      title: trimmedTitle,
+      description: description.trim(),
+      dueAt: dueAt,
+      owner: owner,
+      updatedAt: DateTime.now(),
+      pendingSync: true,
+    );
+    state = state.copyWith(
+      items: [
+        for (final current in state.items)
+          if (current.id == item.id) optimistic else current,
+      ],
+      errorMessage: null,
+    );
+    try {
+      final saved = await _updateTodo(optimistic);
+      state = state.copyWith(
+        items: [
+          for (final current in state.items)
+            if (current.id == item.id) saved else current,
+        ],
+      );
+      return true;
+    } catch (_) {
+      state = state.copyWith(errorMessage: '更新待办失败');
+      return false;
+    }
+  }
+
   Future<void> delete(TodoItem item) async {
+    if (!canManage(item)) {
+      state = state.copyWith(errorMessage: '不能删除 TA 的待办');
+      return;
+    }
     final deleted = item.copyWith(
       isDeleted: true,
       updatedAt: DateTime.now(),

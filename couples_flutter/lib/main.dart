@@ -12,6 +12,7 @@ class CouplesApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(_chatPushBootstrapProvider);
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
@@ -24,3 +25,7 @@ class CouplesApp extends ConsumerWidget {
     );
   }
 }
+
+final _chatPushBootstrapProvider = FutureProvider<void>((ref) async {
+  await ref.watch(chatPushServiceProvider).initialize();
+});

@@ -43,18 +43,25 @@ class _CoupleHomePageState extends ConsumerState<CoupleHomePage> {
     final vm = ref.watch(homeSummaryControllerProvider);
     final recentFeedAsync = ref.watch(recentFeedEventsStreamProvider);
     final controller = ref.read(homeSummaryControllerProvider.notifier);
+    final dailyLine = recentFeedAsync.maybeWhen(
+      data: (events) {
+        if (events.isEmpty) {
+          return '今天也要好好相爱';
+        }
+        return events.first.summaryText;
+      },
+      orElse: () => '今天也要好好相爱',
+    );
 
     ref.listen<HomeSummaryVm>(homeSummaryControllerProvider, (previous, next) {
-      final wasPoked = previous?.justPoked ?? false;
-      if (!wasPoked && next.justPoked) {
+      final hasNewPoke = previous?.lastPokeTime != next.lastPokeTime;
+      if (hasNewPoke && next.lastPokeFromPartner) {
         HapticFeedback.mediumImpact();
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
             const SnackBar(
-              content: Text(
-                'TA \u60f3\u4f60\u4e86\uff0c\u8f7b\u8f7b\u6233\u4e86\u4f60\u4e00\u4e0b \ud83d\udc97',
-              ),
+              content: Text('TA 戳了你一下'),
               duration: Duration(milliseconds: 1400),
             ),
           );
@@ -147,8 +154,7 @@ class _CoupleHomePageState extends ConsumerState<CoupleHomePage> {
                   child: HomeHeaderSection(
                     title: '\u6211\u4eec\u7684\u5c0f\u7a9d',
                     coupleIdentity: vm.coupleIdentity,
-                    subtitle:
-                        '\u4eca\u5929\u4e5f\u8981\u597d\u597d\u76f8\u7231',
+                    subtitle: dailyLine,
                     loveDaysText: loveDaysText,
                     todayText: todayText,
                   ),
@@ -180,7 +186,11 @@ class _CoupleHomePageState extends ConsumerState<CoupleHomePage> {
                 justPoked: vm.justPoked,
                 pokeButtonText: pokeButtonText,
                 lastPokeText: pokeText,
-                onPoke: vm.isPoking ? null : controller.sendPoke,
+                onPoke: vm.isPoking
+                    ? null
+                    : () async {
+                        await controller.sendPoke();
+                      },
                 initialTodayPokeCount: vm.todayPokeCount,
                 interactionStreakDays: vm.effectiveStreakDays,
               ),
@@ -191,6 +201,19 @@ class _CoupleHomePageState extends ConsumerState<CoupleHomePage> {
                 nextAnniversaryText: anniversaryText,
                 isDistanceEnabled: vm.isDistanceEnabled,
                 onToggleDistance: controller.toggleDistance,
+                myLocationVisible: vm.myLocationVisible,
+                onToggleMyLocationVisible: (visible) async {
+                  await ref
+                      .read(distanceRepositoryProvider)
+                      .setMyLocationVisible(visible);
+                  await controller.load();
+                },
+                myLatitude: vm.myLatitude,
+                myLongitude: vm.myLongitude,
+                partnerLatitude: vm.partnerLatitude,
+                partnerLongitude: vm.partnerLongitude,
+                myLocationLabel: vm.myLocationLabel,
+                partnerLocationLabel: vm.partnerLocationLabel,
               ),
               const SizedBox(height: 14),
               const HomeGridMenu(),

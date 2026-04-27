@@ -28,16 +28,25 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<void> syncMessages({
     required String currentUserId,
     required String coupleId,
+    DateTime? since,
   }) async {
     await _localDataSource.purgeLegacyMessages();
-    final cloudMessages = await _cloudDataSource.listMessages(
-      coupleId: coupleId,
-      currentUserId: currentUserId,
-    );
-    await _localDataSource.upsertMessages(
-      cloudMessages,
-      currentUserId: currentUserId,
-    );
+    try {
+      final cloudMessages = await _cloudDataSource.listMessages(
+        coupleId: coupleId,
+        currentUserId: currentUserId,
+        since: since,
+      );
+      if (cloudMessages.isEmpty) {
+        return;
+      }
+      await _localDataSource.upsertMessages(
+        cloudMessages,
+        currentUserId: currentUserId,
+      );
+    } catch (_) {
+      // Keep chat usable from local cache when cloud sync is unavailable.
+    }
   }
 
   @override

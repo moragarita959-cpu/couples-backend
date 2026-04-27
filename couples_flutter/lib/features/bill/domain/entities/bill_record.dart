@@ -1,29 +1,15 @@
-﻿enum BillType {
-  income,
-  expense,
-}
+﻿import '../bill_tag_catalog.dart';
+import '../bill_types.dart';
 
-enum BillCategory {
-  meals,
-  transport,
-  entertainment,
-  shopping,
-  daily,
-  housing,
-  travel,
-  medical,
-  salary,
-  bonus,
-  gift,
-  other,
-}
+export '../bill_types.dart';
 
 class BillRecord {
   const BillRecord({
     required this.id,
     required this.coupleId,
+    required this.ownerUserId,
     required this.type,
-    required this.category,
+    required this.categoryKey,
     required this.amount,
     required this.note,
     required this.createdAt,
@@ -34,8 +20,9 @@ class BillRecord {
 
   final String id;
   final String coupleId;
+  final String ownerUserId;
   final BillType type;
-  final BillCategory category;
+  final String categoryKey;
   final double amount;
   final String note;
   final DateTime createdAt;
@@ -43,11 +30,14 @@ class BillRecord {
   final bool isDeleted;
   final bool pendingSync;
 
+  String get categoryDisplayLabel => BillTagCatalog.displayLabel(categoryKey);
+
   BillRecord copyWith({
     String? id,
     String? coupleId,
+    String? ownerUserId,
     BillType? type,
-    BillCategory? category,
+    String? categoryKey,
     double? amount,
     String? note,
     DateTime? createdAt,
@@ -58,8 +48,9 @@ class BillRecord {
     return BillRecord(
       id: id ?? this.id,
       coupleId: coupleId ?? this.coupleId,
+      ownerUserId: ownerUserId ?? this.ownerUserId,
       type: type ?? this.type,
-      category: category ?? this.category,
+      categoryKey: categoryKey ?? this.categoryKey,
       amount: amount ?? this.amount,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
@@ -75,7 +66,7 @@ class BillPeriodSummary {
     required this.incomeTotal,
     required this.expenseTotal,
     required this.balance,
-    required this.expenseByCategory,
+    required this.expenseByCategoryKey,
     required this.recordCount,
   });
 
@@ -83,13 +74,13 @@ class BillPeriodSummary {
       : incomeTotal = 0,
         expenseTotal = 0,
         balance = 0,
-        expenseByCategory = const <BillCategory, double>{},
+        expenseByCategoryKey = const <String, double>{},
         recordCount = 0;
 
   final double incomeTotal;
   final double expenseTotal;
   final double balance;
-  final Map<BillCategory, double> expenseByCategory;
+  final Map<String, double> expenseByCategoryKey;
   final int recordCount;
 }
 
@@ -109,58 +100,3 @@ class BillSummary {
   final BillPeriodSummary currentWeek;
   final BillPeriodSummary currentMonth;
 }
-
-extension BillCategoryX on BillCategory {
-  String get label {
-    switch (this) {
-      case BillCategory.meals:
-        return '??';
-      case BillCategory.transport:
-        return '??';
-      case BillCategory.entertainment:
-        return '??';
-      case BillCategory.shopping:
-        return '??';
-      case BillCategory.daily:
-        return '??';
-      case BillCategory.housing:
-        return '??';
-      case BillCategory.travel:
-        return '??';
-      case BillCategory.medical:
-        return '??';
-      case BillCategory.salary:
-        return '??';
-      case BillCategory.bonus:
-        return '??';
-      case BillCategory.gift:
-        return '??';
-      case BillCategory.other:
-        return '??';
-    }
-  }
-
-  static List<BillCategory> availableFor(BillType type) {
-    if (type == BillType.income) {
-      return const <BillCategory>[
-        BillCategory.salary,
-        BillCategory.bonus,
-        BillCategory.gift,
-        BillCategory.other,
-      ];
-    }
-    return const <BillCategory>[
-      BillCategory.meals,
-      BillCategory.transport,
-      BillCategory.entertainment,
-      BillCategory.shopping,
-      BillCategory.daily,
-      BillCategory.housing,
-      BillCategory.travel,
-      BillCategory.medical,
-      BillCategory.other,
-    ];
-  }
-}
-
-

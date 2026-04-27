@@ -10,18 +10,14 @@ class AddOrUpdateReview {
     String songId,
     String content,
     List<String> styleTags,
-    int atmosphereScore,
-    int resonanceScore,
-    int shareScore,
+    double singleScore,
     ReviewAuthor author,
   ) {
     return _repository.addOrUpdateReview(
       songId,
       content,
       styleTags,
-      atmosphereScore,
-      resonanceScore,
-      shareScore,
+      singleScore,
       author,
     );
   }

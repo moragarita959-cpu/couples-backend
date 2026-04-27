@@ -3,6 +3,32 @@ import 'package:go_router/go_router.dart';
 
 import '../core/network/api_client.dart';
 import '../core/storage/local_db.dart';
+import '../features/album/data/datasources/album_cloud_data_source.dart';
+import '../features/album/data/datasources/album_local_data_source.dart';
+import '../features/album/data/datasources/album_media_store.dart';
+import '../features/album/data/repositories/album_repository_impl.dart';
+import '../features/album/domain/repositories/album_repository.dart';
+import '../features/album/domain/usecases/delete_album.dart';
+import '../features/album/domain/usecases/delete_comment.dart';
+import '../features/album/domain/usecases/delete_photo.dart';
+import '../features/album/domain/usecases/import_local_photo.dart';
+import '../features/album/domain/usecases/refresh_albums.dart';
+import '../features/album/domain/usecases/refresh_comments.dart';
+import '../features/album/domain/usecases/refresh_photos.dart';
+import '../features/album/domain/usecases/save_album.dart';
+import '../features/album/domain/usecases/save_comment.dart';
+import '../features/album/domain/usecases/save_photo.dart';
+import '../features/album/domain/usecases/watch_album.dart';
+import '../features/album/domain/usecases/watch_albums.dart';
+import '../features/album/domain/usecases/watch_comments.dart';
+import '../features/album/domain/usecases/watch_photo.dart';
+import '../features/album/domain/usecases/watch_photos.dart';
+import '../features/album/presentation/state/album_controller.dart';
+import '../features/album/presentation/state/album_detail_controller.dart';
+import '../features/album/presentation/state/album_detail_state.dart';
+import '../features/album/presentation/state/album_state.dart';
+import '../features/album/presentation/state/photo_detail_controller.dart';
+import '../features/album/presentation/state/photo_detail_state.dart';
 import '../features/auth/data/datasources/auth_cloud_data_source.dart';
 import '../features/auth/data/datasources/auth_local_data_source.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
@@ -25,6 +51,7 @@ import '../features/bill/presentation/state/bill_state.dart';
 import '../features/chat/data/datasources/chat_cloud_data_source.dart';
 import '../features/chat/data/datasources/chat_mock_data_source.dart';
 import '../features/chat/data/repositories/chat_repository_impl.dart';
+import '../features/chat/data/services/chat_push_service.dart';
 import '../features/chat/domain/repositories/chat_repository.dart';
 import '../features/chat/domain/usecases/get_chat_stats.dart';
 import '../features/chat/domain/usecases/send_message.dart';
@@ -64,6 +91,8 @@ import '../features/distance/domain/usecases/get_distance_info.dart';
 import '../features/distance/domain/usecases/update_distance_text.dart';
 import '../features/distance/presentation/state/distance_controller.dart';
 import '../features/distance/presentation/state/distance_state.dart';
+import '../features/feed/data/datasources/daily_sentence_pick_local_data_source.dart';
+import '../features/feed/data/datasources/feed_cloud_data_source.dart';
 import '../features/feed/data/datasources/feed_local_data_source.dart';
 import '../features/feed/data/repositories/feed_repository_impl.dart';
 import '../features/feed/domain/entities/feed_event.dart';
@@ -76,6 +105,7 @@ import '../features/playlist/data/repositories/playlist_repository_impl.dart';
 import '../features/playlist/domain/repositories/playlist_repository.dart';
 import '../features/playlist/domain/usecases/add_or_update_review.dart';
 import '../features/playlist/domain/usecases/add_song.dart';
+import '../features/playlist/domain/usecases/delete_song.dart';
 import '../features/playlist/domain/usecases/get_reviews.dart';
 import '../features/playlist/domain/usecases/get_songs.dart';
 import '../features/playlist/domain/usecases/toggle_song_preference.dart';
@@ -100,6 +130,32 @@ import '../features/schedule/domain/usecases/get_courses.dart';
 import '../features/schedule/domain/usecases/update_course.dart';
 import '../features/schedule/presentation/state/schedule_controller.dart';
 import '../features/schedule/presentation/state/schedule_state.dart';
+import '../features/thoughts/data/datasources/thoughts_cloud_data_source.dart';
+import '../features/thoughts/data/datasources/thoughts_local_data_source.dart';
+import '../features/thoughts/data/repositories/thoughts_repository_impl.dart';
+import '../features/thoughts/domain/repositories/thoughts_repository.dart';
+import '../features/thoughts/domain/usecases/add_thought_comment.dart';
+import '../features/thoughts/domain/usecases/create_excerpt_note.dart';
+import '../features/thoughts/domain/usecases/create_idea_note.dart';
+import '../features/thoughts/domain/usecases/delete_excerpt_note.dart';
+import '../features/thoughts/domain/usecases/delete_idea_note.dart';
+import '../features/thoughts/domain/usecases/delete_thought_comment.dart';
+import '../features/thoughts/domain/usecases/refresh_excerpt_notes.dart';
+import '../features/thoughts/domain/usecases/refresh_idea_notes.dart';
+import '../features/thoughts/domain/usecases/refresh_thought_comments.dart';
+import '../features/thoughts/domain/usecases/update_excerpt_note.dart';
+import '../features/thoughts/domain/usecases/update_idea_note.dart';
+import '../features/thoughts/domain/usecases/watch_excerpt_note.dart';
+import '../features/thoughts/domain/usecases/watch_excerpt_notes.dart';
+import '../features/thoughts/domain/usecases/watch_idea_note.dart';
+import '../features/thoughts/domain/usecases/watch_idea_notes.dart';
+import '../features/thoughts/domain/usecases/watch_thought_comments.dart';
+import '../features/thoughts/presentation/controllers/excerpt_detail_controller.dart';
+import '../features/thoughts/presentation/controllers/excerpt_detail_state.dart';
+import '../features/thoughts/presentation/controllers/idea_detail_controller.dart';
+import '../features/thoughts/presentation/controllers/idea_detail_state.dart';
+import '../features/thoughts/presentation/controllers/thoughts_home_controller.dart';
+import '../features/thoughts/presentation/controllers/thoughts_home_state.dart';
 import '../features/todo/data/datasources/todo_cloud_data_source.dart';
 import '../features/todo/data/datasources/todo_local_data_source.dart';
 import '../features/todo/data/repositories/todo_repository_impl.dart';
@@ -123,6 +179,172 @@ final localDbProvider = Provider<LocalDb>((ref) {
     localDb.close();
   });
   return localDb;
+});
+
+final albumLocalDataSourceProvider = Provider<AlbumLocalDataSource>((ref) {
+  return AlbumLocalDataSource(ref.watch(localDbProvider).database);
+});
+
+final albumCloudDataSourceProvider = Provider<AlbumCloudDataSource>((ref) {
+  return AlbumCloudDataSource(ref.watch(apiClientProvider));
+});
+
+final albumMediaStoreProvider = Provider<AlbumMediaStore>((ref) {
+  return const AlbumMediaStore();
+});
+
+final albumRepositoryProvider = Provider<AlbumRepository>((ref) {
+  return AlbumRepositoryImpl(
+    ref.watch(albumLocalDataSourceProvider),
+    ref.watch(albumCloudDataSourceProvider),
+    ref.watch(albumMediaStoreProvider),
+    resolveCoupleId: ref.watch(currentCoupleIdResolverProvider),
+    resolveCurrentUserId: ref.watch(currentUserIdResolverProvider),
+  );
+});
+
+final watchAlbumsProvider = Provider<WatchAlbums>((ref) {
+  return WatchAlbums(ref.watch(albumRepositoryProvider));
+});
+
+final watchAlbumProvider = Provider<WatchAlbum>((ref) {
+  return WatchAlbum(ref.watch(albumRepositoryProvider));
+});
+
+final saveAlbumProvider = Provider<SaveAlbum>((ref) {
+  return SaveAlbum(ref.watch(albumRepositoryProvider));
+});
+
+final refreshAlbumsProvider = Provider<RefreshAlbums>((ref) {
+  return RefreshAlbums(ref.watch(albumRepositoryProvider));
+});
+
+final deleteAlbumProvider = Provider<DeleteAlbum>((ref) {
+  return DeleteAlbum(ref.watch(albumRepositoryProvider));
+});
+
+final watchPhotosProvider = Provider<WatchPhotos>((ref) {
+  return WatchPhotos(ref.watch(albumRepositoryProvider));
+});
+
+final watchPhotoProvider = Provider<WatchPhoto>((ref) {
+  return WatchPhoto(ref.watch(albumRepositoryProvider));
+});
+
+final savePhotoProvider = Provider<SavePhoto>((ref) {
+  return SavePhoto(ref.watch(albumRepositoryProvider));
+});
+
+final refreshPhotosProvider = Provider<RefreshPhotos>((ref) {
+  return RefreshPhotos(ref.watch(albumRepositoryProvider));
+});
+
+final deletePhotoProvider = Provider<DeletePhoto>((ref) {
+  return DeletePhoto(ref.watch(albumRepositoryProvider));
+});
+
+final watchCommentsProvider = Provider<WatchComments>((ref) {
+  return WatchComments(ref.watch(albumRepositoryProvider));
+});
+
+final saveCommentProvider = Provider<SaveComment>((ref) {
+  return SaveComment(ref.watch(albumRepositoryProvider));
+});
+
+final refreshCommentsProvider = Provider<RefreshComments>((ref) {
+  return RefreshComments(ref.watch(albumRepositoryProvider));
+});
+
+final deleteCommentProvider = Provider<DeleteComment>((ref) {
+  return DeleteComment(ref.watch(albumRepositoryProvider));
+});
+
+final importLocalPhotoProvider = Provider<ImportLocalPhoto>((ref) {
+  return ImportLocalPhoto(ref.watch(albumRepositoryProvider));
+});
+
+final thoughtsLocalDataSourceProvider = Provider<ThoughtsLocalDataSource>((ref) {
+  return ThoughtsLocalDataSource(ref.watch(localDbProvider).database);
+});
+
+final thoughtsCloudDataSourceProvider = Provider<ThoughtsCloudDataSource>((ref) {
+  return ThoughtsCloudDataSource(
+    ref.watch(apiClientProvider),
+    ref.watch(currentUserIdResolverProvider),
+  );
+});
+
+final thoughtsRepositoryProvider = Provider<ThoughtsRepository>((ref) {
+  return ThoughtsRepositoryImpl(
+    ref.watch(thoughtsLocalDataSourceProvider),
+    ref.watch(thoughtsCloudDataSourceProvider),
+    resolveCoupleId: ref.watch(currentCoupleIdResolverProvider),
+    resolveCurrentUserId: ref.watch(currentUserIdResolverProvider),
+  );
+});
+
+final watchIdeaNotesProvider = Provider<WatchIdeaNotes>((ref) {
+  return WatchIdeaNotes(ref.watch(thoughtsRepositoryProvider));
+});
+
+final watchIdeaNoteProvider = Provider<WatchIdeaNote>((ref) {
+  return WatchIdeaNote(ref.watch(thoughtsRepositoryProvider));
+});
+
+final createIdeaNoteProvider = Provider<CreateIdeaNote>((ref) {
+  return CreateIdeaNote(ref.watch(thoughtsRepositoryProvider));
+});
+
+final refreshIdeaNotesProvider = Provider<RefreshIdeaNotes>((ref) {
+  return RefreshIdeaNotes(ref.watch(thoughtsRepositoryProvider));
+});
+
+final updateIdeaNoteProvider = Provider<UpdateIdeaNote>((ref) {
+  return UpdateIdeaNote(ref.watch(thoughtsRepositoryProvider));
+});
+
+final deleteIdeaNoteProvider = Provider<DeleteIdeaNote>((ref) {
+  return DeleteIdeaNote(ref.watch(thoughtsRepositoryProvider));
+});
+
+final watchExcerptNotesProvider = Provider<WatchExcerptNotes>((ref) {
+  return WatchExcerptNotes(ref.watch(thoughtsRepositoryProvider));
+});
+
+final watchExcerptNoteProvider = Provider<WatchExcerptNote>((ref) {
+  return WatchExcerptNote(ref.watch(thoughtsRepositoryProvider));
+});
+
+final createExcerptNoteProvider = Provider<CreateExcerptNote>((ref) {
+  return CreateExcerptNote(ref.watch(thoughtsRepositoryProvider));
+});
+
+final refreshExcerptNotesProvider = Provider<RefreshExcerptNotes>((ref) {
+  return RefreshExcerptNotes(ref.watch(thoughtsRepositoryProvider));
+});
+
+final updateExcerptNoteProvider = Provider<UpdateExcerptNote>((ref) {
+  return UpdateExcerptNote(ref.watch(thoughtsRepositoryProvider));
+});
+
+final deleteExcerptNoteProvider = Provider<DeleteExcerptNote>((ref) {
+  return DeleteExcerptNote(ref.watch(thoughtsRepositoryProvider));
+});
+
+final watchThoughtCommentsProvider = Provider<WatchThoughtComments>((ref) {
+  return WatchThoughtComments(ref.watch(thoughtsRepositoryProvider));
+});
+
+final refreshThoughtCommentsProvider = Provider<RefreshThoughtComments>((ref) {
+  return RefreshThoughtComments(ref.watch(thoughtsRepositoryProvider));
+});
+
+final addThoughtCommentProvider = Provider<AddThoughtComment>((ref) {
+  return AddThoughtComment(ref.watch(thoughtsRepositoryProvider));
+});
+
+final deleteThoughtCommentProvider = Provider<DeleteThoughtComment>((ref) {
+  return DeleteThoughtComment(ref.watch(thoughtsRepositoryProvider));
 });
 
 final apiClientProvider = Provider<ApiClient>((ref) {
@@ -238,6 +460,107 @@ final currentCoupleIdResolverProvider = Provider<String? Function()>((ref) {
   };
 });
 
+final albumControllerProvider =
+    StateNotifierProvider.autoDispose<AlbumController, AlbumState>((ref) {
+      return AlbumController(
+        ref.watch(watchAlbumsProvider),
+        ref.watch(refreshAlbumsProvider),
+        ref.watch(saveAlbumProvider),
+        ref.watch(deleteAlbumProvider),
+        ref.watch(currentCoupleIdResolverProvider),
+        ref.watch(currentUserIdResolverProvider),
+        () => ref.read(albumRepositoryProvider).takeCloudSyncWarning(),
+      );
+    });
+
+final albumDetailControllerProvider = StateNotifierProvider.autoDispose
+    .family<AlbumDetailController, AlbumDetailState, String>((ref, albumId) {
+      return AlbumDetailController(
+        albumId,
+        ref.watch(watchAlbumProvider),
+        ref.watch(watchPhotosProvider),
+        ref.watch(refreshPhotosProvider),
+        ref.watch(savePhotoProvider),
+        ref.watch(deletePhotoProvider),
+        ref.watch(deleteAlbumProvider),
+        ref.watch(importLocalPhotoProvider),
+        ref.watch(currentCoupleIdResolverProvider),
+        ref.watch(currentUserIdResolverProvider),
+        () => ref.read(albumRepositoryProvider).takeCloudSyncWarning(),
+      );
+    });
+
+final photoDetailControllerProvider = StateNotifierProvider.autoDispose
+    .family<PhotoDetailController, PhotoDetailState, String>((ref, photoId) {
+      return PhotoDetailController(
+        photoId,
+        ref.watch(watchPhotoProvider),
+        ref.watch(watchCommentsProvider),
+        ref.watch(refreshCommentsProvider),
+        ref.watch(saveCommentProvider),
+        ref.watch(deleteCommentProvider),
+        ref.watch(deletePhotoProvider),
+        ref.watch(currentCoupleIdResolverProvider),
+        ref.watch(currentUserIdResolverProvider),
+        () => ref.read(albumRepositoryProvider).takeCloudSyncWarning(),
+      );
+    });
+
+final thoughtsHomeControllerProvider = StateNotifierProvider.autoDispose<
+    ThoughtsHomeController, ThoughtsHomeState>((ref) {
+  return ThoughtsHomeController(
+    ref.watch(watchIdeaNotesProvider),
+    ref.watch(refreshIdeaNotesProvider),
+    ref.watch(createIdeaNoteProvider),
+    ref.watch(updateIdeaNoteProvider),
+    ref.watch(deleteIdeaNoteProvider),
+    ref.watch(watchExcerptNotesProvider),
+    ref.watch(refreshExcerptNotesProvider),
+    ref.watch(createExcerptNoteProvider),
+    ref.watch(updateExcerptNoteProvider),
+    ref.watch(deleteExcerptNoteProvider),
+    ref.watch(currentCoupleIdResolverProvider),
+    ref.watch(currentUserIdResolverProvider),
+    () => ref.read(thoughtsRepositoryProvider).takeCloudSyncWarning(),
+  );
+});
+
+final ideaDetailControllerProvider = StateNotifierProvider.autoDispose
+    .family<IdeaDetailController, IdeaDetailState, String>((ref, ideaId) {
+      return IdeaDetailController(
+        ideaId,
+        ref.watch(watchIdeaNoteProvider),
+        ref.watch(refreshIdeaNotesProvider),
+        ref.watch(watchThoughtCommentsProvider),
+        ref.watch(refreshThoughtCommentsProvider),
+        ref.watch(addThoughtCommentProvider),
+        ref.watch(deleteThoughtCommentProvider),
+        ref.watch(deleteIdeaNoteProvider),
+        ref.watch(currentCoupleIdResolverProvider),
+        ref.watch(currentUserIdResolverProvider),
+        () => ref.read(thoughtsRepositoryProvider).takeCloudSyncWarning(),
+      );
+    });
+
+final excerptDetailControllerProvider = StateNotifierProvider.autoDispose
+    .family<ExcerptDetailController, ExcerptDetailState, String>(
+      (ref, excerptId) {
+        return ExcerptDetailController(
+          excerptId,
+          ref.watch(watchExcerptNoteProvider),
+          ref.watch(refreshExcerptNotesProvider),
+          ref.watch(watchThoughtCommentsProvider),
+          ref.watch(refreshThoughtCommentsProvider),
+          ref.watch(addThoughtCommentProvider),
+          ref.watch(deleteThoughtCommentProvider),
+          ref.watch(deleteExcerptNoteProvider),
+          ref.watch(currentCoupleIdResolverProvider),
+          ref.watch(currentUserIdResolverProvider),
+          () => ref.read(thoughtsRepositoryProvider).takeCloudSyncWarning(),
+        );
+      },
+    );
+
 final chatControllerProvider =
     StateNotifierProvider.autoDispose<ChatController, ChatState>((ref) {
       return ChatController(
@@ -249,6 +572,18 @@ final chatControllerProvider =
         ref.watch(currentCoupleIdResolverProvider),
       );
     });
+
+final chatPushServiceProvider = Provider<ChatPushService>((ref) {
+  final service = ChatPushService(
+    ref.watch(apiClientProvider),
+    ref.watch(currentUserIdResolverProvider),
+    ref.watch(currentCoupleIdResolverProvider),
+  );
+  ref.onDispose(() {
+    service.dispose();
+  });
+  return service;
+});
 
 final billLocalDataSourceProvider = Provider<BillLocalDataSource>((ref) {
   return BillLocalDataSource(ref.watch(localDbProvider).database);
@@ -287,6 +622,8 @@ final deleteBillRecordProvider = Provider<DeleteBillRecord>((ref) {
 
 final billControllerProvider = StateNotifierProvider<BillController, BillState>(
   (ref) {
+    final getProfile = ref.watch(getLocalCoupleProfileProvider);
+    final api = ref.watch(apiClientProvider);
     return BillController(
       ref.watch(loadAllBillRecordsProvider),
       ref.watch(refreshBillRecordsProvider),
@@ -295,6 +632,30 @@ final billControllerProvider = StateNotifierProvider<BillController, BillState>(
       ref.watch(deleteBillRecordProvider),
       ref.watch(addFeedEventProvider),
       ref.watch(currentCoupleIdResolverProvider),
+      ref.watch(currentUserIdResolverProvider),
+      () async {
+        final profile = await getProfile();
+        final fromProfile = profile?.partnerUserId.trim();
+        if (fromProfile != null && fromProfile.isNotEmpty) {
+          return fromProfile;
+        }
+        final coupleId = ref.read(currentCoupleIdResolverProvider)();
+        final me = ref.read(currentUserIdResolverProvider)();
+        if (coupleId == null ||
+            coupleId.isEmpty ||
+            me == null ||
+            me.isEmpty) {
+          return null;
+        }
+        try {
+          return await api.fetchPartnerUserId(
+            coupleId: coupleId,
+            currentUserId: me,
+          );
+        } catch (_) {
+          return null;
+        }
+      },
     )..loadAll();
   },
 );
@@ -391,6 +752,10 @@ final toggleSongPreferenceProvider = Provider<ToggleSongPreference>((ref) {
   return ToggleSongPreference(ref.watch(playlistRepositoryProvider));
 });
 
+final deleteSongProvider = Provider<DeleteSong>((ref) {
+  return DeleteSong(ref.watch(playlistRepositoryProvider));
+});
+
 final addOrUpdateReviewProvider = Provider<AddOrUpdateReview>((ref) {
   return AddOrUpdateReview(ref.watch(playlistRepositoryProvider));
 });
@@ -405,6 +770,7 @@ final playlistControllerProvider =
         ref.watch(addSongProvider),
         ref.watch(getSongsProvider),
         ref.watch(toggleSongPreferenceProvider),
+        ref.watch(deleteSongProvider),
         ref.watch(addOrUpdateReviewProvider),
         ref.watch(getReviewsProvider),
         ref.watch(addFeedEventProvider),
@@ -487,8 +853,26 @@ final feedLocalDataSourceProvider = Provider<FeedLocalDataSource>((ref) {
   return FeedLocalDataSource(ref.watch(localDbProvider).database);
 });
 
+final dailySentencePickLocalDataSourceProvider =
+    Provider<DailySentencePickLocalDataSource>((ref) {
+  return DailySentencePickLocalDataSource(ref.watch(localDbProvider).database);
+});
+
+final dailySentencePickStreamProvider = StreamProvider((ref) {
+  return ref.watch(dailySentencePickLocalDataSourceProvider).watchPick();
+});
+
+final feedCloudDataSourceProvider = Provider<FeedCloudDataSource>((ref) {
+  return FeedCloudDataSource(ref.watch(apiClientProvider));
+});
+
 final feedRepositoryProvider = Provider<FeedRepository>((ref) {
-  return FeedRepositoryImpl(ref.watch(feedLocalDataSourceProvider));
+  return FeedRepositoryImpl(
+    ref.watch(feedLocalDataSourceProvider),
+    cloudDataSource: ref.watch(feedCloudDataSourceProvider),
+    resolveCurrentUserId: ref.watch(currentUserIdResolverProvider),
+    resolveCoupleId: ref.watch(currentCoupleIdResolverProvider),
+  );
 });
 
 final addFeedEventProvider = Provider<AddFeedEvent>((ref) {

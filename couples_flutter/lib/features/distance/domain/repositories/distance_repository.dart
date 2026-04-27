@@ -8,4 +8,6 @@ abstract class DistanceRepository {
   Future<DistanceInfo> disableDistance();
 
   Future<DistanceInfo> updateDistanceText(String distanceText);
+
+  Future<DistanceInfo> setMyLocationVisible(bool isVisible);
 }

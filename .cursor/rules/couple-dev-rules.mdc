@@ -1,0 +1,40 @@
+---
+description: Couple Flutter 项目协作与开发约束（用户约定，始终生效）
+alwaysApply: true
+---
+
+# 开发规则（本仓库）
+
+## 产品与节奏
+
+- 双人私密情侣 App：私密互动、共同记录、异地陪伴；优先自用、可安装、双端互通，非上架优先。
+- 先理解再改；优先功能闭环、互通、不破坏现有代码，采用小步修改，避免一次动太多模块。
+- 不确定处，先根据现有代码推断；仍不确定时先问用户。
+- 在计划阶段必须先进行多轮关键确认，确保需求口径准确后再给实施计划；口径不明确时不直接实现。
+
+## 架构与代码
+
+- 禁止未经允许的大规模重构，不随意改架构。
+- 优先在现有模式上补闭环：`presentation -> controller -> usecase -> repository -> datasource`。
+- 每次改动前说明：改哪些文件、为什么改、影响范围。
+- 改动须保证 `couples_flutter` 可继续编译；Drift 改表时同步 schemaVersion 与 migration。
+
+## 前后端与数据
+
+涉及联动时写清：
+
+- Flutter 调用链：页面 -> Controller/Provider -> Repository -> Local/Cloud -> `ApiClient`
+- 后端路由：`couples_backend/src/server.js` 与对应 `services/*`
+- 本地 vs 云端：同步方向、`pendingSync`、`updatedAt` 合并策略
+
+## 执行与交付
+
+- 在真实环境自行执行命令排查，不把操作甩给用户；失败要换路径或诊断后重试。
+- 输出结构化，少空话。
+- 需要安装 Skill 时先问用户；可主动推荐适用 skill，由用户决定。
+- 用户未要求时不写无关 markdown 文档，聚焦任务所需文件。
+
+## Thoughts 模块专项
+
+- `thoughts` 模块必须保持“纸张质感、柔和渐变、低饱和、文学感、长期可用”的统一视觉语言，不得回退为普通 Material 列表页或生硬表单页。
+- 涉及 `thoughts` 模块的中大型 UI/交互改动时，先做多轮关键确认，再实施；实现时同时校验功能闭环、参考视觉一致性与可维护性。

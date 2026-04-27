@@ -229,7 +229,7 @@ List<_FeedSectionItem> _buildSections(List<FeedEvent> events) {
   return result;
 }
 
-class _FeedEventTile extends StatelessWidget {
+class _FeedEventTile extends ConsumerWidget {
   const _FeedEventTile({required this.item});
 
   final FeedEvent item;
@@ -258,7 +258,7 @@ class _FeedEventTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
@@ -310,10 +310,32 @@ class _FeedEventTile extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                size: 18,
-                color: Color(0xFFA58D97),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    tooltip: '设为今日一句',
+                    icon: const Icon(Icons.push_pin_outlined, size: 20, color: Color(0xFFB15E72)),
+                    onPressed: () async {
+                      await ref
+                          .read(dailySentencePickLocalDataSourceProvider)
+                          .saveFromFeedEvent(item);
+                      if (!context.mounted) {
+                        return;
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('已设为首页「今日一句」')),
+                      );
+                    },
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: Color(0xFFA58D97),
+                  ),
+                ],
               ),
             ],
           ),

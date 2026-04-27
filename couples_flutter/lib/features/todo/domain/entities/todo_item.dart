@@ -1,5 +1,7 @@
 enum TodoOwner { me, partner, shared }
 
+const Object unsetTodoDueAt = Object();
+
 class TodoItem {
   const TodoItem({
     required this.id,
@@ -34,7 +36,7 @@ class TodoItem {
     String? coupleId,
     String? title,
     String? description,
-    DateTime? dueAt,
+    Object? dueAt = unsetTodoDueAt,
     TodoOwner? owner,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -48,7 +50,7 @@ class TodoItem {
       coupleId: coupleId ?? this.coupleId,
       title: title ?? this.title,
       description: description ?? this.description,
-      dueAt: dueAt ?? this.dueAt,
+      dueAt: dueAt == unsetTodoDueAt ? this.dueAt : dueAt as DateTime?,
       owner: owner ?? this.owner,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

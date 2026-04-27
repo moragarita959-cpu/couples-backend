@@ -8,11 +8,15 @@ class BillRecordsTable extends Table {
 
   TextColumn get coupleId => text().withDefault(const Constant(''))();
 
+  TextColumn get ownerUserId => text().withDefault(const Constant(''))();
+
   TextColumn get type => text()();
 
   RealColumn get amount => real()();
 
-  TextColumn get category => text().withDefault(const Constant('other'))();
+  /// Persisted SQLite column `category`: `parent.child` tag keys.
+  TextColumn get categoryKey =>
+      text().named('category').withDefault(const Constant('other.misc'))();
 
   TextColumn get note => text()();
 

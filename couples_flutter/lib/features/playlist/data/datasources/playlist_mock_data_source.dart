@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import '../../../../core/storage/drift/app_database.dart';
 import '../../domain/entities/song.dart';
 import '../../domain/entities/song_review.dart';
+import '../../domain/repositories/playlist_repository.dart';
 import '../models/song_model.dart';
 import '../models/song_review_model.dart';
 
@@ -13,11 +14,23 @@ class PlaylistMockDataSource {
 
   final AppDatabase _db;
 
-  Future<SongModel> addSong(String name, String artist) async {
+  Future<SongModel> addSong(String name, String artist, {String genre = ''}) async {
     final trimmedName = name.trim();
     final trimmedArtist = artist.trim();
     if (trimmedName.isEmpty || trimmedArtist.isEmpty) {
       throw Exception('歌名和歌手不能为空');
+    }
+
+    final existing = await (_db.select(_db.songsTable)
+          ..where((t) => t.isDeleted.equals(false)))
+        .get();
+    final duplicate = existing.any(
+      (row) =>
+          row.name.trim().toLowerCase() == trimmedName.toLowerCase() &&
+          row.artist.trim().toLowerCase() == trimmedArtist.toLowerCase(),
+    );
+    if (duplicate) {
+      throw const DuplicatePlaylistSongException();
     }
 
     final now = DateTime.now();
@@ -25,8 +38,12 @@ class PlaylistMockDataSource {
       id: 'song-${now.microsecondsSinceEpoch}',
       name: trimmedName,
       artist: trimmedArtist,
+      genre: genre.trim(),
       createdAt: now,
+      updatedAt: now,
       preference: SongPreference.none,
+      recommender: SongRecommender.me,
+      pendingSync: false,
     );
 
     await _db
@@ -37,6 +54,11 @@ class PlaylistMockDataSource {
             name: song.name,
             artist: song.artist,
             createdAt: song.createdAt,
+            genre: Value<String>(song.genre),
+            recommender: const Value<String>('me'),
+            updatedAt: Value<DateTime>(song.updatedAt),
+            isDeleted: const Value<bool>(false),
+            pendingSync: const Value<bool>(false),
             preference: _preferenceToDbValue(song.preference),
           ),
         );
@@ -47,7 +69,10 @@ class PlaylistMockDataSource {
   Future<List<SongModel>> getSongs() async {
     final rows = await (_db.select(
       _db.songsTable,
-    )..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).get();
+    )
+          ..where((t) => t.isDeleted.equals(false))
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+        .get();
 
     return rows
         .map(
@@ -56,10 +81,25 @@ class PlaylistMockDataSource {
             name: row.name,
             artist: row.artist,
             createdAt: row.createdAt,
+            genre: row.genre,
+            recommender: _recommenderFromDbValue(row.recommender),
+            updatedAt: row.updatedAt,
+            isDeleted: row.isDeleted,
+            pendingSync: row.pendingSync,
             preference: _preferenceFromDbValue(row.preference),
           ),
         )
         .toList();
+  }
+
+  Future<void> deleteSong(String songId) async {
+    await (_db.update(_db.songsTable)..where((t) => t.id.equals(songId))).write(
+      SongsTableCompanion(
+        isDeleted: const Value<bool>(true),
+        pendingSync: const Value<bool>(false),
+        updatedAt: Value<DateTime>(DateTime.now()),
+      ),
+    );
   }
 
   Future<void> toggleSongPreference(String songId, SongPreference value) async {
@@ -84,15 +124,11 @@ class PlaylistMockDataSource {
     String songId,
     String content,
     List<String> styleTags,
-    int atmosphereScore,
-    int resonanceScore,
-    int shareScore,
+    double singleScore,
     ReviewAuthor author,
   ) async {
+    final encodedScore = (singleScore.clamp(-15.0, 15.0) * 10).round();
     final trimmedContent = content.trim();
-    if (trimmedContent.isEmpty) {
-      throw Exception('Review content is required');
-    }
     final normalizedTags = _normalizeStyleTags(styleTags);
 
     final song = await (_db.select(
@@ -118,9 +154,9 @@ class PlaylistMockDataSource {
           SongReviewsTableCompanion(
             content: Value<String>(trimmedContent),
             styleTags: Value<String>(_encodeStyleTags(normalizedTags)),
-            atmosphereScore: Value<int>(atmosphereScore),
-            resonanceScore: Value<int>(resonanceScore),
-            shareScore: Value<int>(shareScore),
+            atmosphereScore: Value<int>(encodedScore),
+            resonanceScore: const Value<int>(0),
+            shareScore: const Value<int>(0),
             createdAt: Value<DateTime>(now),
           ),
         );
@@ -131,9 +167,9 @@ class PlaylistMockDataSource {
           author: ReviewAuthor.me,
           content: trimmedContent,
           styleTags: normalizedTags,
-          atmosphereScore: atmosphereScore,
-          resonanceScore: resonanceScore,
-          shareScore: shareScore,
+          atmosphereScore: encodedScore,
+          resonanceScore: 0,
+          shareScore: 0,
           createdAt: now,
         );
       }
@@ -145,9 +181,9 @@ class PlaylistMockDataSource {
       author: author,
       content: trimmedContent,
       styleTags: normalizedTags,
-      atmosphereScore: atmosphereScore,
-      resonanceScore: resonanceScore,
-      shareScore: shareScore,
+      atmosphereScore: encodedScore,
+      resonanceScore: 0,
+      shareScore: 0,
       createdAt: now,
     );
 
@@ -222,6 +258,10 @@ class PlaylistMockDataSource {
 
   ReviewAuthor _authorFromDbValue(String value) {
     return value == 'partner' ? ReviewAuthor.partner : ReviewAuthor.me;
+  }
+
+  SongRecommender _recommenderFromDbValue(String value) {
+    return value == 'partner' ? SongRecommender.partner : SongRecommender.me;
   }
 
   List<String> _normalizeStyleTags(List<String> styleTags) {

@@ -1,6 +1,7 @@
 ﻿import 'package:drift/drift.dart';
 
 import '../../../../core/storage/drift/app_database.dart';
+import '../../domain/bill_tag_catalog.dart';
 import '../../domain/entities/bill_record.dart';
 import '../models/bill_record_model.dart';
 
@@ -11,20 +12,24 @@ class BillMockDataSource {
 
   Future<BillRecordModel> createRecord(
     BillType type,
-    BillCategory category,
+    String categoryKey,
     double amount,
-    String note,
-  ) async {
+    String note, {
+    required String ownerUserId,
+    required String coupleId,
+  }) async {
     if (amount <= 0) {
       throw Exception('金额必须大于 0');
     }
 
     final now = DateTime.now();
+    final key = BillTagCatalog.normalizeKey(categoryKey);
     final record = BillRecordModel(
       id: 'bill-${now.microsecondsSinceEpoch}',
-      coupleId: '',
+      coupleId: coupleId,
+      ownerUserId: ownerUserId,
       type: type,
-      category: category,
+      categoryKey: key,
       amount: amount,
       note: note.trim(),
       createdAt: now,
@@ -33,20 +38,7 @@ class BillMockDataSource {
       pendingSync: false,
     );
 
-    await _db.into(_db.billRecordsTable).insert(
-          BillRecordsTableCompanion.insert(
-            id: record.id,
-            coupleId: Value<String>(record.coupleId),
-            type: _typeToDbValue(record.type),
-            category: Value<String>(_categoryToDbValue(record.category)),
-            amount: record.amount,
-            note: record.note,
-            createdAt: record.createdAt,
-            updatedAt: Value<DateTime>(record.updatedAt),
-            isDeleted: Value<bool>(record.isDeleted),
-            pendingSync: Value<bool>(record.pendingSync),
-          ),
-        );
+    await _db.into(_db.billRecordsTable).insert(record.toCompanion());
 
     return record;
   }
@@ -57,12 +49,12 @@ class BillMockDataSource {
             (table) => OrderingTerm.desc(table.createdAt),
           ]))
         .get();
-    return rows.map(_rowToModel).toList();
+    return rows.map(BillRecordModel.fromRow).toList();
   }
 
   Future<BillSummary> getSummary() async {
     final rows = await _db.select(_db.billRecordsTable).get();
-    final records = rows.map(_rowToModel).toList();
+    final records = rows.map(BillRecordModel.fromRow).toList();
     final now = DateTime.now();
     final startOfWeek = _startOfWeek(now);
     final startOfMonth = DateTime(now.year, now.month, 1);
@@ -78,25 +70,10 @@ class BillMockDataSource {
     );
   }
 
-  BillRecordModel _rowToModel(BillRecordsTableData row) {
-    return BillRecordModel(
-      id: row.id,
-      coupleId: row.coupleId,
-      type: _typeFromDbValue(row.type),
-      category: _categoryFromDbValue(row.category),
-      amount: row.amount,
-      note: row.note,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      isDeleted: row.isDeleted,
-      pendingSync: row.pendingSync,
-    );
-  }
-
   BillPeriodSummary _buildPeriodSummary(List<BillRecordModel> records) {
     double incomeTotal = 0;
     double expenseTotal = 0;
-    final expenseByCategory = <BillCategory, double>{};
+    final expenseByCategoryKey = <String, double>{};
 
     for (final record in records) {
       if (record.type == BillType.income) {
@@ -105,21 +82,22 @@ class BillMockDataSource {
       }
 
       expenseTotal += record.amount;
-      expenseByCategory.update(
-        record.category,
+      final key = BillTagCatalog.normalizeKey(record.categoryKey);
+      expenseByCategoryKey.update(
+        key,
         (value) => value + record.amount,
         ifAbsent: () => record.amount,
       );
     }
 
-    final sortedEntries = expenseByCategory.entries.toList()
+    final sortedEntries = expenseByCategoryKey.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return BillPeriodSummary(
       incomeTotal: incomeTotal,
       expenseTotal: expenseTotal,
       balance: incomeTotal - expenseTotal,
-      expenseByCategory: Map<BillCategory, double>.fromEntries(sortedEntries),
+      expenseByCategoryKey: Map<String, double>.fromEntries(sortedEntries),
       recordCount: records.length,
     );
   }
@@ -129,26 +107,4 @@ class BillMockDataSource {
     final offset = normalized.weekday - DateTime.monday;
     return normalized.subtract(Duration(days: offset));
   }
-
-  String _typeToDbValue(BillType type) {
-    return type == BillType.income ? 'income' : 'expense';
-  }
-
-  BillType _typeFromDbValue(String value) {
-    return value == 'expense' ? BillType.expense : BillType.income;
-  }
-
-  String _categoryToDbValue(BillCategory category) {
-    return category.name;
-  }
-
-  BillCategory _categoryFromDbValue(String value) {
-    for (final category in BillCategory.values) {
-      if (category.name == value) {
-        return category;
-      }
-    }
-    return BillCategory.other;
-  }
 }
-

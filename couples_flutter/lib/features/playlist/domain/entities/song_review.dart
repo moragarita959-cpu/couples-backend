@@ -23,5 +23,17 @@ class SongReview {
   final int shareScore;
   final DateTime createdAt;
 
-  int get totalScore => atmosphereScore + resonanceScore + shareScore;
+  static const int _singleScoreScale = 10;
+
+  bool get usesSingleScoreEncoding =>
+      resonanceScore == 0 && shareScore == 0 && atmosphereScore.abs() > 15;
+
+  double get singleScore {
+    if (usesSingleScoreEncoding) {
+      return atmosphereScore / _singleScoreScale;
+    }
+    return (atmosphereScore + resonanceScore + shareScore).toDouble();
+  }
+
+  double get totalScore => singleScore;
 }

@@ -11,8 +11,12 @@ class ChatCloudDataSource {
   Future<List<ChatMessageModel>> listMessages({
     required String coupleId,
     required String currentUserId,
+    DateTime? since,
   }) async {
-    final payload = await _apiClient.listChatMessages(coupleId: coupleId);
+    final payload = await _apiClient.listChatMessages(
+      coupleId: coupleId,
+      since: since,
+    );
     return payload
         .map(
           (item) => ChatMessageModel.fromCloudJson(

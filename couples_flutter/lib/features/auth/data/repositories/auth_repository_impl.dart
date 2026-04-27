@@ -19,12 +19,18 @@ class AuthRepositoryImpl implements AuthRepository {
       return null;
     }
 
-    final refreshed = await _cloudDataSource.bootstrapUser(
-      userId: localUser.userId,
-      nickname: localUser.nickname,
-    );
-    await _localDataSource.saveUser(refreshed);
-    return refreshed;
+    try {
+      final refreshed = await _cloudDataSource.bootstrapUser(
+        userId: localUser.userId,
+        nickname: localUser.nickname,
+      );
+      await _localDataSource.saveUser(refreshed);
+      return refreshed;
+    } catch (_) {
+      // Keep the existing local identity usable when cloud refresh fails
+      // so the app can still open instead of forcing a re-login.
+      return localUser;
+    }
   }
 
   @override

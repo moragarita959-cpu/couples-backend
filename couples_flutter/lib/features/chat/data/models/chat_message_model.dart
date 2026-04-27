@@ -52,7 +52,7 @@ class ChatMessageModel extends ChatMessage {
       timestamp: DateTime.parse(json['createdAt'] as String),
       messageType: _messageTypeFromRaw(json['messageType'] as String?),
       mediaUrl: json['mediaUrl'] as String?,
-      mediaDurationMs: json['mediaDurationMs'] as int?,
+      mediaDurationMs: _toInt(json['mediaDurationMs']),
       senderUserId: senderUserId,
       clientMessageId: json['clientMessageId'] as String?,
       isPending: false,
@@ -68,5 +68,18 @@ class ChatMessageModel extends ChatMessage {
       default:
         return ChatMessageType.text;
     }
+  }
+
+  static int? _toInt(Object? value) {
+    if (value is int) {
+      return value;
+    }
+    if (value is double) {
+      return value.round();
+    }
+    if (value is String) {
+      return int.tryParse(value.trim());
+    }
+    return null;
   }
 }

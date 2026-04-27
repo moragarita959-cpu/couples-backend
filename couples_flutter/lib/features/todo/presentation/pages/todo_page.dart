@@ -59,7 +59,7 @@ class _TodoPageState extends ConsumerState<TodoPage> with WidgetsBindingObserver
         backgroundColor: CoupleUi.surface,
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openCreateSheet(context),
+        onPressed: () => _openTodoSheet(context),
         backgroundColor: CoupleUi.primary,
         icon: const Icon(Icons.add_task_rounded),
         label: const Text('新建待办'),
@@ -120,9 +120,12 @@ class _TodoPageState extends ConsumerState<TodoPage> with WidgetsBindingObserver
                         entry: entry,
                         ownerBadge: _ownerBadge(entry.item.owner),
                         ownerColor: _ownerColor(entry.item.owner),
+                        canManage: controller.canManage(entry.item),
                         onMyDoneChanged: (value) {
                           controller.toggleMyDone(entry.item.id, value);
                         },
+                        onEdit: () => _openTodoSheet(context, editing: entry.item),
+                        onDelete: () => _confirmDeleteTodo(context, entry.item),
                       ),
                     );
                   }),
@@ -134,11 +137,13 @@ class _TodoPageState extends ConsumerState<TodoPage> with WidgetsBindingObserver
     );
   }
 
-  Future<void> _openCreateSheet(BuildContext context) async {
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
-    DateTime? dueAt;
-    TodoOwner owner = TodoOwner.shared;
+  Future<void> _openTodoSheet(BuildContext context, {TodoItem? editing}) async {
+    final titleController = TextEditingController(text: editing?.title ?? '');
+    final descriptionController = TextEditingController(
+      text: editing?.description ?? '',
+    );
+    DateTime? dueAt = editing?.dueAt;
+    TodoOwner owner = editing?.owner ?? TodoOwner.shared;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -193,7 +198,7 @@ class _TodoPageState extends ConsumerState<TodoPage> with WidgetsBindingObserver
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Text(
-                    '创建待办',
+                    editing == null ? '创建待办' : '编辑待办',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
@@ -240,15 +245,34 @@ class _TodoPageState extends ConsumerState<TodoPage> with WidgetsBindingObserver
                           : '${_dateTimeText(dueAt!)} · 提前 30 分钟提醒',
                     ),
                   ),
+                  if (dueAt != null)
+                    TextButton.icon(
+                      onPressed: () {
+                        setSheetState(() {
+                          dueAt = null;
+                        });
+                      },
+                      icon: const Icon(Icons.event_busy_outlined),
+                      label: const Text('清除截止时间'),
+                    ),
                   const SizedBox(height: 12),
                   FilledButton(
                     onPressed: () async {
-                      final ok = await ref.read(todoControllerProvider.notifier).create(
-                            title: titleController.text,
-                            description: descriptionController.text,
-                            dueAt: dueAt,
-                            owner: owner,
-                          );
+                      final notifier = ref.read(todoControllerProvider.notifier);
+                      final ok = editing == null
+                          ? await notifier.create(
+                              title: titleController.text,
+                              description: descriptionController.text,
+                              dueAt: dueAt,
+                              owner: owner,
+                            )
+                          : await notifier.updateDetails(
+                              item: editing,
+                              title: titleController.text,
+                              description: descriptionController.text,
+                              dueAt: dueAt,
+                              owner: owner,
+                            );
                       if (!ok || !mounted) {
                         return;
                       }
@@ -258,7 +282,7 @@ class _TodoPageState extends ConsumerState<TodoPage> with WidgetsBindingObserver
                       }
                     },
                     style: CoupleUi.primaryButtonStyle(),
-                    child: const Text('保存待办'),
+                    child: Text(editing == null ? '保存待办' : '保存修改'),
                   ),
                 ],
               ),
@@ -270,6 +294,36 @@ class _TodoPageState extends ConsumerState<TodoPage> with WidgetsBindingObserver
 
     titleController.dispose();
     descriptionController.dispose();
+  }
+
+  Future<void> _confirmDeleteTodo(BuildContext context, TodoItem item) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('删除待办'),
+          content: Text('确认删除「${item.title}」吗？'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('删除'),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    await ref.read(todoControllerProvider.notifier).delete(item);
+    if (!mounted) {
+      return;
+    }
+    await ref.read(homeSummaryControllerProvider.notifier).load();
   }
 
   static String _filterLabel(TodoFilter filter) {
@@ -399,13 +453,19 @@ class _TodoTile extends StatelessWidget {
     required this.entry,
     required this.ownerBadge,
     required this.ownerColor,
+    required this.canManage,
     required this.onMyDoneChanged,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   final TodoEntry entry;
   final String ownerBadge;
   final Color ownerColor;
+  final bool canManage;
   final ValueChanged<bool> onMyDoneChanged;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   bool get _mineEditable {
     return entry.item.owner == TodoOwner.me || entry.item.owner == TodoOwner.shared;
@@ -492,6 +552,18 @@ class _TodoTile extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
+                if (canManage) ...<Widget>[
+                  IconButton(
+                    tooltip: '编辑',
+                    icon: const Icon(Icons.edit_outlined, size: 20),
+                    onPressed: onEdit,
+                  ),
+                  IconButton(
+                    tooltip: '删除',
+                    icon: const Icon(Icons.delete_outline, size: 20),
+                    onPressed: onDelete,
+                  ),
+                ],
               ],
             ),
             if (entry.item.description.trim().isNotEmpty) ...<Widget>[

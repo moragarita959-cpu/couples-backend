@@ -27,7 +27,16 @@ class HomeSummaryVm {
     required this.totalChatCharacterCount,
     required this.isDistanceEnabled,
     required this.distanceKm,
+    required this.myLatitude,
+    required this.myLongitude,
+    required this.partnerLatitude,
+    required this.partnerLongitude,
+    required this.myLocationVisible,
+    required this.partnerLocationVisible,
+    required this.myLocationLabel,
+    required this.partnerLocationLabel,
     required this.lastPokeTime,
+    required this.lastPokeFromPartner,
     required this.nextEvent,
     required this.isPoking,
     required this.justPoked,
@@ -58,7 +67,16 @@ class HomeSummaryVm {
       totalChatCharacterCount = 0,
       isDistanceEnabled = false,
       distanceKm = null,
+      myLatitude = null,
+      myLongitude = null,
+      partnerLatitude = null,
+      partnerLongitude = null,
+      myLocationVisible = true,
+      partnerLocationVisible = true,
+      myLocationLabel = null,
+      partnerLocationLabel = null,
       lastPokeTime = null,
+      lastPokeFromPartner = false,
       nextEvent = null,
       isPoking = false,
       justPoked = false,
@@ -87,7 +105,16 @@ class HomeSummaryVm {
   final int totalChatCharacterCount;
   final bool isDistanceEnabled;
   final double? distanceKm;
+  final double? myLatitude;
+  final double? myLongitude;
+  final double? partnerLatitude;
+  final double? partnerLongitude;
+  final bool myLocationVisible;
+  final bool partnerLocationVisible;
+  final String? myLocationLabel;
+  final String? partnerLocationLabel;
   final DateTime? lastPokeTime;
+  final bool lastPokeFromPartner;
   final CountdownEvent? nextEvent;
   final bool isPoking;
   final bool justPoked;
@@ -119,7 +146,16 @@ class HomeSummaryVm {
     int? totalChatCharacterCount,
     bool? isDistanceEnabled,
     Object? distanceKm = _noChange,
+    Object? myLatitude = _noChange,
+    Object? myLongitude = _noChange,
+    Object? partnerLatitude = _noChange,
+    Object? partnerLongitude = _noChange,
+    bool? myLocationVisible,
+    bool? partnerLocationVisible,
+    Object? myLocationLabel = _noChange,
+    Object? partnerLocationLabel = _noChange,
     Object? lastPokeTime = _noChange,
+    bool? lastPokeFromPartner,
     Object? nextEvent = _noChange,
     bool? isPoking,
     bool? justPoked,
@@ -162,9 +198,31 @@ class HomeSummaryVm {
       distanceKm: identical(distanceKm, _noChange)
           ? this.distanceKm
           : distanceKm as double?,
+      myLatitude: identical(myLatitude, _noChange)
+          ? this.myLatitude
+          : myLatitude as double?,
+      myLongitude: identical(myLongitude, _noChange)
+          ? this.myLongitude
+          : myLongitude as double?,
+      partnerLatitude: identical(partnerLatitude, _noChange)
+          ? this.partnerLatitude
+          : partnerLatitude as double?,
+      partnerLongitude: identical(partnerLongitude, _noChange)
+          ? this.partnerLongitude
+          : partnerLongitude as double?,
+      myLocationVisible: myLocationVisible ?? this.myLocationVisible,
+      partnerLocationVisible:
+          partnerLocationVisible ?? this.partnerLocationVisible,
+      myLocationLabel: identical(myLocationLabel, _noChange)
+          ? this.myLocationLabel
+          : myLocationLabel as String?,
+      partnerLocationLabel: identical(partnerLocationLabel, _noChange)
+          ? this.partnerLocationLabel
+          : partnerLocationLabel as String?,
       lastPokeTime: identical(lastPokeTime, _noChange)
           ? this.lastPokeTime
           : lastPokeTime as DateTime?,
+      lastPokeFromPartner: lastPokeFromPartner ?? this.lastPokeFromPartner,
       nextEvent: identical(nextEvent, _noChange)
           ? this.nextEvent
           : nextEvent as CountdownEvent?,

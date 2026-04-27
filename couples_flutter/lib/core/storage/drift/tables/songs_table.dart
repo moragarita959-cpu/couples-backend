@@ -12,6 +12,16 @@ class SongsTable extends Table {
 
   DateTimeColumn get createdAt => dateTime()();
 
+  TextColumn get genre => text().withDefault(const Constant(''))();
+
+  TextColumn get recommender => text().withDefault(const Constant('me'))();
+
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+
+  BoolColumn get pendingSync => boolean().withDefault(const Constant(false))();
+
   TextColumn get preference => text()();
 
   @override

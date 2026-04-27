@@ -116,6 +116,17 @@ const {
   setDistanceVisibilityPg,
   getDistanceInfoPg,
 } = require('./services/distance_pg');
+const {
+  listIdeaNotesPg,
+  upsertIdeaNotePg,
+  deleteIdeaNotePg,
+  listExcerptNotesPg,
+  upsertExcerptNotePg,
+  deleteExcerptNotePg,
+  listThoughtCommentsPg,
+  upsertThoughtCommentPg,
+  deleteThoughtCommentPg,
+} = require('./services/thoughts_pg');
 
 const app = express();
 
@@ -573,6 +584,132 @@ app.post('/distance/set-visibility', (req, res, next) => {
   })().catch(next);
 });
 
+app.post('/thoughts/ideas/list', (req, res, next) => {
+  (async () => {
+    if (!config.usePostgres) {
+      throw new AppError(
+        'thoughts_postgres_required',
+        'Thoughts cloud sync requires PostgreSQL backend',
+        501,
+      );
+    }
+    const data = await listIdeaNotesPg(pool, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/thoughts/ideas/upsert', (req, res, next) => {
+  (async () => {
+    if (!config.usePostgres) {
+      throw new AppError(
+        'thoughts_postgres_required',
+        'Thoughts cloud sync requires PostgreSQL backend',
+        501,
+      );
+    }
+    const data = await upsertIdeaNotePg(pool, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/thoughts/ideas/delete', (req, res, next) => {
+  (async () => {
+    if (!config.usePostgres) {
+      throw new AppError(
+        'thoughts_postgres_required',
+        'Thoughts cloud sync requires PostgreSQL backend',
+        501,
+      );
+    }
+    const data = await deleteIdeaNotePg(pool, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/thoughts/excerpts/list', (req, res, next) => {
+  (async () => {
+    if (!config.usePostgres) {
+      throw new AppError(
+        'thoughts_postgres_required',
+        'Thoughts cloud sync requires PostgreSQL backend',
+        501,
+      );
+    }
+    const data = await listExcerptNotesPg(pool, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/thoughts/excerpts/upsert', (req, res, next) => {
+  (async () => {
+    if (!config.usePostgres) {
+      throw new AppError(
+        'thoughts_postgres_required',
+        'Thoughts cloud sync requires PostgreSQL backend',
+        501,
+      );
+    }
+    const data = await upsertExcerptNotePg(pool, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/thoughts/excerpts/delete', (req, res, next) => {
+  (async () => {
+    if (!config.usePostgres) {
+      throw new AppError(
+        'thoughts_postgres_required',
+        'Thoughts cloud sync requires PostgreSQL backend',
+        501,
+      );
+    }
+    const data = await deleteExcerptNotePg(pool, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/thoughts/comments/list', (req, res, next) => {
+  (async () => {
+    if (!config.usePostgres) {
+      throw new AppError(
+        'thoughts_postgres_required',
+        'Thoughts cloud sync requires PostgreSQL backend',
+        501,
+      );
+    }
+    const data = await listThoughtCommentsPg(pool, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/thoughts/comments/upsert', (req, res, next) => {
+  (async () => {
+    if (!config.usePostgres) {
+      throw new AppError(
+        'thoughts_postgres_required',
+        'Thoughts cloud sync requires PostgreSQL backend',
+        501,
+      );
+    }
+    const data = await upsertThoughtCommentPg(pool, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
+app.post('/thoughts/comments/delete', (req, res, next) => {
+  (async () => {
+    if (!config.usePostgres) {
+      throw new AppError(
+        'thoughts_postgres_required',
+        'Thoughts cloud sync requires PostgreSQL backend',
+        501,
+      );
+    }
+    const data = await deleteThoughtCommentPg(pool, req.body || {});
+    res.json({ data });
+  })().catch(next);
+});
+
 app.use((error, _req, res, _next) => {
   if (isAppError(error)) {
     res.status(error.status).json({
@@ -607,7 +744,15 @@ app.use((error, _req, res, _next) => {
 
 async function start() {
   if (config.usePostgres) {
-    await initPostgresSchema();
+    try {
+      await initPostgresSchema();
+    } catch (error) {
+      // Data protection first: do not block server startup on schema init hiccups.
+      console.error(
+        'Postgres schema initialization failed, continuing startup with existing schema:',
+        error,
+      );
+    }
   }
   app.listen(config.port, () => {
     console.log(`Couples backend listening on http://0.0.0.0:${config.port}`);
